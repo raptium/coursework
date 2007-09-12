@@ -11,12 +11,13 @@
  */
 #include <sys/types.h>
 typedef struct taskCDT *taskADT;
-typedef struct taskCDT *tasksADT;
+typedef struct tasksCDT *tasksADT;
 
 taskADT taskNew(const char *cmd);
-tasksADT tasksInsert(tasksADT tasks);
+tasksADT tasksNew(char *head,char *tail,int append);
+tasksADT tasksInsert(tasksADT tasks, taskADT task);
 int tasksExec(tasksADT tasks);
-pid_t taskExec(taskADT task,int input,int output);
+pid_t taskExec(taskADT task);
 int taskSusspend(taskADT task);
 int taskKill(taskADT task);
 
