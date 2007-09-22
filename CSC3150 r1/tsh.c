@@ -157,7 +157,7 @@ static void pwait(pid_t cp) {
     tp = wait(&s);
     if (tp == -1)
       break;
-  //if (s != 0) {}
+    //if (s != 0) {}
     if (tp == cp)
       break;
   }

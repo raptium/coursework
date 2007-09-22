@@ -5,5 +5,4 @@ style:
 	~/bin/astyle --style=kr -Up -s2 *.c
 
 clean:
-	rm *.orig
-	rm *.o
+	rm *.orig *.o *.txt
