@@ -39,86 +39,6 @@ struct tasksCDT {
   taskADT *list;
 };
 
-struct jobsCDT {
-  //taskADT *bg;
-  //taskADT fg;
-  pid_t *bg;
-  pid_t fg;
-  int bgn;
-};
-
-jobsADT jobs;
-
-jobsADT new_jobs(void) {
-  jobsADT jobs;
-
-  jobs = malloc(sizeof(struct jobsCDT));
-  jobs->fg = 0;
-  jobs->bg = malloc(sizeof(pid_t) * 32);
-  jobs->bgn = 0;
-  return jobs;
-}
-
-void bg_job(jobsADT jobs) {
-
-  jobs->bg[jobs->bgn++] = jobs->fg;
-  jobs->fg = 0;
-  return;
-}
-
-void add_job(jobsADT jobs, pid_t pid) {
-  int i;
-
-  if (fg(jobs))
-    bg_job(jobs);
-  jobs->fg = pid;
-  return;
-}
-
-
-
-
-void del_job(jobsADT jobs, pid_t pid) {
-  int i, j;
-
-  if (jobs->fg == pid) {
-    jobs->fg = 0;
-    return;
-  }
-
-  for (i = 0;i < jobs->bgn;i++)
-    if (jobs->bg[i] == pid) {
-      for (j = i;j < jobs->bgn - 1;j++)
-        jobs->bg[j] = jobs->bg[j+1];
-      jobs->bgn--;
-    }
-
-  return;
-}
-
-
-void update_job(jobsADT jobs) {
-  int i = 0;
-
-  while (jobs->bg[i] != 0)
-    i++;
-  jobs->bgn = i;
-  return;
-}
-
-int jobs_clean(jobsADT jobs) {
-  return !fg(jobs);
-}
-
-int fg(jobsADT jobs) {
-  return jobs->fg;
-}
-
-
-
-
-
-
 
 taskADT taskNew(const char *cmd) {
   taskADT task;
@@ -154,7 +74,6 @@ pid_t taskExec(taskADT task) {
   static int c1 = -1, c2 = -1;
 
   if (pid) {
-    add_job(jobs, pid);
     task->pid = pid;
     if (c1 > 0)
       close(c1);
@@ -321,7 +240,7 @@ int tasksExec(tasksADT tasks) {
 }
 
 
-
+/*
 void sigchld_handler(int sig) {
   int status;
   pid_t pid;
@@ -331,19 +250,12 @@ void sigchld_handler(int sig) {
     //printf("Handle zombie pid=%d fg=%d\n",pid,fg);
     if (WIFSTOPPED(status)) {
       printf("bg jos\n");
-      bg_job(jobs);
     } else
       del_job(jobs, pid);
   }
 }
 
-void sig_ignore(int sig) {
-  if (sig == SIGINT || sig == SIGTERM || sig == SIGQUIT || sig == SIGTSTP || sig == SIGSTOP) {
-    return;
-  }
-}
-
-
+*/
 
 
 static void fgout(void) {
@@ -353,21 +265,30 @@ static void fgout(void) {
   // fg=-1;
 }
 
-void sigtstp_rerouter(int sig) {
-
-  printf("%d is going to be susspended.\n", fg(jobs));
-  if (sig == SIGTSTP) {
-    if (fg(jobs)) {
-      kill(fg(jobs), SIGTSTP);
-      bg_job(jobs);
+void sigtstp_handler(int sig) {
+  int gpid, fg;
+  /*
+    if (sig == SIGTSTP) {
+      fg = jlist->fg;
+      if (fg == -1)
+        return;
+      gpid = jlist->glist[fg];
+      if (gpid == 0)
+        return;
+      killpg(gpid, sig);
+      printf("[%d] %s with gpid %d\n", jlist->n, jlist->gcmd[fg], gpid);
+      nowait = gpid;
+      return;
+      tcsetpgrp(tty, getpgid(getpid()));
     }
-  }
+    */
 }
 
 
 
 int main(int argc, char *argv[], char *envp[]) {
   char line[256];
+  char ch;
   char cmd[256];
   char *pwd;
   int input;
@@ -382,23 +303,39 @@ int main(int argc, char *argv[], char *envp[]) {
   strcpy(pwd, getenv("PWD"));
 
 
-  signal(SIGCHLD, sigchld_handler);
-  //  signal(SIGINT,sig_ignore);
-  signal(SIGTERM, sig_ignore);
-  signal(SIGQUIT, sig_ignore);
-  signal(SIGTSTP, sigtstp_rerouter);
-  signal(SIGSTOP, sig_ignore);
+  //signal(SIGCHLD, SIG_DFL);
+  signal(SIGINT,  SIG_IGN);
+  signal(SIGTERM, SIG_IGN);
+  signal(SIGQUIT, SIG_IGN);
+  signal(SIGTSTP, SIG_IGN);
+  signal(SIGSTOP, SIG_IGN);
 
 
-  jobs = new_jobs();
+
+
+  jlist = malloc(sizeof(struct jobs));
+  jlist->n = 0;
+  jlist->fg = -1;
+
   for (;;) {
 
     printf("%s$", pwd);
-    gets(line);
+    line[0] = 0;
+    i = 0;
+    while ((ch = getchar()) != '\n') {
+      line[i++] = ch;
+    }
+    line[i] = 0;
+    if (line[0] == 0)
+      continue;
     if (!strcmp(line, "exit"))
       return 0;
     if (line[0] == 'c' && line[1] == 'd' && line[2] == ' ') {
       pwd = cmd_cd(line + 3);
+      continue;
+    }
+    if (line[0] == 'f' && line[1] == 'g' && (line[2] == ' ' || line[2] == 0)) {
+      cmd_fg(line + 2);
       continue;
     }
 
@@ -431,6 +368,8 @@ int main(int argc, char *argv[], char *envp[]) {
       strcpy(cmd, cmdptr->ptr[i]->cmdname);
       strcat(cmd, cmdptr->ptr[i]->arg);
       task = taskNew(cmd);
+      strcpy(jlist->gcmd[jlist->n], cmd);
+      jlist->fg = jlist->n;
       if (t != NULL) {
         t->next = malloc(sizeof(struct tnode));
         t = t->next;
@@ -450,7 +389,7 @@ int main(int argc, char *argv[], char *envp[]) {
       if (i == 0)
         t1 = t;
     }
-    execute(t1, NULL, NULL);
+    execute(t1, NULL, NULL, 0);
   }
   /*
      task = taskNew("cat");
