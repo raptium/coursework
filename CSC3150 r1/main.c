@@ -22,80 +22,91 @@
 #include "tsh.c"
 
 
-void initialzie_jobs(struct jobs* jlist) {
-  jlist = malloc(sizeof(struct jobs));
-  jlist->n = 0;
-  jlist->s = 0;
-  jlist->fg = -1;
+static struct jobs *jobs_init(void) {
+  struct jobs *j;
+  j = malloc(sizeof(struct jobs));
+  j->fg = -1;
+  j->n = 0;
+  j->s = 0;
+  j->job = (struct task **)malloc(sizeof(struct task*) * 64);
+  j->stop = (struct task **)malloc(sizeof(struct task*) * 64);
+  return j;
 }
 
-struct tnode *initialzie_tnode(void) {
+struct tnode *new_tnode(void) {
+  struct tnode *nodelist;
   nodelist = malloc(sizeof(struct tnode));
   nodelist->fin = NULL;
   nodelist->fout = NULL;
   nodelist->next = NULL;
   nodelist->flags = 0;
   nodelist->type = -1;
+  nodelist->argv = malloc(sizeof(char*)*128);
   return nodelist;
 }
 
-struct tnode * newnode(cmd_ptr *cmdptr) {
+struct tnode *newnode(cmd_ptr *cmdptr) {
   int j, n;
   char *token, *tempstring;
-  struct tnode* tempnode, *tempnode2;
+  struct tnode *t = NULL, *t1;
   for (j = 0;j < cmdptr->number_cmd;j++) {
-    struct tnode* nodelist;
-    nodelist = initialzie_tnode();
-    nodelist->argv[0] = malloc(sizeof(char) * strlen(cmdptr->ptr[j]->cmdname));
-    nodelist->argv[0] = strcpy(cmdptr->ptr[j]->cmdname);
-    tempstring = malloc(sizeof(char) * strlen((cmdptr->ptr[j]->arg) + 1);
-                        strcpy(tempstring, cmdptr->ptr[j]->arg);
-                        token = strtok(tempstring, " ");
+    if (t != NULL) {
+      t->next = new_tnode();
+      t = t->next;
+    } else
+      t = new_tnode();
+    if (j == 0)
+      t1 = t;
+    t->type = TPIPE;
+    t->argv[0] = malloc(sizeof(char) * strlen(cmdptr->ptr[j]->cmdname));
+    strcpy(t->argv[0], cmdptr->ptr[j]->cmdname);
+    tempstring = malloc(sizeof(char) * strlen((cmdptr->ptr[j]->arg) + 1));
+    strcpy(tempstring, cmdptr->ptr[j]->arg);
+    token = strtok(tempstring, " ");
     for (n = 0;n < cmdptr->ptr[j]->number_arg;n++) {
-    nodelist->argv[n+1] = malloc(sizeof(char) * (strlen(token) + 1));
-      strcpy(nodelist->argv[n+1], token);
+      t->argv[n+1] = malloc(sizeof(char) * (strlen(token) + 1));
+      strcpy(t->argv[n+1], token);
       token = strtok(NULL, " ");
     }
-    if (j == 0) {
-    tempnode = nodelist;
-    tempnode2 = nodelist;
-  } else {
-    tempnode->next = nodelist;
-    tempnode = nodelist;
   }
-}
-if (strlen(cmdptr->head)) {
-    tempnode2->fin = malloc(sizeof(char) * strlen((cmdptr->head) + 1));
-    strcpy(tempnode2->fin, cmdptr->head);
-    tempnode2->flags = FFIN;
+  if (strlen(cmdptr->head)) {
+    t1->fin = malloc(sizeof(char) * strlen((cmdptr->head) + 1));
+    strcpy(t1->fin, cmdptr->head);
+    t1->flags |= FFIN;
   }
   if (strlen(cmdptr->tail)) {
-    tempnode2->fout = malloc(sizeof(char) * strlen((cmdptr->tail) + 1));
-    strcpy(tempnode2->fout, cmdptr->tail);
+    t1->fout = malloc(sizeof(char) * strlen((cmdptr->tail) + 1));
+    strcpy(t1->fout, cmdptr->tail);
   }
   if (cmdptr->indicater == 2)
-    tempnode2->flags = tempnode2->flags | FAPN;
-  return tempnode2;
+    t1->flags |= FAPN;
+  free(cmdptr);
+  return t1;
 }
 
+static struct tnode *bnode(char *line) {
+  char *token;
+  struct tnode *t;
+  int i = 0;
+  t = new_tnode();
+  t->type = TBDIN;
+  token = strtok(line, " ");
+  while (token != NULL) {
+    t->argv[i] = malloc(sizeof(char) * (strlen(token) + 1));
+    strcpy(t->argv[i++], token);
+  }
+  return t;
+}
 
 int main(int argc, char *argv[], char *envp[]) {
   char line[256];
   char ch;
-  char cmd[256];
   char *pwd;
-  int input;
   int i;
-  taskADT task;
-  tasksADT tasks;
-  int clean;
   cmd_ptr *cmdptr = NULL;
-  pid_t pid;
-
 
   pwd = malloc(sizeof(char) * 1024);
-  strcpy(pwd, getenv("PWD"));
-  initialzie_jobs(jlist);
+  jlist = jobs_init();
   //signal(SIGCHLD, SIG_DFL);
   signal(SIGINT,  SIG_IGN);
   signal(SIGTERM, SIG_IGN);
@@ -104,11 +115,11 @@ int main(int argc, char *argv[], char *envp[]) {
   signal(SIGSTOP, SIG_IGN);
 
 
-
   for (;;) {
     struct task *newtask;
-    struct tnode *nodelist,
-          printf("%s$", pwd);
+    struct tnode *nodelist;
+    strcpy(pwd, getenv("PWD"));
+    printf("%s$", pwd);
 
     line[0] = 0;
     i = 0;
@@ -117,13 +128,18 @@ int main(int argc, char *argv[], char *envp[]) {
     line[i] = 0;
     if (line[0] == 0)
       continue;
-
     cmdptr = malloc(sizeof(cmd_ptr));
     initialize2(cmdptr);
     newtask = malloc(sizeof(struct task));
     newtask->cmd = malloc(sizeof(char) * (strlen(line) + 1));
     strcpy(newtask->cmd, line);
     jlist->job[jlist->n++] = newtask;
+
+    if (start_chk(line) == 1) {
+      nodelist = bnode(line);
+      exec1(nodelist);
+      continue;
+    }
 
     if (start_chk(line) == 2)
       getcmd8(line, cmdptr);
@@ -140,9 +156,8 @@ int main(int argc, char *argv[], char *envp[]) {
     else if (start_chk(line) == 8)
       getcmd8(line, cmdptr);
 
-
     nodelist = newnode(cmdptr);
-    newtask->tid = execute(t, NULL, NULL, 0);
+    newtask->tid = execute(nodelist, NULL, NULL);
   }
 
 

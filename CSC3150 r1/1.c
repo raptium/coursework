@@ -233,6 +233,7 @@ int resv_chk(const char *resv) {
     return 8;
   if (trm_chk(resv + 3 + strlen(cmd_name_temp)) || trm_chk(resv + 2 + strlen(cmd_name_temp)))
     return 9;
+  return 0;
 }
 
 
@@ -381,6 +382,7 @@ char * packtrm(char *left, cmd_ptr * cmdptr, int indicater) {
     cmdptr->indicater = indicater % 3;
     return left + 3 + strlen(token);
   }
+  return NULL;
 }
 
 char* packresv(char *left, cmd_ptr * cmdptr) {
@@ -413,6 +415,7 @@ char* packresv(char *left, cmd_ptr * cmdptr) {
 
     packtrm(left, cmdptr, indicater);
   }
+  return NULL;
 }
 char* packhead(char *left, cmd_ptr * cmdptr) {
   char *cpy_left;

@@ -1,7 +1,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -55,15 +54,17 @@ struct task {
 
 struct jobs *jlist;
 
-static pid_t execute(struct tnode *t, int *pin, int *pout, pid_t pgid);
-static pid_t exec1(struct tnode *t);
-static pid_t exec2(struct tnode *t, int *pin, int *pout, pid_t pgid);
+static pid_t execute(struct tnode *t, int *pin, int *pout);
+static void exec1(struct tnode *t);
+static pid_t exec2(struct tnode *t, int *pin, int *pout);
 static void pwait(pid_t cp);
-static void gwait(pid_t cg);
 static struct task *gettask(struct jobs *jlist, pid_t pid);
 static void deltask(struct jobs *jlist, pid_t pid);
+static void cmd_fg(char *ch);
+static void cmd_cd(const char *path);
+static void cmd_jobs(void);
 
-static pid_t execute(struct tnode *t, int  *pin, int *pout, pid_t pgid) {
+static pid_t execute(struct tnode *t, int  *pin, int *pout) {
   struct tnode *t1;
   pid_t cpid;
   int f, pfd[2];
@@ -76,11 +77,11 @@ static pid_t execute(struct tnode *t, int  *pin, int *pout, pid_t pgid) {
       perror("Invalid command");
       return 0;
     }
-    return exec1(t);
+    exec1(t);
+    return 0;
   case TPIPE:
     if ((t1 = t->next) == NULL) {
-      exec2(t, pin, NULL, pgid);
-      return 0;
+      return exec2(t, pin, NULL);
     }
     if (pipe(pfd) == -1) {
       perror("Cannot create pipe");
@@ -90,27 +91,54 @@ static pid_t execute(struct tnode *t, int  *pin, int *pout, pid_t pgid) {
       }
       return 0;
     }
-    exec2(t, pin, pfd, pgid);
+    exec2(t, pin, pfd);
     t->flags |= FPOUT;
     f = t->flags;
     t1->flags |= FPIN | (f & FAPN);
     t1->fout = t->fout;
-    execute(t1, pfd, pout, pgid);
+    cpid = execute(t1, pfd, pout);
     close(pfd[0]);
     close(pfd[1]);
-    return 0;
+    return cpid;
+  }
+  return 0;
+}
+
+static void exec1(struct tnode *t) {
+  char cmd[8];
+  char arg[1024];
+
+  if (t == NULL)
+    return;
+  if (t->type != TBDIN)
+    return;
+  strcpy(cmd, t->argv[0]);
+  strcpy(arg, t->argv[1]);
+  if (cmd[0] == 'e')
+    exit(0);
+  if (cmd[0] == 'c') {
+    cmd_cd(arg);
+    return;
+  }
+  if (cmd[0] == 'f') {
+    cmd_fg(arg);
+    return;
+  }
+  if (cmd[0] == 'j') {
+    cmd_jobs();
+    return;
   }
 }
 
-static void exec2(struct tnode *t, int *pin, int *pout, pid_t pgid) {
-  struct tnode *t1;
+
+
+static pid_t exec2(struct tnode *t, int *pin, int *pout) {
   int f, i, cpid;
-  char *cmd;
 
   f = t->flags;
   if ((cpid = fork()) == -1) {
     perror("fork failed!");
-    return;
+    return 0;
   }
   /****** Parent! ******/
   if (cpid != 0) {
@@ -121,9 +149,9 @@ static void exec2(struct tnode *t, int *pin, int *pout, pid_t pgid) {
     }
 
     if ((f&FPOUT) == 0) {
-      gwait(pgid == 0 ? cpid : pgid);
+      pwait(cpid);
     }
-    return;
+    return cpid;
   }
   /****** Child! ******/
   signal(SIGTSTP, SIG_DFL);
@@ -172,27 +200,24 @@ static void exec2(struct tnode *t, int *pin, int *pout, pid_t pgid) {
 }
 
 
-static void gwait(pid_t gid) {
-  int s, i, j, t;
+static void pwait(pid_t gid) {
+  int s,  t;
   struct task *ct;
 
   if (gid == 0)
     return;
   for (;;) {
-    t = waitpid(-gid, &s, WUNTRACED);
-    if (t == -1) {
-      t = waitpid(gid, &s, WUNTRACED);
-      if (WIFEXITED(s)) {
-        deltask(jlist, gid);
-        return;
-      }
-      if (WIFSTOPPED(s)) {
-        jlist->fg = -1;
-        ct = gettask(jlist, gid);
-        jlist->stop[jlist->s++] = ct;
-        printf("[%d] %d\n", jlist->n, gid);
-        return;
-      }
+    t = waitpid(gid, &s, WUNTRACED);
+    if (WIFEXITED(s)) {
+      deltask(jlist, gid);
+      return;
+    }
+    if (WIFSTOPPED(s)) {
+      jlist->fg = -1;
+      ct = gettask(jlist, gid);
+      jlist->stop[jlist->s++] = ct;
+      printf("[%d] %d\n", jlist->n, gid);
+      return;
     }
   }
 }
@@ -225,23 +250,63 @@ static void pwait(pid_t cp) {
 }
 */
 
-void cmd_fg(char *ch) {
+static void cmd_fg(char *ch) {
   int jid;
   int i;
   pid_t gid;
 
   jid = atoi(ch);
-  if (jlist->n == 0)
+  if (jlist->s == -1)
     return;
   if (jid == 0) {
     jlist->fg = jlist->s;
     gid = jlist->stop[jlist->s]->tid;
     kill(gid, SIGCONT);
     jlist->s--;
-    gwait(gid);
+    pwait(gid);
+    return;
   }
+  if (jid < 0 || jid >= jlist->s) {
+    printf("No such job.\n");
+    return;
+  }
+  gid = jlist->stop[jid-1]->tid;
+  for (i = jid - 1;i < jlist->s - 1;i++)
+    jlist->stop[i] = jlist->stop[i+1];
+  jlist->s--;
+  kill(gid, SIGCONT);
+  pwait(gid);
+
+
+}
+static void cmd_cd(const char *path) {
+  char *cwd, *nwd;
+  if (path[0] != '/') {
+    cwd = getenv("PWD");
+    nwd = malloc(sizeof(char) * (strlen(path) + strlen(cwd) + 2));
+    strcpy(nwd, cwd);
+    strcat(nwd, "/");
+    strcat(nwd, path);
+  } else {
+    nwd = malloc(sizeof(char) * (strlen(path) + 1));
+    strcpy(nwd, path);
+  }
+  if (!chdir(nwd)) {
+    getcwd(nwd, 1023);
+    setenv("PWD", nwd, 1);
+    return;
+  }
+  return;
 }
 
+static void cmd_jobs(void) {
+  int i;
+
+  if (jlist->s == -1)
+    return;
+  for (i = 0;i < jlist->s;i++)
+    printf("[%d] %s\n", i + 1, jlist->stop[i]->cmd);
+}
 
 
 static struct task *gettask(struct jobs *jlist, pid_t pid) {
