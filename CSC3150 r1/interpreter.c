@@ -52,6 +52,7 @@ char* packresv(char *left, cmd_ptr * cmdptr);
 char* packhead(char *left, cmd_ptr * cmdptr);
 void initialize2(cmd_ptr *cmdptr);
 cmdcell* initialize(cmdcell *cell);
+int firstck(char *line);
 
 int token_chk(const char *token) {
   int i;
@@ -233,7 +234,6 @@ int resv_chk(const char *resv) {
     return 8;
   if (trm_chk(resv + 3 + strlen(cmd_name_temp)) || trm_chk(resv + 2 + strlen(cmd_name_temp)))
     return 9;
-  return 0;
 }
 
 
@@ -355,6 +355,8 @@ char* packcmd(char *left, cmd_ptr * cmdptr) {
     while (strcmp(token, "<") != 0 && token[0] != '|' && token[0] != '>') {
       strcat(cmdptr->ptr[cmdptr->number_cmd-1]->arg, token);
       strcat(cmdptr->ptr[cmdptr->number_cmd-1]->arg, " ");
+	  if(strlen(left+strlen(token))==0)
+		  return 0;
       left = left + strlen(token) + 1;
       token = strtok(NULL, " ");
       cmdptr->ptr[cmdptr->number_cmd-1]->number_arg++;
@@ -382,7 +384,6 @@ char * packtrm(char *left, cmd_ptr * cmdptr, int indicater) {
     cmdptr->indicater = indicater % 3;
     return left + 3 + strlen(token);
   }
-  return NULL;
 }
 
 char* packresv(char *left, cmd_ptr * cmdptr) {
@@ -415,7 +416,6 @@ char* packresv(char *left, cmd_ptr * cmdptr) {
 
     packtrm(left, cmdptr, indicater);
   }
-  return NULL;
 }
 char* packhead(char *left, cmd_ptr * cmdptr) {
   char *cpy_left;
@@ -441,7 +441,19 @@ void initialize2(cmd_ptr *cmdptr) {
   cmdptr->indicater = 0;
 }
 
-
+int firstck(char *line){
+	char *temp;
+	if(line[0]==' '||line[strlen(line)-1]==' ')
+		return 0;
+	temp=malloc(sizeof(char)*(strlen(line)+1));
+	strcpy(temp,"  ");
+	while(strlen(temp)<=strlen(line)){
+		if(strstr(line,temp)!=NULL)
+			return 0;
+		strcat(temp," ");
+	}
+	return 1;
+}
 
 /*
 int main(void){

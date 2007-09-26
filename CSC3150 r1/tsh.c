@@ -113,8 +113,16 @@ static void exec1(struct tnode *t) {
   if (t->type != TBDIN)
     return;
   strcpy(cmd, t->argv[0]);
-  strcpy(arg, t->argv[1]);
+  if (t->argv[1] != NULL)
+    strcpy(arg, t->argv[1]);
+  else
+    strcpy(arg, "");
   if (cmd[0] == 'e')
+	  if(jlist->s==1)
+		  printf("There is a susspended job.\n");
+	  else if(jlist->s>1)
+		  printf("There are %d susspended jobs.\n",jlist->s);
+	  else
     exit(0);
   if (cmd[0] == 'c') {
     cmd_cd(arg);
@@ -149,12 +157,17 @@ static pid_t exec2(struct tnode *t, int *pin, int *pout) {
     }
 
     if ((f&FPOUT) == 0) {
-      pwait(cpid);
+      //pwait(cpid);
     }
     return cpid;
   }
   /****** Child! ******/
   signal(SIGTSTP, SIG_DFL);
+  signal(SIGINT,  SIG_DFL);
+  signal(SIGTERM, SIG_DFL);
+  signal(SIGQUIT, SIG_DFL);
+  signal(SIGTSTP, SIG_DFL);
+  signal(SIGSTOP, SIG_DFL);
   if (pin != NULL && (f&FPIN) != 0) {
     if (dup2(pin[0], STDIN_FILENO) == -1)
       perror("File redirect faild");
@@ -173,8 +186,10 @@ static pid_t exec2(struct tnode *t, int *pin, int *pout) {
   if (t->fin != NULL && (f&FPIN) == 0) {
     f |= FFIN;
     i = open(t->fin, O_RDONLY);
-    if (i == -1)
-      perror("Input file open failed");
+	if (i == -1){
+      perror(t->fin);
+	  exit(errno);
+	}
     if (dup2(i, STDIN_FILENO) == -1)
       perror("File redirect faild");
     close(i);
@@ -195,7 +210,7 @@ static pid_t exec2(struct tnode *t, int *pin, int *pout) {
   setenv("PATH", "/bin:/usr/bin:.", 1);
   execvp(t->argv[0], (char *const *)t->argv);
   /* ERROR HERE!!! */
-  perror("Execute failed");
+  perror(t->argv[0]);
   exit(errno);
 }
 
@@ -208,7 +223,7 @@ static void pwait(pid_t gid) {
     return;
   for (;;) {
     t = waitpid(gid, &s, WUNTRACED);
-    if (WIFEXITED(s)) {
+    if (WIFEXITED(s)||WIFSIGNALED(s)) {
       deltask(jlist, gid);
       return;
     }
@@ -216,7 +231,7 @@ static void pwait(pid_t gid) {
       jlist->fg = -1;
       ct = gettask(jlist, gid);
       jlist->stop[jlist->s++] = ct;
-      printf("[%d] %d\n", jlist->n, gid);
+      printf("[%d] %s\n", jlist->s, ct->cmd);
       return;
     }
   }
@@ -260,13 +275,13 @@ static void cmd_fg(char *ch) {
     return;
   if (jid == 0) {
     jlist->fg = jlist->s;
-    gid = jlist->stop[jlist->s]->tid;
+    gid = jlist->stop[jlist->s-1]->tid;
     kill(gid, SIGCONT);
     jlist->s--;
     pwait(gid);
     return;
   }
-  if (jid < 0 || jid >= jlist->s) {
+  if (jid < 0 || jid > jlist->s) {
     printf("No such job.\n");
     return;
   }
@@ -276,7 +291,6 @@ static void cmd_fg(char *ch) {
   jlist->s--;
   kill(gid, SIGCONT);
   pwait(gid);
-
 
 }
 static void cmd_cd(const char *path) {
@@ -296,6 +310,7 @@ static void cmd_cd(const char *path) {
     setenv("PWD", nwd, 1);
     return;
   }
+  perror(path);
   return;
 }
 

@@ -9,7 +9,6 @@
  *
  *
  */
-#include "task.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -18,7 +17,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include "1.c"
+#include "interpreter.c"
 #include "tsh.c"
 
 
@@ -94,7 +93,9 @@ static struct tnode *bnode(char *line) {
   while (token != NULL) {
     t->argv[i] = malloc(sizeof(char) * (strlen(token) + 1));
     strcpy(t->argv[i++], token);
+    token = strtok(NULL, " ");
   }
+  t->argv[i] = NULL;
   return t;
 }
 
@@ -118,6 +119,7 @@ int main(int argc, char *argv[], char *envp[]) {
   for (;;) {
     struct task *newtask;
     struct tnode *nodelist;
+	char *temp;
     strcpy(pwd, getenv("PWD"));
     printf("%s$", pwd);
 
@@ -128,6 +130,13 @@ int main(int argc, char *argv[], char *envp[]) {
     line[i] = 0;
     if (line[0] == 0)
       continue;
+	//temp=malloc(sizeof(char)*(strlen(line)+1));
+	//strcpy(temp,line);
+	if(!firstck(line)){
+		printf("Error: invalid input command line\n");
+		continue;
+	}
+	//printf("Error\n");
     cmdptr = malloc(sizeof(cmd_ptr));
     initialize2(cmdptr);
     newtask = malloc(sizeof(struct task));
@@ -135,15 +144,12 @@ int main(int argc, char *argv[], char *envp[]) {
     strcpy(newtask->cmd, line);
     jlist->job[jlist->n++] = newtask;
 
-    if (start_chk(line) == 1) {
+    if (start_chk(line) == 2) {
       nodelist = bnode(line);
       exec1(nodelist);
       continue;
     }
-
-    if (start_chk(line) == 2)
-      getcmd8(line, cmdptr);
-    else if (start_chk(line) == 3)
+    if (start_chk(line) == 3)
       getcmd3(line, cmdptr);
     else if (start_chk(line) == 4)
       getcmd4(line, cmdptr);
@@ -156,8 +162,20 @@ int main(int argc, char *argv[], char *envp[]) {
     else if (start_chk(line) == 8)
       getcmd8(line, cmdptr);
 
+	else{
+		printf("Error: invalid input command line\n");
+		continue;
+	}
+
+
     nodelist = newnode(cmdptr);
     newtask->tid = execute(nodelist, NULL, NULL);
+    if (newtask->tid > 0) {
+      jlist->job[jlist->n] = newtask;
+      jlist->n++;
+    }
+    pwait(newtask->tid);
+
   }
 
 
