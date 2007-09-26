@@ -1,4 +1,4 @@
-all:
+all: 
 	gcc -c -g main.c
 	gcc -o tsh *.o
 style:

@@ -355,8 +355,8 @@ char* packcmd(char *left, cmd_ptr * cmdptr) {
     while (strcmp(token, "<") != 0 && token[0] != '|' && token[0] != '>') {
       strcat(cmdptr->ptr[cmdptr->number_cmd-1]->arg, token);
       strcat(cmdptr->ptr[cmdptr->number_cmd-1]->arg, " ");
-	  if(strlen(left+strlen(token))==0)
-		  return 0;
+      if (strlen(left + strlen(token)) == 0)
+        return 0;
       left = left + strlen(token) + 1;
       token = strtok(NULL, " ");
       cmdptr->ptr[cmdptr->number_cmd-1]->number_arg++;
@@ -441,18 +441,18 @@ void initialize2(cmd_ptr *cmdptr) {
   cmdptr->indicater = 0;
 }
 
-int firstck(char *line){
-	char *temp;
-	if(line[0]==' '||line[strlen(line)-1]==' ')
-		return 0;
-	temp=malloc(sizeof(char)*(strlen(line)+1));
-	strcpy(temp,"  ");
-	while(strlen(temp)<=strlen(line)){
-		if(strstr(line,temp)!=NULL)
-			return 0;
-		strcat(temp," ");
-	}
-	return 1;
+int firstck(char *line) {
+  char *temp;
+  if (line[0] == ' ' || line[strlen(line)-1] == ' ')
+    return 0;
+  temp = malloc(sizeof(char) * (strlen(line) + 1));
+  strcpy(temp, "  ");
+  while (strlen(temp) <= strlen(line)) {
+    if (strstr(line, temp) != NULL)
+      return 0;
+    strcat(temp, " ");
+  }
+  return 1;
 }
 
 /*
