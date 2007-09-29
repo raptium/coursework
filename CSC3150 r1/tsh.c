@@ -7,81 +7,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "tsh.h"
 
 
-struct tnode {
-  struct tnode *next;
-  int type;
-  int flags;
-  char **argv;
-  char *fin;
-  char *fout;
-};
-
-/*
- * Node Type
- * */
-#define TBDIN 0
-#define TPIPE 1
-
-/*
- * Node Flags
- */
-#define FFIN 0001 // redirect stdin from file
-#define FAPN 0002 // append to output file
-#define FPIN 0004 // redirect stdin from pipe
-#define FPOUT 0010 // redirect stdout to pipe
-
-
-struct jobs {
-  int n, s, fg;
-  struct task **job;
-  struct task **stop;
-};
-
-struct task {
-  struct tnode *start;
-  char *cmd;
-  pid_t tid;
-};
-
-
-/*
- * Globe Variables
- *
- *
- */
-
-struct jobs *jlist;
-
-static pid_t execute(struct tnode *t, int *pin, int *pout);
-static void exec1(struct tnode *t);
-static pid_t exec2(struct tnode *t, int *pin, int *pout);
-static void pwait(pid_t cp);
-static struct task *gettask(struct jobs *jlist, pid_t pid);
-static void deltask(struct jobs *jlist, pid_t pid);
-static void cmd_fg(char *ch);
-static void cmd_cd(const char *path);
-static void cmd_jobs(void);
-
-static pid_t execute(struct tnode *t, int  *pin, int *pout) {
+static struct plist *execute(struct tnode *t, int  *pin, int *pout) {
   struct tnode *t1;
+  struct plist *pids;
   pid_t cpid;
   int f, pfd[2];
+  int i;
 
   if (t == NULL)
-    return 0;
+    return NULL;
   switch (t->type) {
   case TBDIN:
     if (t->argv == NULL || t->argv[0] == NULL) {
       perror("Invalid command");
-      return 0;
+      return NULL;
     }
     exec1(t);
-    return 0;
+    return NULL;
   case TPIPE:
+    pids = malloc(sizeof(struct plist));
     if ((t1 = t->next) == NULL) {
-      return exec2(t, pin, NULL);
+      pids->pid = exec2(t, pin, NULL);
+      pids->next = NULL;
+      return pids;
     }
     if (pipe(pfd) == -1) {
       perror("Cannot create pipe");
@@ -89,19 +40,19 @@ static pid_t execute(struct tnode *t, int  *pin, int *pout) {
         close(pin[0]);
         close(pin[1]);
       }
-      return 0;
+      return NULL;
     }
-    exec2(t, pin, pfd);
+    pids->pid = exec2(t, pin, pfd);
     t->flags |= FPOUT;
     f = t->flags;
     t1->flags |= FPIN | (f & FAPN);
     t1->fout = t->fout;
-    cpid = execute(t1, pfd, pout);
+    pids->next = execute(t1, pfd, pout);
     close(pfd[0]);
     close(pfd[1]);
-    return cpid;
+    return pids;
   }
-  return 0;
+  return NULL;
 }
 
 static void exec1(struct tnode *t) {
@@ -139,7 +90,6 @@ static void exec1(struct tnode *t) {
 }
 
 
-
 static pid_t exec2(struct tnode *t, int *pin, int *pout) {
   int f, i, cpid;
 
@@ -168,6 +118,8 @@ static pid_t exec2(struct tnode *t, int *pin, int *pout) {
   signal(SIGQUIT, SIG_DFL);
   signal(SIGTSTP, SIG_DFL);
   signal(SIGSTOP, SIG_DFL);
+
+
   if (pin != NULL && (f&FPIN) != 0) {
     if (dup2(pin[0], STDIN_FILENO) == -1)
       perror("File redirect faild");
@@ -210,66 +162,117 @@ static pid_t exec2(struct tnode *t, int *pin, int *pout) {
     close(i);
   }
   setenv("PATH", "/bin:/usr/bin:.", 1);
+#ifdef DEBUG
+  puts(t->argv[0]);
+  if (t->argv[1] != NULL)
+    puts(t->argv[1]);
+  if (t->argv[2] != NULL)
+    puts(t->argv[2]);
+#endif
   execvp(t->argv[0], (char *const *)t->argv);
   /* ERROR HERE!!! */
   perror(t->argv[0]);
   exit(errno);
 }
 
-
+/*
 static void pwait(pid_t gid) {
-  int s,  t;
+  int s;
+  pid_t t;
   struct task *ct;
 
   if (gid == 0)
     return;
   for (;;) {
-    t = waitpid(gid, &s, WUNTRACED);
+    t = wait3(&s, WUNTRACED, NULL);
+    if (t == gid) {
+      if (WIFEXITED(s) || WIFSIGNALED(s)) {
+        deltask(jlist, gid);
+        return;
+      }
+      if (WIFSTOPPED(s)) {
+        jlist->fg = -1;
+        ct = gettask(jlist, gid);
+        jlist->stop[jlist->s++] = ct;
+        printf("[%d] %s\n", jlist->s, ct->cmd);
+        return;
+      }
+    }// else if (t == -1)
+    // break;
+  }
+}
+*/
+
+static void lwait(struct plist *l) {
+  int s;
+  pid_t t;
+  struct task *ct;
+
+  while (l != NULL) {
+    waitpid(l->pid, &s, WUNTRACED);
     if (WIFEXITED(s) || WIFSIGNALED(s)) {
-      deltask(jlist, gid);
+      deltask(jlist, l);
       return;
     }
     if (WIFSTOPPED(s)) {
       jlist->fg = -1;
-      ct = gettask(jlist, gid);
+      ct = gettask(jlist, l);
       jlist->stop[jlist->s++] = ct;
       printf("[%d] %s\n", jlist->s, ct->cmd);
       return;
     }
   }
+
 }
 
 
 static void cmd_fg(char *ch) {
   int jid;
   int i;
-  pid_t gid;
+  struct plist *l, *ol;
 
   jid = atoi(ch);
   if (jlist->s <= 0)
     return;
   if (strlen(ch) == 0 && jid == 0) {
     jlist->fg = jlist->s;
-    gid = jlist->stop[jlist->s-1]->tid;
-    kill(gid, SIGCONT);
+    l = jlist->stop[jlist->s-1]->tids;
+    printf("Job wake up:  %s\n", jlist->stop[jlist->s-1]->cmd);
+    ol = l;
+    while (l != NULL) {
+      kill(l->pid, SIGCONT);
+      l = l->next;
+    }
     jlist->s--;
-    pwait(gid);
+    lwait(ol);
     return;
   }
   if (jid <= 0 || jid > jlist->s) {
     printf("No such job.\n");
     return;
   }
-  gid = jlist->stop[jid-1]->tid;
+  l = jlist->stop[jid-1]->tids;
+  printf("Job wake up:  %s\n", jlist->stop[jid-1]->cmd);
+  ol = l;
   for (i = jid - 1;i < jlist->s;i++)
     jlist->stop[i] = jlist->stop[i+1];
   jlist->s--;
-  kill(gid, SIGCONT);
-  pwait(gid);
-
+  while (l != NULL) {
+    kill(l->pid, SIGCONT);
+    l = l->next;
+  }
+  lwait(ol);
 }
 static void cmd_cd(const char *path) {
   char *cwd, *nwd;
+  if (path == NULL || strlen(path) == 0) {
+    printf("cd: No argument\nBack to your home directory\n");
+    if (!chdir(getenv("HOME"))) {
+      getcwd(nwd, 1023);
+      setenv("PWD", nwd, 1);
+    } else perror("cd");
+    return;
+  }
   if (path[0] != '/') {
     cwd = getenv("PWD");
     nwd = malloc(sizeof(char) * (strlen(path) + strlen(cwd) + 2));
@@ -299,30 +302,30 @@ static void cmd_jobs(void) {
 }
 
 
-static struct task *gettask(struct jobs *jlist, pid_t pid) {
+static struct task *gettask(struct jobs *jlist, struct plist *l) {
   int i;
-  if (pid == 0)
+  if (l == NULL)
     return NULL;
   for (i = 0;i < jlist->n;i++)
-    if (jlist->job[i]->tid == pid)
+    if (jlist->job[i]->tids == l)
       return jlist->job[i];
   return NULL;
 }
 
-static void deltask(struct jobs *jlist, pid_t pid) {
+static void deltask(struct jobs *jlist, struct plist *l) {
   int i, j;
 
-  if (pid == 0)
+  if (l == NULL)
     return;
   for (i = 0;i < jlist->n;i++)
-    if (jlist->job[i]->tid == pid) {
-      free(gettask(jlist, pid));
+    if (jlist->job[i]->tids == l) {
+      free(gettask(jlist, l));
       for (j = i;i < jlist->n - 1;i++)
         jlist->job[j] = jlist->job[j+1];
     }
   jlist->n--;
   for (i = 0;i < jlist->s;i++)
-    if (jlist->stop[i]->tid == pid) {
+    if (jlist->stop[i]->tids == l) {
       for (j = i;i < jlist->s - 1;i++)
         jlist->stop[j] = jlist->stop[j+1];
     }

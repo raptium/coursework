@@ -21,6 +21,7 @@
 #include "tsh.c"
 
 
+
 static struct jobs *jobs_init(void) {
   struct jobs *j;
   j = malloc(sizeof(struct jobs));
@@ -121,7 +122,7 @@ int main(int argc, char *argv[], char *envp[]) {
     struct tnode *nodelist;
     char *temp;
     strcpy(pwd, getenv("PWD"));
-    printf("%s$", pwd);
+    printf("[CSC3150 shell:%s]$", pwd);
 
     line[0] = 0;
     i = 0;
@@ -169,12 +170,12 @@ int main(int argc, char *argv[], char *envp[]) {
 
 
     nodelist = newnode(cmdptr);
-    newtask->tid = execute(nodelist, NULL, NULL);
-    if (newtask->tid > 0) {
+    newtask->tids = execute(nodelist, NULL, NULL);
+    if (newtask->tids != NULL) {
       jlist->job[jlist->n] = newtask;
       jlist->n++;
     }
-    pwait(newtask->tid);
+    lwait(newtask->tids);
 
   }
 

@@ -1,5 +1,5 @@
-all: 
-	gcc -c -g main.c
+all: style 
+	gcc -c -g -O3 main.c
 	gcc -o tsh *.o
 style:
 	~/bin/astyle --style=kr -Up -s2 *.c

@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "interpreter.h"
 
 //#include <regex.h>
 /*
@@ -18,41 +19,6 @@
  * 0 will be returned when any invalid character is found.
  *
  */
-typedef struct {
-  char cmdname[256];
-  char arg[256];
-  int number_arg;
-}
-cmdcell;
-
-typedef struct {
-  cmdcell *ptr[100];
-  char tail[256];
-  char head[256];
-  int number_cmd;
-  int indicater;
-}
-cmd_ptr;
-
-int start_chk(const char *cmd);
-int token_chk(const char *token);
-int build_cmd_chk(const char *token);
-int cmd_chk(const char *cmd);
-int trm_chk(const char *trm);
-int resv_chk(const char *resv);
-void getcmd3(char * input, cmd_ptr * cmdptr);
-void getcmd4(char * input, cmd_ptr * cmdptr);
-void getcmd5(char * input, cmd_ptr * cmdptr);
-void getcmd6(char * input, cmd_ptr * cmdptr);
-void getcmd7(char * input, cmd_ptr * cmdptr);
-void getcmd8(char * input, cmd_ptr * cmdptr);
-char* packcmd(char *left, cmd_ptr * cmdptr);
-char * packtrm(char *left, cmd_ptr * cmdptr, int indicater);
-char* packresv(char *left, cmd_ptr * cmdptr);
-char* packhead(char *left, cmd_ptr * cmdptr);
-void initialize2(cmd_ptr *cmdptr);
-cmdcell* initialize(cmdcell *cell);
-int firstck(char *line);
 
 int token_chk(const char *token) {
   int i;
@@ -355,11 +321,11 @@ char* packcmd(char *left, cmd_ptr * cmdptr) {
     while (strcmp(token, "<") != 0 && token[0] != '|' && token[0] != '>') {
       strcat(cmdptr->ptr[cmdptr->number_cmd-1]->arg, token);
       strcat(cmdptr->ptr[cmdptr->number_cmd-1]->arg, " ");
+      cmdptr->ptr[cmdptr->number_cmd-1]->number_arg++;
       if (strlen(left + strlen(token)) == 0)
         return 0;
       left = left + strlen(token) + 1;
       token = strtok(NULL, " ");
-      cmdptr->ptr[cmdptr->number_cmd-1]->number_arg++;
     }
     return left + strlen(token) + 1;
   } else
@@ -455,76 +421,7 @@ int firstck(char *line) {
   return 1;
 }
 
-/*
-int main(void){
-  char test2[14][40];
-  char test[256];
-  int i,j;
-  cmd_ptr *cmdptr=NULL;
-  	strcpy(test2[0],"man ");
-        strcpy(test2[1],"man 1.txt");
-        strcpy(test2[2],"man 1.txt 2.txt");
-        strcpy(test2[3],"man");
-        strcpy(test2[4],"man 1.txt < 2.txt | man | man");
-        strcpy(test2[5],"man 1.txt < 2.txt | man | man >> 2.txt");
-        strcpy(test2[6],"man 1.txt < 2.txt | man | man > 2.txt");
-        strcpy(test2[7],"man 1.txt < 2.txt");
-        strcpy(test2[8],"man 1.txt < 2.txt > 3.txt");
-        strcpy(test2[9],"man 1.txt 2.txt |ls -l | man | ls -m >> 4.txt");
-        strcpy(test2[10],"man 1.txt < 2.txt");
-        strcpy(test2[11],"man 1.txt > 2.txt < 3.txt");
-        strcpy(test2[12],"man 1.txt >> 2.txt");
-        strcpy(test2[13],"man 1.txt >> 2.txt");
-        printf("typetail     tail          head\n");
 
-  //for(i=0;i<13;i++)
-  while(1)
-  {
-    gets(test);
-    cmdptr=malloc(sizeof(cmd_ptr));
-    initialize2(cmdptr);
-    //test=malloc(sizeof(char)*(strlen(test2[i])+1));
-    //strcpy(test,test2[i]);
-    if(strstr(test,"  ")){
-      printf("invalid input\n");
-      //free(test);
-      free(cmdptr);
-      continue;
-    }
-    if(test[strlen(test)-1]==' ')
-      test[strlen(test)-1]='\0';
-    if(start_chk(test)==2)
-      getcmd8(test,cmdptr);
-    else if(start_chk(test)==3)
-      getcmd3(test,cmdptr);
-    else if(start_chk(test)==4)
-      getcmd4(test,cmdptr);
-    else if(start_chk(test)==5)
-      getcmd5(test,cmdptr);
-    else if(start_chk(test)==6)
-      getcmd6(test,cmdptr);
-    else if(start_chk(test)==7)
-      getcmd7(test,cmdptr);
-    else if(start_chk(test)==8)
-      getcmd8(test,cmdptr);
-
-    else{
-      printf("invalid input\n");
-      //free(test);
-      free(cmdptr);
-      continue;
-    }
-    //printf("\n\n%d\n",i);
-    printf("\t%d\t%s\t %s",cmdptr->indicater,cmdptr->tail,cmdptr->head);
-    for(j=0;j<cmdptr->number_cmd;j++)
-      printf("\n\t%d\t%s\t%s\n",cmdptr->ptr[j]->number_arg,cmdptr->ptr[j]->cmdname,cmdptr->ptr[j]->arg);
-    //free(test);
-    free(cmdptr);
-  }
-  return 0;
-}
-
-*/
 
 
 
