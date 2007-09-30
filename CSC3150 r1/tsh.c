@@ -66,7 +66,7 @@ static void exec1(struct tnode *t) {
     strcpy(arg, t->argv[1]);
   else
     strcpy(arg, "");
-  if (cmd[0] == 'e'){
+  if (cmd[0] == 'e') {
     if (jlist->s == 1)
       printf("There is a susspended job.\n");
     else if (jlist->s > 1)
@@ -262,7 +262,7 @@ static void cmd_fg(char *ch) {
   lwait(ol);
 }
 static void cmd_cd(const char *path) {
-  char *cwd, *nwd=NULL;
+  char *cwd, *nwd = NULL;
   if (path == NULL || strlen(path) == 0) {
     printf("cd: No argument\n");
     return;

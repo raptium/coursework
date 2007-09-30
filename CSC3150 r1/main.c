@@ -48,7 +48,7 @@ struct tnode *new_tnode(void) {
 struct tnode *newnode(cmd_ptr *cmdptr) {
   int j, n;
   char *token, *tempstring;
-  struct tnode *t = NULL, *t1=NULL;
+  struct tnode *t = NULL, *t1 = NULL;
   for (j = 0;j < cmdptr->number_cmd;j++) {
     if (t != NULL) {
       t->next = new_tnode();
