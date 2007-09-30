@@ -48,7 +48,7 @@ struct tnode *new_tnode(void) {
 struct tnode *newnode(cmd_ptr *cmdptr) {
   int j, n;
   char *token, *tempstring;
-  struct tnode *t = NULL, *t1;
+  struct tnode *t = NULL, *t1=NULL;
   for (j = 0;j < cmdptr->number_cmd;j++) {
     if (t != NULL) {
       t->next = new_tnode();
@@ -120,7 +120,6 @@ int main(int argc, char *argv[], char *envp[]) {
   for (;;) {
     struct task *newtask;
     struct tnode *nodelist;
-    char *temp;
     strcpy(pwd, getenv("PWD"));
     printf("[CSC3150 shell:%s]$", pwd);
 

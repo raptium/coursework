@@ -13,9 +13,7 @@
 static struct plist *execute(struct tnode *t, int  *pin, int *pout) {
   struct tnode *t1;
   struct plist *pids;
-  pid_t cpid;
   int f, pfd[2];
-  int i;
 
   if (t == NULL)
     return NULL;
@@ -68,13 +66,14 @@ static void exec1(struct tnode *t) {
     strcpy(arg, t->argv[1]);
   else
     strcpy(arg, "");
-  if (cmd[0] == 'e')
+  if (cmd[0] == 'e'){
     if (jlist->s == 1)
       printf("There is a susspended job.\n");
     else if (jlist->s > 1)
       printf("There are %d susspended jobs.\n", jlist->s);
     else
       exit(0);
+  }
   if (cmd[0] == 'c') {
     cmd_cd(arg);
     return;
@@ -205,7 +204,6 @@ static void pwait(pid_t gid) {
 
 static void lwait(struct plist *l) {
   int s;
-  pid_t t;
   struct task *ct;
 
   while (l != NULL) {
@@ -264,7 +262,7 @@ static void cmd_fg(char *ch) {
   lwait(ol);
 }
 static void cmd_cd(const char *path) {
-  char *cwd, *nwd;
+  char *cwd, *nwd=NULL;
   if (path == NULL || strlen(path) == 0) {
     printf("cd: No argument\nBack to your home directory\n");
     if (!chdir(getenv("HOME"))) {
