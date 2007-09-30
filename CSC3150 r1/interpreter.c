@@ -25,6 +25,8 @@ int token_chk(const char *token) {
   char ch[2] = "";
   char chain[] = " \t><|*\"!'`";
 
+  if(token==NULL)
+	  return 0;
   for (i = 0;i < 10;i++) {
     ch[0] = chain[i];
     ch[1] = '\0';
@@ -41,9 +43,17 @@ int build_cmd_chk(const char *token) {
   cpy_token[0] = 0;
   strcpy(cpy_token, token);
   token2 = strtok(cpy_token, " ");
-  if ((strcmp(token2, "cd") == 0) || (strcmp(token2, "exit") == 0) || (strcmp(token2, "fg") == 0) || (strcmp(token2, "jobs") == 0))
+  if ((strcmp(token2, "cd") != 0) && (strcmp(token2, "fg") != 0) && (strcmp(token2, "jobs") != 0) && (strcmp(token2, "exit") != 0))
+	  return 0;
+  if ((strcmp(token2, "cd") == 0) || (strcmp(token2, "fg") == 0)){
+	  if(strtok(NULL," ")!=NULL)
+	  if(strtok(NULL," ")!=NULL)
+		  return 0;
+		  }else if((strcmp(token2, "jobs") == 0)|| (strcmp(token2, "exit") == 0)){
+			  if(strtok(NULL," ")!=NULL)
+				  return 0;
+		  }
     return 1;
-  else return 0;
 }
 
 int start_chk(const char *cmd) {

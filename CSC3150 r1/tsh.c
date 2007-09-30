@@ -264,11 +264,7 @@ static void cmd_fg(char *ch) {
 static void cmd_cd(const char *path) {
   char *cwd, *nwd=NULL;
   if (path == NULL || strlen(path) == 0) {
-    printf("cd: No argument\nBack to your home directory\n");
-    if (!chdir(getenv("HOME"))) {
-      getcwd(nwd, 1023);
-      setenv("PWD", nwd, 1);
-    } else perror("cd");
+    printf("cd: No argument\n");
     return;
   }
   if (path[0] != '/') {
