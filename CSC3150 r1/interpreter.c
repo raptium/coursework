@@ -92,6 +92,8 @@ int start_chk(const char *cmd) {
   //situation 2
   if (build_cmd_chk(cmd))
     return 2;
+  if ((strcmp(token2, "cd") == 0) || (strcmp(token2, "fg") == 0) || (strcmp(token2, "jobs") == 0) || (strcmp(token2, "exit") == 0))
+    return 0;
   if (strstr(cmd, "<") == NULL && strstr(cmd, ">") == NULL && strstr(cmd, "|") == NULL)
     return 8;
   //situation 3 and 4 and 6

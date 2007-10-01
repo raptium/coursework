@@ -68,9 +68,9 @@ static void exec1(struct tnode *t) {
     strcpy(arg, "");
   if (cmd[0] == 'e') {
     if (jlist->s == 1)
-      printf("There is a susspended job.\n");
+      printf("There is a suspended job.\n");
     else if (jlist->s > 1)
-      printf("There are %d susspended jobs.\n", jlist->s);
+      printf("There are %d suspended jobs.\n", jlist->s);
     else
       exit(0);
   }
@@ -230,6 +230,10 @@ static void cmd_fg(char *ch) {
   struct plist *l, *ol;
 
   jid = atoi(ch);
+  if (strlen(ch) != 0 && (jid <= 0 || jid > jlist->s)) {
+    printf("No such job.\n");
+    return;
+  }
   if (jlist->s <= 0)
     return;
   if (strlen(ch) == 0 && jid == 0) {
@@ -243,10 +247,6 @@ static void cmd_fg(char *ch) {
     }
     jlist->s--;
     lwait(ol);
-    return;
-  }
-  if (jid <= 0 || jid > jlist->s) {
-    printf("No such job.\n");
     return;
   }
   l = jlist->stop[jid-1]->tids;
