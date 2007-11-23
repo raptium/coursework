@@ -1,13 +1,6 @@
 #!/bin/bash
-MB_SIZE=48
-let "MB_SIZE *= 2048"
-echo Creating ${MB_SIZE} 512-blocks ramdisk
-CREATED_RAMDISK=`hdik -nomount ram://${MB_SIZE}`
-echo New block device: ${CREATED_RAMDISK}
-DISK_NAME=`basename ${CREATED_RAMDISK}`
-echo Creating volume with label: ${DISK_NAME}
-newfs_msdos -F 32 ${DISK_NAME} /dev/r$CREATED_RAMDISK
-echo Mounting in /Volumes/${DISK_NAME}
-mkdir /Volumes/${DISK_NAME}
-chmod 644 $CREATED_RAMDISK
-#diskutil mount ${CREATED_RAMDISK}
+mkfs.vfat -F 32 /dev/ram
+mkdir -p /mnt/rd
+mount /dev/ram /mnt/rd -o loop
+mount | grep ram
+df -T | grep ram
