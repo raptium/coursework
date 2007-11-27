@@ -3,10 +3,12 @@
 
 idata unsigned char stage[6][13]={{0}};
 xdata unsigned int hiScore[3];
-code unsigned char boy[] = {0x3c, 0x3c, 0x18, 0x3c, 0x5a, 0x18, 0x24, 0x42};
-unsigned char boyX=0; // boy x offset 0~42
+xdata unsigned char first;
+code unsigned char boy[] = {0x1e, 0x1e, 0x0c, 0x1e, 0x2d, 0x0c, 0x12, 0x21};
+char boyX=0; // boy x offset 0~42
 unsigned char empty[6] = {0};
-unsigned char s; // stage bottom y
+char s; // stage bottom y
+char life=20; // initial lives
 code unsigned char d_01[] = {0x72,0x56,0x52,0x52,0x77};
 code unsigned char d_23[] = {0x77,0x11,0x77,0x41,0x77};
 code unsigned char d_45[] = {0x57,0x54,0x77,0x11,0x17};
@@ -35,6 +37,9 @@ unsigned char key_rd(void){
 void print2d(unsigned char n, unsigned char lcd){
   unsigned char ch,m;
   unsigned char i;
+  
+  if(!n)
+	return;
 
   for(i=0;i<5;i++){
     ch=0;
@@ -76,30 +81,32 @@ labelSw:
       m=n%10;
       goto labelSw;
     }
+	if(n<10)
+	  ch&=0x0f;
     glcd_wd(lcd,ch);
   }
 
 }
 
 void printHiScore(void){
-  unsigned int s[3];
+  unsigned int s;
   unsigned int i,x;
 
   EECON|=0x08; // enable EEPROM
-  s[0]=hiScore[0];
-  s[1]=hiScore[1];
-  s[2]=hiScore[2];
-  EECON&=~0x08; // disable EEPROM
-
   for(i=0;i<3;i++){
     x=0;
-    while(s[i]){
+	s=hiScore[i];
+	delay(500);
+    while(s){
+	  glcd_pos(1,5,i*7);
+	  print2d(i+1,1);
       glcd_pos(1,2+x,i*7);
-      print2d(1,s[1]%100);
+      print2d(s%100,1);
       x++;
-      s[i]/=100;
+      s/=100;
     }
   }
+  EECON&=~0x08; // disable EEPROM
 
 }
 
@@ -112,79 +119,47 @@ void updateHiScore(unsigned int s){
   c=hiScore[2];
   EECON&=~0x08; // disable EEPROM
 
-  if(s>a)
-    a=s;
-  else if(s>b)
-    b=s;
-  else if(s>c)
-    c=s;
 
-  EECON|=0x08;
+	if(s>a){
+		c=b;
+		b=a;
+		a=s;
+	}
+	else if(s>b){
+		c=b;
+		b=s;
+		}
+	else if(s>c)
+		c=s;
+
+
+  EECON|=0x08; // EEMEN=1 
+  EECON|=0x10; // EEMWE=1; 
   hiScore[0]=a;
-  while((EECON&0x02)==0); // wait until not busy
+  while((EECON&0x02)==0){
+	_asm
+	nop
+	_endasm;
+  } // wait until not busy
   hiScore[1]=b;
-  while((EECON&0x02)==0); // wait until not busy
+  while((EECON&0x02)==0){
+	_asm
+	nop
+	_endasm;
+  } // wait until not busy
   hiScore[2]=c;
-  while((EECON&0x02)==0); // wait until not busy
-  EECON&=~0x08;
+  while((EECON&0x02)==0){
+	_asm
+	nop
+	_endasm;
+  } // wait until not busy
+  EECON&=~0x10; // EEMWE=0; 
+  EECON&=~0x08; // EEMEN=0 
 }
 
-void printStage(void){
-  unsigned char i,j,k,y;
-  unsigned char bb; 
-  for(i=0;i<6;i++)
-    for(j=0;j<13;j++){
-      for(k=0;k<8;k++){
-        y=(j*8+s+k)%104;
-        bb=stage[i][y/13];
-        if(y<40){
-          glcd_pos(1,i+1,y);
-          if(bb&(1<<k))
-            glcd_wd(1,0x18);
-          else
-            glcd_wd(1,0x00);
-        }
-        else{
-          glcd_pos(2,i+1,y-40);
-          if(bb&(1<<k))
-            glcd_wd(2,0x18);
-          else
-            glcd_wd(2,0x00);
-        }
-      }
-    }
-}
 
-void insertStage(unsigned char pattern){
-  unsigned char i;
-  for(i=0;i<6;i++){
-    stage[i][(s-1)/8]&=(0xff-1<<((s-1)%8));
-    stage[i][(s-1)/8]|=(pattern&(1<<((s-1)%8)));
-  }
-  s++;
-}
 
-void printBoy(void){
-  unsigned char i,ch;
-  glcd_pos(1,(boyX+3)/8+1,32);
-  for(i=0;i<8;i++){
-    ch=boy[i];
-    ch<<=((boyX)%8);
-    if(stage[(boyX+3)/8][s+8-i])
-      ch|=0x18;
-    glcd_wd(1,ch);
-  }
-  if(boyX%8>2){
-    glcd_pos(1,(boyX+3)/8+2,32);
-    for(i=0;i<8;i++){
-      ch=boy[i];
-      ch>>=(8-(boyX)%8);
-      if(stage[(boyX+3)/8+1][s+8-i])
-        ch|=0x18;
-      glcd_wd(1,ch);
-    }
-  }
-}
+
 
 void bootScreen(void){
   unsigned char i;
@@ -726,72 +701,184 @@ void gameOver(void){
   glcd_wd(2, 0x01);
 }
 
+void printBoy(void){
+  unsigned char i,ch;
+  glcd_pos(1,(boyX+3)/8+1,32);
+  for(i=0;i<8;i++){
+    ch=boy[i];
+    ch<<=((boyX+3)%8);
+	/*
+    if(stage[(boyX+3)/8][(s+96)%104%8]&(1<<i))
+      ch|=0x18;
+	  */
+    glcd_wd(1,ch);
+  }
+  glcd_wd(1,0xff);
+  if((boyX+3)%8>2){
+    glcd_pos(1,(boyX+3)/8+2,31);
+    for(i=0;i<8;i++){
+      ch=boy[i];
+      ch>>=(8-(boyX+3)%8);
+	  /*
+      if(stage[(boyX+3)/8+1][(s+96)%104%8]&(1<<i))
+        ch|=0x18;
+		*/
+      glcd_wd(1,ch);
+    }
+	glcd_wd(1,0xff);
+  }
+}
+
+void insertStage(unsigned char pattern){
+  unsigned char i;
+  s--;
+  if(s<0)
+	s+=103;
+  for(i=0;i<6;i++){
+    stage[i][s/8]&=(0xff-1<<(s%8));
+	if(pattern&(1<<i))
+		stage[i][s/8]|=(1<<(s%8));
+  }
+}
+
+void printStage(void){
+  unsigned char i,y;
+  unsigned char bb; 
+  for(i=0;i<6;i++){
+	glcd_pos(2,i+1,0);
+	for(y=0;y<64;y++){
+		bb=stage[i][(s+y)%103/8];
+		if(bb&(1<<((s+y)%103%8)))
+			glcd_wd(2,0x18);
+		else
+			glcd_wd(2,0x00);
+	}
+	glcd_pos(1,i+1,0);
+	for(y=64;y<96;y++){
+		bb=stage[i][(s+y)%103/8];
+		if(bb&(1<<((s+y)%103%8)))
+			glcd_wd(1,0x18);
+		else
+			glcd_wd(1,0x00);
+	}
+    for(y=96;y<103;y++){
+		bb=stage[i][(s+y)%103/8];
+		if(boyX/8==i){
+			if(bb&(1<<((s+y)%103%8))){
+				glcd_wd(1,0x18|(boy[y-96]<<(boyX%8)));
+				life--;
+			}
+			else
+				glcd_wd(1,(boy[y-96]<<(boyX%8)));
+		}else if(boyX/8+1==i && boyX%8>2){
+			if(bb&(1<<((s+y)%103%8))){
+				glcd_wd(1,0x18|(boy[y-96]>>(8-boyX%8)));
+				life--;
+			}
+			else
+				glcd_wd(1,(boy[y-96]>>(8-boyX%8)));
+		}else {if(bb&(1<<((s+y)%103%8)))
+				glcd_wd(1,0x18);
+			else
+				glcd_wd(1,0x00);
+		}
+	}
+  }
+}
+
 void newGame(void){
-  unsigned char bb[6]={0};
-  unsigned char pattern=0;
+  unsigned char bb[6]={0},bb2[6]={0};
+  unsigned char pattern;
   unsigned char i,j;
-  unsigned char life=100; // initial lives
+  unsigned char ch;
   unsigned int score=0;
+  unsigned char speed=2;
 
   //initialize
+  life=20;
+  glcd_fillup(0x00);
   gameScreen();
   for(i=0;i<6;i++)
     for(j=0;j<13;j++)
       stage[i][j]=0;
   boyX=21; //put rockboy at the center of screen
-  printBoy();
 
-  while(1){
-    for(i=0;i<6;i++){
-      if(bb[i]>0){
-        pattern|=(1<<i);
-        bb[i]--;
-      }
-      else if(rnd(100)<20){ // difficult variable
-        bb[i]=3; // rock height
-      }
-    }
+  for(i=0;i<100;i++){
+	for(j=0;j<speed;j++){
+	    pattern=0;
+		for(i=0;i<6;i++){
+		  if(bb[i]>0){
+			pattern|=(1<<i);
+			bb[i]--;
+		  }
+		  else {
+			if(bb2[i])
+				bb2[i]--;
+			if(bb2[i]==0 && rnd(100)<10){ // difficult variable
+				bb[i]=3; // rock height
+				bb2[i]=5;
+			}
+		  }
+		}
     insertStage(pattern);
+	}
     printStage();
 
     // check keypad input
     for(j=0;j<6;j++){
       if(~key_rd()&(1<<j)){
-        if(j>=3)
-          boyX--;
-        else
-          boyX++;	
+        if(j==3)
+          boyX-=2;
+        else if(j==2)
+          boyX+=2;
       }
+	  if(boyX>42)
+		boyX=42;
+	  if(boyX<0)
+		boyX=0;
     }
     // check keypad input END 
 
-    printBoy();
+    //printBoy();
     // check rock and boy
-    for(j=0;j<8;j++){
-      if(stage[(boyX+3)/8][s]&(1<<(8-j)))
-        if((boy[j]<<(boyX%8)|0x18)!=(boy[j]<<(boyX%8)+0x18))
-          life--;
-      if(boyX%8>2){
-        if(stage[(boyX+3)/8+1][s]&(1<<(8-j)))
-          if((boy[j]>>(8-(boyX%8))|0x18)!=(boy[j]<<(8-(boyX%8))+0x18))
+	ch=stage[(boyX+3)/8][(s+96)%104/8];
+	if(ch>(1<<((s+96)%8)))
+	  life--;
+	/*
+      if((boyX+3)%8>2){
+        if(stage[(boyX+3)/8+1][(s+96)%103/8];
             life--;
-      }
-    }
+			
+      }*/
+	
+	glcd_pos(1,1,120);
+	print2d(life,1);
 
     if(life<=0){
       break;
     }
     score++;
+	glcd_pos(1,3,120);
+	print2d(score%100,1);
+	glcd_pos(1,4,120);
+	print2d(score/100,1);
   }
 
   // out of loop
   // boy die
   vos_cls(); //stage clear;
-  gameOver();
   updateHiScore(score);
+  gameOver();
+  printHiScore();
+  while(1){
+	if(~key_rd()&0x20)
+		break;
+	delay(500);
+  }
 }
 
 void main(void) {
+	unsigned char tmp;
 
   //==== INFO ===//
   // P1_0 : infra-red LED
@@ -805,11 +892,62 @@ void main(void) {
   // test program for GRAPHIC LCD ==================================
   glcd_wc(1, 0x3F); // GRAPHIC LCD 1 on
   glcd_wc(2, 0x3F); // GRAPHIC LCD 2 on
-  glcd_fillup(0x00);
+  
 
   bootScreen();
-  //delay(2000);
+  delay(200);
+  EECON|=0x08;
+  tmp=first;
+  EECON&=~(0x08);
+  
+  glcd_pos(1,1,0);
+  print2d(tmp,1);
+  
+  if(tmp!=0x11){
+	EECON|=0x08;
+	EECON|=0x10;
+	delay(500);
+	hiScore[0]=0x11;
+	while((EECON&0x02)==0){
+		_asm
+		nop
+		_endasm;
+	} // wait until not busy
+	delay(500);
+	hiScore[1]=0x11;
+	while((EECON&0x02)==0){
+		_asm
+		nop
+		_endasm;
+	} // wait until not busy
+	delay(500);
+	hiScore[2]=0x11;
+	while((EECON&0x02)==0){
+		_asm
+		nop
+		_endasm;
+	} // wait until not busy
+	delay(500);
+	first=0x11;
+	while((EECON&0x02)==0){
+		_asm
+		nop
+		_endasm;
+	} // wait until not busy
+	EECON&=~0x10;
+    EECON&=~0x08;
+  }
+
+
+ 
+
   while(1){
+	delay(200);
+    glcd_fillup(0x00);
+    bootScreen();
+	while(key_rd()==0x3f){
+	  delay(2000);
+    }
     if(~key_rd()&0x01)
       newGame();
     if(~key_rd()&0x02)
@@ -817,8 +955,11 @@ void main(void) {
     if(~key_rd()&0x04)
       delay(100);
     if(~key_rd()&0x08){
+	  glcd_fillup(0x00);
       gameScreen();
       printHiScore();
+	  while(key_rd()&0x20)
+		delay(100);
     }
   }
 

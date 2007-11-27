@@ -2,7 +2,12 @@
 
 /* Delay program */
 void delay(unsigned long value) {
-    while (value > 0) value--;
+    while (value > 0){
+	 value--;
+	 _asm
+	 nop
+	 _endasm;
+	}
 }
 
 /* write command word to GRAPHIC LCD*/
