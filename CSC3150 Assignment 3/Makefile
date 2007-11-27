@@ -5,6 +5,8 @@ all: oops
 
 oops: oops.o
 
+oops.o: oops.c oops.h
+
 clean:
 	rm *.o *~ *.orig
 	

@@ -2,6 +2,7 @@
 #define BOOT_H 1
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -89,7 +90,8 @@ void buf_dup(void *buf, int size);
 unsigned long lookupFAT(int fid, unsigned long clus);
 void updateFAT(int fid,unsigned long clus,unsigned long nextClus);
 int strlow(char *str);
-void rcvy(int fid,char *filename);
+void rcvy(int fid,unsigned long clus ,char *filename);
+unsigned long findClus(int fid, unsigned long clus, char *filename);
 #endif
 
 
