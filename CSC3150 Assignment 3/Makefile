@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-g -Wall -O2 -pipe
+CFLAGS=-g -Wall -pipe
 
 all: oops
 
