@@ -5,6 +5,59 @@ int chkfn(char ch) {
     return (islower(ch) | isdigit(ch) | isupper(ch)) && !isspace(ch);
 }
 
+
+typedef struct entryS {
+    unsigned long FstClus;
+    char path[128];
+    struct entryS *next;
+}
+qEntryCDT;
+
+
+typedef struct queueS {
+    qEntryCDT *head, *tail;
+    int cnt;
+}
+queueCDT;
+
+typedef queueCDT* queueADT;
+typedef qEntryCDT* qEntryADT;
+
+
+qEntryADT dequeue(queueADT Q) {
+    qEntryADT entry;
+    if (Q == NULL)
+        return NULL;
+    if (Q->head == NULL || Q->tail == NULL)
+        return NULL;
+    entry = Q->head;
+    Q->head = entry->next;
+    Q->cnt--;
+    if (!Q->cnt)
+        Q->tail = NULL;
+    return entry;
+}
+
+void enqueue(queueADT Q, qEntryADT E) {
+    if (Q == NULL || E == NULL)
+        return;
+    Q->tail->next = E;
+    Q->tail = E;
+    Q->cnt++;
+}
+
+queueADT emptyQ(void) {
+    queueADT Q;
+    Q = malloc(sizeof(queueCDT));
+    Q->cnt = 0;
+    Q->head = NULL;
+    Q->tail = NULL;
+
+    return Q;
+}
+
+
+
 int main(int argc, char const *argv[]) {
     bootEntryStruct *bootEntry;
     int fid;
@@ -271,23 +324,17 @@ void rcvy(int fid, unsigned long clus, char *filename) {
                 name[++j] = '\0';
                 strlow(name);
                 if (!strcmp(name + 1, filename + 1)) {
-                    printf("?%s found!!\n", name + 1);
                     FstClus = ((dirE->DIR_FstClusHI) << 16) | dirE->DIR_FstClusLO;
-                    printf("first cluster is %d,next %d\n", FstClus, dirE->DIR_Attr&ATTR_LFN);
                     if (dirE->DIR_FileSize <= bps*spc) {
-                        printf("?%s:%dBytes is less than one sector, it can be recoveried.\n", name + 1, dirE->DIR_FileSize);
                         dirE->DIR_Name[0] = filename[0];
                         memcpy(buf + i*sizeof(dirEntryStruct), dirE, sizeof(dirEntryStruct));
                         write_sectors(fid, bps, (clus - rc + rsc) * spc + nft * ftsz32, buf, spc);
                         updateFAT(fid, FstClus, EOF);
                         break;
-                    } else
-                        printf("?%s:%dBytes is larger than one sector, it cannot be recoveried.\n", name + 1, dirE->DIR_FileSize);
+                    }
                 }
             }
         }
-
-
         clus = lookupFAT(fid, clus);
         if (!clus || clus >= 0xffffff0)
             break;
@@ -367,11 +414,9 @@ unsigned long findClus(int fid, unsigned long clus, char *filename) {
     for (;;) {
         int j;
         numBytes = read_sectors(fid, bps, (clus - rc + rsc) * spc + nfat * ftsz32, buf, spc);
-        //printf("%d Bytes read.\n",numBytes);
 
         for (i = 0;i < numBytes / sizeof(dirEntryStruct);i++) {
             memcpy(dirE, buf + i*sizeof(dirEntryStruct), sizeof(dirEntryStruct));
-            //printf("%s\n",dirE->DIR_Name);
             if (dirE->DIR_Name[0] && dirE->DIR_Name[0] != 0x5e && (dirE->DIR_Attr&ATTR_SUBDIR)) {
                 unsigned long FstClus;
 
@@ -401,6 +446,126 @@ unsigned long findClus(int fid, unsigned long clus, char *filename) {
         clus = lookupFAT(fid, clus);
         if (!clus || clus >= 0xffffff0)
             break;
+    }
+    return 0;
+}
+
+
+void tryAllRcvy(int fid, char *filename) {
+    bootEntryStruct *bootE;
+    dirEntryStruct *dirE;
+    int numBytes;
+    unsigned short rsc;
+    unsigned long ftsz32, rc, clus;
+    unsigned char nfat;
+    unsigned short bps;
+    unsigned char spc;
+    int i, len = 0;
+    unsigned char *buf;
+    char *str;
+    char fn[12];
+    queueADT Q;
+    qEntryADT queueE;
+    char delFiles[100][128];
+    int foundN = 0;
+
+    if (filename == NULL)
+        return 0;
+
+    //boot sector information read
+    bootE = getBootEntry(fid);
+    if (bootE == NULL)
+        return 0;
+    rsc = bootE->BPB_RsvdSecCnt;
+    ftsz32 = bootE->BPB_FATSz32;
+    bps = bootE->BPB_BytsPerSec;
+    spc = bootE->BPB_SecPerClus;
+    rc = bootE->BPB_RootClus;
+    nfat = bootE->BPB_NumFATs;
+    free(bootE);
+
+    // Queue initialize
+    Q = emptyQ();
+    // queueE initialize, add ROOT to queue as the start point of WFS
+    queueE = malloc(sizeof(qEntryCDT));
+    queueE->FstClus = rc;
+    strcpy(queueE->path, "/");
+    enqueue(Q, queueE);
+
+
+    //buffer initialize
+    buf = malloc(sizeof(unsigned char) * bps * spc);
+    dirE = malloc(sizeof(dirEntryStruct));
+
+
+    //WFS begin
+    while (Q->cnt) { //while Q is not empty
+        queueE = dequeue(Q);
+
+        clus = queueE->FstClus;
+
+        for (;;) {
+            int j;
+            numBytes = read_sectors(fid, bps, (clus - rc + rsc) * spc + nfat * ftsz32, buf, spc);
+
+            for (i = 0;i < numBytes / sizeof(dirEntryStruct);i++) {
+                memcpy(dirE, buf + i*sizeof(dirEntryStruct), sizeof(dirEntryStruct));
+                if (dirE->DIR_Name[0]) {
+                    if (dirE->DIR_Name[0] != 0x5e && dirE->DIR_Attr&(ATTR_SUBDIR | ATTR_VOLLAB)) { //when a subdir is found, add to the Queue
+                        unsigned long FstClus;
+                        qEntryADT newE;
+
+                        FstClus = ((dirE->DIR_FstClusHI) << 16) | dirE->DIR_FstClusLO;
+
+                        newE = malloc(sizeof(qEntryCDT));
+                        newE->FstClus = rc;
+                        strcpy(newE->path, queueE->path);
+
+                        memcpy(fn, dirE->DIR_Name, 8);
+                        j = 7;
+                        while (j && !chkfn(fn[j]))
+                            j--;
+                        fn[++j] = '/';
+                        fn[j+1] = '\0';
+                        strlow(fn);
+
+                        strcat(newE->path, fn);
+                        newE->FstClus = FstClus;
+
+                        enqueue(Q, newE);
+
+
+                    } else if (dirE->DIR_Name[0] == 0x5e) {
+                        memcpy(fn, dirE->DIR_Name, 8);
+                        j = 7;
+                        while (j && !chkfn(fn[j]))
+                            j--;
+                        fn[++j] = '.';
+                        memcpy(fn + j, dirE->DIR_Name + 8, 3);
+                        j += 3;
+                        while (j && !chkfn(fn[j]))
+                            j--;
+                        fn[j+1] = '\0';
+                        strlow(fn);
+                        strlow(filename);
+                        if (!strcmp(filename + 1, fn + 1)) {
+                            strcpy(delFiles[foundN], queueE->path);
+                            strcat(delFiles[foundN], fn);
+                            foundN++;
+                        }
+                    }
+                }
+            }
+
+            clus = lookupFAT(fid, clus);
+            if (!clus || clus >= 0xffffff0)
+                break;
+        }
+    }
+    //search finished
+    if(foundN){
+      for(i=0;i<foundN;i++){
+        printf("%d. %s\n",delFiles[i]);
 
     }
     return 0;
