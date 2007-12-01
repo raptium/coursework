@@ -85,13 +85,15 @@ typedef struct LFNEntry {
 bootEntryStruct *getBootEntry(int fid);
 int read_sectors(int fid, int bps, int sector_number, unsigned char *buffer, int num_sectors);
 int write_sectors(int fid, int bps, int sector_number, unsigned char *buffer, int num_sectors);
-void read_root(int fid);
+void listRoot(int fid);
 void buf_dup(void *buf, int size);
 unsigned long lookupFAT(int fid, unsigned long clus);
 void updateFAT(int fid,unsigned long clus,unsigned long nextClus);
 int strlow(char *str);
-void rcvy(int fid,unsigned long clus ,char *filename);
+int rcvy(int fid,unsigned long clus ,char *filename, char *newname);
 unsigned long findClus(int fid, unsigned long clus, char *filename);
+int hasFile(int fid, unsigned clus, char *filename);
+void tryAllRcvy(int fid, char *filename);
 #endif
 
 
