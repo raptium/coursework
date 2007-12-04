@@ -321,7 +321,7 @@ unsigned long lookupFAT(int fid, unsigned long clus) {
     bootEntryStruct *bootE;
     unsigned long *buf;
     unsigned short rsc;
-    unsigned long ftsz32, clusr;
+    unsigned long ftsz32, ss;
     unsigned short bps;
     unsigned char spc;
     int numBytes;
@@ -335,15 +335,15 @@ unsigned long lookupFAT(int fid, unsigned long clus) {
     spc = bootE->BPB_SecPerClus;
     free(bootE);
     buf = (unsigned long *)malloc(sizeof(unsigned char) * bps * spc);
-    clusr = clus * 4 / bps + rsc;
+    ss = clus * 4 / bps + rsc;
     //printf("clus=%d clurs=%d\n", clus, clusr);
-    numBytes = read_sectors(fid, bps, clusr * spc, (unsigned char *)buf, spc);
+    numBytes = read_sectors(fid, bps, ss , (unsigned char *)buf, spc);
     if (numBytes == -1) {
         printf("read sector: failed\n");
         return 0;
     }
     //buf_dup(buf, 512);
-    return buf[clus-(clusr-rsc)*bps/4];
+    return buf[clus-(ss-rsc)*bps/4];
 }
 
 int rcvy(int fid, unsigned long clus, char *filename, char *newname) {
@@ -432,7 +432,7 @@ void updateFAT(int fid, unsigned long clus, unsigned long nextClus) {
     unsigned long *buf;
     unsigned short rsc;
     unsigned char nfat;
-    unsigned long ftsz32, clusr, rc;
+    unsigned long ftsz32, ss , rc;
     unsigned short bps;
     unsigned char spc;
     int numBytes, i;
@@ -450,16 +450,16 @@ void updateFAT(int fid, unsigned long clus, unsigned long nextClus) {
 
     buf = (unsigned long *)malloc(sizeof(unsigned char) * bps * spc);
     for (i = 0;i < nfat;i++) {
-        clusr = clus * 4 / bps + rsc + i * ftsz32;
+        ss = clus * 4 / bps + rsc + i * ftsz32;
         //printf("clus=%d clurs=%d\n", clus, clusr);
-        numBytes = read_sectors(fid, bps, clusr * spc, (unsigned char *)buf, spc);
+        numBytes = read_sectors(fid, bps, ss , (unsigned char *)buf, spc);
         if (numBytes == -1) {
             printf("read sector: failed\n");
             return;
         }
-        buf[clus-(clusr-rsc-i*ftsz32)*bps/4] = nextClus;
+        buf[clus-(ss-rsc-i*ftsz32)*bps/4] = nextClus;
         //printf("sector:%d clus:%d modified %d\n", clusr*spc, clus, clus - (clusr - rsc - i*ftsz32)*bps / 4);
-        write_sectors(fid, bps, clusr * spc, (unsigned char *)buf, spc);
+        write_sectors(fid, bps, ss , (unsigned char *)buf, spc);
         //buf_dup(buf, 512);
     }
 }
@@ -688,7 +688,7 @@ void tryAllRcvy(int fid, char *filename) {
         clus = findClus(fid, bootE->BPB_RootClus, delFiles[c]);
 
         strcpy(tmp, filename);
-        strcpy(tmp2, delFiles[i]);
+        strcpy(tmp2, delFiles[c]);
         tmp2[strlen(tmp2)-strlen(filename)] = '\0';
         strcat(tmp2, tmp);
         while (hasFile(fid, clus, tmp)) {

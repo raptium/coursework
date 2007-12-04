@@ -1,5 +1,5 @@
 #!/bin/bash
-mkfs.vfat -F 32 /dev/ram
+mkfs.vfat -F 32 -s 2 /dev/ram
 mkdir -p /mnt/rd
 mount /dev/ram /mnt/rd -o loop
 mount | grep ram
