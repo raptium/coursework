@@ -246,7 +246,7 @@ void listRoot(int fid) {
     clus = rc;
     buf = malloc(sizeof(unsigned char) * bps * spc);
     for (;;) {
-        numBytes = read_sectors(fid, bps, (clus - 2 + rsc) * spc + nft * ftsz32, buf + len, spc);
+        numBytes = read_sectors(fid, bps, (clus - 2 ) * spc + rsc + nft * ftsz32, buf + len, spc);
         if (numBytes == -1)
             return;
         len += numBytes;
@@ -335,7 +335,7 @@ unsigned long lookupFAT(int fid, unsigned long clus) {
     spc = bootE->BPB_SecPerClus;
     free(bootE);
     buf = (unsigned long *)malloc(sizeof(unsigned char) * bps * spc);
-    clusr = clus / bps * 4 + rsc;
+    clusr = clus * 4 / bps + rsc;
     //printf("clus=%d clurs=%d\n", clus, clusr);
     numBytes = read_sectors(fid, bps, clusr * spc, (unsigned char *)buf, spc);
     if (numBytes == -1) {
@@ -368,7 +368,7 @@ int rcvy(int fid, unsigned long clus, char *filename, char *newname) {
     buf = malloc(sizeof(unsigned char) * bps * spc);
     for (;;) {
         int i;
-        numBytes = read_sectors(fid, bps, (clus - 2 + rsc) * spc + nft * ftsz32, buf, spc);
+        numBytes = read_sectors(fid, bps, (clus - 2) * spc + rsc + nft * ftsz32, buf, spc);
         if (numBytes == -1)
             return 0;
 
@@ -413,7 +413,7 @@ int rcvy(int fid, unsigned long clus, char *filename, char *newname) {
 
                         }
                         memcpy(buf + i*sizeof(dirEntryStruct), dirE, sizeof(dirEntryStruct));
-                        write_sectors(fid, bps, (clus - 2 + rsc) * spc + nft * ftsz32, buf, spc);
+                        write_sectors(fid, bps, (clus - 2) * spc + rsc + nft * ftsz32, buf, spc);
                         updateFAT(fid, FstClus, EOF);
                         return 1;
                     }
@@ -499,7 +499,7 @@ unsigned long findClus(int fid, unsigned long clus, char *filename) {
         return 2;
     for (;;) {
         int j;
-        numBytes = read_sectors(fid, bps, (clus - 2 + rsc) * spc + nfat * ftsz32, buf, spc);
+        numBytes = read_sectors(fid, bps, (clus - 2) * spc + rsc + nfat * ftsz32, buf, spc);
 
         for (i = 0;i < numBytes / sizeof(dirEntryStruct);i++) {
             memcpy(dirE, buf + i*sizeof(dirEntryStruct), sizeof(dirEntryStruct));
@@ -593,7 +593,7 @@ void tryAllRcvy(int fid, char *filename) {
 
         for (;;) {
             int j;
-            numBytes = read_sectors(fid, bps, (clus - 2 + rsc) * spc + nfat * ftsz32, buf, spc);
+            numBytes = read_sectors(fid, bps, (clus - 2) * spc + rsc + nfat * ftsz32, buf, spc);
             memset(fn, 0, sizeof(fn));
 
             for (i = 0;i < numBytes / sizeof(dirEntryStruct);i++) {
@@ -728,7 +728,7 @@ int hasFile(int fid, unsigned clus, char *filename) {
     buf = malloc(sizeof(unsigned char) * bps * spc);
     for (;;) {
         int i;
-        numBytes = read_sectors(fid, bps, (clus - 2 + rsc) * spc + nft * ftsz32, buf, spc);
+        numBytes = read_sectors(fid, bps, (clus - 2) * spc + rsc + nft * ftsz32, buf, spc);
         if (numBytes == -1)
             return 0;
 
