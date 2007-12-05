@@ -1,0 +1,55 @@
+IEG3310 Project User Guide
+
+
+Introduction
+
+This Round-robin Real-time Information Distribution System is divided into two parts. One is the server programme and the other is the client. You can use this system to distribute information form one server to several clients.
+
+Requirements
+
+You need a *nix-based system, this means this programme never runs on Microsoft Windows.
+If you want to compile on your own system, you will need gcc installed and some other necessary libraries.
+libbz2 is a must, since it is used to compresses/decompresses data.
+
+Tests have been done on SUN Solaris 2.9, Fedora Core 5, Ubuntu Feisty Fawn 7.04 and Mac OS X 10.4.8.
+
+
+Installation
+
+If you are familiar with the standard GNU package installation('./configure make make install'), you can skip below.
+
+To install this package, there are have only 3 steps, but open your Terminal first.
+
+1./configureThis will check your system settings and whether all the headers and libraries needed have been installed.
+If no error occurs, the makefile will be generated for compilation.
+2 make
+The gcc compiler will compile the programmes and after this you can find them under src/.
+You can use the programme now, and if you want to install it into your /usr/bin, you can continue to Step 3.
+3 make install
+This step will copy the programme into your /usr/bin or other place depends on your system setting.
+
+Known Issues
+
+Solaris
+To complie and install on a SUN Solaris system, you have to append CFLAGS='-lsocket -lnsl' after ./configure. Otherwise you will fail the compilation because the Solaris system do not link the socket libs by default. You may also need to modify the config.h, delete or commet the line contain #define HAVA_LIBNCURSES 1. This is a bug of gcc, it will try to include two different vertions of ncurses.h.
+
+
+Usage
+
+Server:
+    stock_srv <data file> [port]
+The server will read data from the data file specified.
+If no port is specified, it will try to listen on the default port 2333.
+
+Client:
+    stock_client <log file> [host [port]]
+The host can be either a ip address or a domain name.
+If no host is specified, it will try to connect to localhost on the default port 2333.
+If a host name is specified without port number, it will try to connect to the host on the default port 2333.
+The price log will be written to the log file specified.
+
+
+Contacts
+
+raptium
+raptium@cuhk.edu.hk
