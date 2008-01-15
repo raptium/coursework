@@ -32,6 +32,7 @@ BEGIN_MESSAGE_MAP(CNetProbeDlg, CDialog)
 	ON_WM_QUERYDRAGICON()
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_HOSTINFO, &CNetProbeDlg::OnBnClickedHostinfo)
+	ON_BN_CLICKED(IDEXIT, &CNetProbeDlg::OnBnClickedExit)
 END_MESSAGE_MAP()
 
 
@@ -90,6 +91,15 @@ HCURSOR CNetProbeDlg::OnQueryDragIcon()
 
 void CNetProbeDlg::OnBnClickedHostinfo()
 {
-	HostInfoDlg dlg(this);
+
+	CHostInfoDlg dlg;
 	dlg.DoModal();
+
+	//dlg->Create(IDD_HOSTINFO, this);
+	//dlg->ShowWindow(SW_SHOW);
+}
+
+void CNetProbeDlg::OnBnClickedExit()
+{
+	exit(0);
 }

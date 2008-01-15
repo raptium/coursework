@@ -1,16 +1,15 @@
 #pragma once
 
 
-// HostInfoDlg dialog
+// CHostInfoDlg dialog
 
-class HostInfoDlg : public CDialog
+class CHostInfoDlg : public CDialog
 {
-	DECLARE_DYNAMIC(HostInfoDlg)
+	DECLARE_DYNAMIC(CHostInfoDlg)
 
 public:
-	HostInfoDlg(CWnd* pParent = NULL);   // standard constructor
-	virtual ~HostInfoDlg();
-
+	CHostInfoDlg(CWnd* pParent = NULL);   // standard constructor
+	virtual ~CHostInfoDlg();
 // Dialog Data
 	enum { IDD = IDD_HOSTINFO };
 
@@ -19,5 +18,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-	afx_msg void OnBnClickedExit();
+	afx_msg void OnBnClickedOk();
+public:
+	afx_msg void OnBnClickedLookup();
 };

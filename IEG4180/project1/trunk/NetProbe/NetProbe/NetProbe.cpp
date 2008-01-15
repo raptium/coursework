@@ -35,6 +35,10 @@ CNetProbeApp theApp;
 
 BOOL CNetProbeApp::InitInstance()
 {
+
+	WSADATA wsaData;
+	int iResult;
+
 	// InitCommonControlsEx() is required on Windows XP if an application
 	// manifest specifies use of ComCtl32.dll version 6 or later to enable
 	// visual styles.  Otherwise, any window creation will fail.
@@ -64,6 +68,15 @@ BOOL CNetProbeApp::InitInstance()
 	// such as the name of your company or organization
 	SetRegistryKey(_T("Local AppWizard-Generated Applications"));
 
+
+	iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
+	if(iResult != 0){
+		printf("WSAStartup failed: %d\n", iResult);
+		return FALSE;
+	}
+
+
+
 	CNetProbeDlg dlg;
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
@@ -77,6 +90,7 @@ BOOL CNetProbeApp::InitInstance()
 		// TODO: Place code here to handle when the dialog is
 		//  dismissed with Cancel
 	}
+	WSACleanup();
 
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.

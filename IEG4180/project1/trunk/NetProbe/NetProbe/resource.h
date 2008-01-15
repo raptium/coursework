@@ -4,8 +4,8 @@
 //
 #define IDD_NETPROBE_DIALOG             102
 #define IDP_SOCKETS_INIT_FAILED         103
-#define IDD_HOSTINFO                    103
 #define IDR_MAINFRAME                   128
+#define IDD_HOSTINFO                    129
 #define IDC_IPADDRESS1                  1000
 #define IDEXIT                          1001
 #define IDC_RADIO1                      1002
@@ -23,19 +23,19 @@
 #define IDC_EDIT6                       1012
 #define IDC_EDIT7                       1013
 #define IDC_EDIT8                       1014
-#define IDC_IPLIST                      1015
-#define IDC_EXIT                        1016
-#define IDC_IP                          1017
-#define IDC_HOST                        1018
-#define IDC_HOSTNAME                    1019
+#define IDC_LIST2                       1021
+#define IDC_IPLIST                      1021
+#define IDC_HOST                        1022
+#define IDC_OFFICIAL                    1023
+#define IDC_IP                          1024
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        129
+#define _APS_NEXT_RESOURCE_VALUE        130
 #define _APS_NEXT_COMMAND_VALUE         32771
-#define _APS_NEXT_CONTROL_VALUE         1020
+#define _APS_NEXT_CONTROL_VALUE         1025
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif
