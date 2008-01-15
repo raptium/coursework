@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "NetProbe.h"
 #include "NetProbeDlg.h"
+#include "HostInfoDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -30,6 +31,7 @@ BEGIN_MESSAGE_MAP(CNetProbeDlg, CDialog)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	//}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_HOSTINFO, &CNetProbeDlg::OnBnClickedHostinfo)
 END_MESSAGE_MAP()
 
 
@@ -85,3 +87,9 @@ HCURSOR CNetProbeDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+void CNetProbeDlg::OnBnClickedHostinfo()
+{
+	HostInfoDlg dlg(this);
+	dlg.DoModal();
+}
