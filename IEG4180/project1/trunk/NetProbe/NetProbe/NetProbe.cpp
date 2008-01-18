@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "NetProbe.h"
 #include "NetProbeDlg.h"
+#include <string.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -29,6 +30,8 @@ CNetProbeApp::CNetProbeApp()
 // The one and only CNetProbeApp object
 
 CNetProbeApp theApp;
+
+NetProbe theProbe;
 
 
 // CNetProbeApp initialization
@@ -95,4 +98,50 @@ BOOL CNetProbeApp::InitInstance()
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.
 	return FALSE;
+}
+
+
+
+void NetProbe::setRefreshInterval(int t){
+	refreshInterval = t;
+}
+
+void NetProbe::setPacketSize(int n){
+	packetSize = n;
+}
+
+
+void NetProbe::setSendingRate(int n){
+	sendingRate = n;
+}
+	
+void NetProbe::setNumPackets(int n){
+	numPackets = n;
+}
+	
+void NetProbe::setProtocol(int p){
+	protocol = p;
+}
+
+
+void NetProbe::setLocal(char *h){
+	if(local != NULL)
+		free(local);
+	local=(char *)malloc(sizeof(char)*(strlen(h)+1));
+	strcpy(local, h);
+}
+
+void NetProbe::setRemote(char *h){
+	if(remote != NULL)
+		free(remote);
+	remote=(char *)malloc(sizeof(char)*(strlen(h)+1));
+	strcpy(remote, h);
+}
+
+void NetProbe::setLocalPort(int n){
+	localPort = n;
+}
+
+void NetProbe::setRemotePort(int n){
+	remotePort = n;
 }

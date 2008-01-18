@@ -8,6 +8,7 @@
 #endif
 
 #include "resource.h"		// main symbols
+#include "es_TIMER.H"
 
 
 // CNetProbeApp:
@@ -29,3 +30,42 @@ public:
 };
 
 extern CNetProbeApp theApp;
+
+
+class NetProbe{
+public:
+	void startSend();
+	void startReceive();
+	void stop();
+	void setLocal(char *h);
+	void setRemote(char *h);
+	void setLocalPort(int n);
+	void setRemotePort(int n);
+	void setRefreshInterval(int t);
+	void setPacketSize(int n);
+	void setSendingRate(int n);
+	void setNumPackets(int n);
+	void setProtocol(int p);
+	int getTransferRate(void);
+	double getPacketLoss(void);
+	int getPacketTransferred(void);
+	int getPacketLost(void);
+	double getTime(void);
+
+private:
+	int status;
+	char *local;
+	char *remote;
+	int localPort;
+	int remotePort;
+	int refreshInterval;
+	int packetSize;
+	int sendingRate;
+	int numPackets;
+	int packetTransferred;
+	int protocol;
+	ES_FlashTimer timer;
+	
+};
+
+extern NetProbe theProbe;

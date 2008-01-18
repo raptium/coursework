@@ -31,4 +31,8 @@ public:
 	afx_msg void OnBnClickedHostinfo();
 public:
 	afx_msg void OnBnClickedExit();
+public:
+	afx_msg void OnEnChangeLocal();
+public:
+	afx_msg void OnEnChangeRemote();
 };
