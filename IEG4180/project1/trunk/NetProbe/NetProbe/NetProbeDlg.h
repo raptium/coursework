@@ -45,4 +45,6 @@ public:
 	afx_msg void OnBnClickedSend();
 public:
 	afx_msg void OnEnChangeLport();
+public:
+	afx_msg void OnEnChangePs();
 };

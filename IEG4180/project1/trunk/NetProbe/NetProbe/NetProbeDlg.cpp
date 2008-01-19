@@ -40,6 +40,7 @@ BEGIN_MESSAGE_MAP(CNetProbeDlg, CDialog)
 	ON_BN_CLICKED(IDC_RECV, &CNetProbeDlg::OnBnClickedRecv)
 	ON_BN_CLICKED(IDC_SEND, &CNetProbeDlg::OnBnClickedSend)
 	ON_EN_CHANGE(IDC_LPORT, &CNetProbeDlg::OnEnChangeLport)
+	ON_EN_CHANGE(IDC_PS, &CNetProbeDlg::OnEnChangePs)
 END_MESSAGE_MAP()
 
 
@@ -162,4 +163,9 @@ void CNetProbeDlg::OnBnClickedSend()
 void CNetProbeDlg::OnEnChangeLport()
 {
 	theProbe.setLocalPort(this->GetDlgItemInt(IDC_LPORT));
+}
+
+void CNetProbeDlg::OnEnChangePs()
+{
+	theProbe.setPacketSize(this->GetDlgItemInt(IDC_PS));
 }

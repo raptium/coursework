@@ -52,6 +52,15 @@ public:
 	int getPacketLost(void);
 	double getTime(void);
 	int getStatus(void);
+	char *getLocal(void);
+	char *getRemote(void);
+	int getLocalPort(void);
+	int getRemotePort(void);
+	void setStatus(int n);
+	int getPacketSize(void);
+	ES_FlashTimer timer;
+
+
 
 private:
 	int status;
@@ -65,7 +74,7 @@ private:
 	int numPackets;
 	int packetTransferred;
 	int protocol;
-	ES_FlashTimer timer;
+
 	
 };
 

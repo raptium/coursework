@@ -12,6 +12,19 @@
 #endif
 
 
+
+
+
+
+UINT __cdecl TCPStart(LPVOID pParam);
+
+
+
+
+
+
+
+
 // CNetProbeApp
 
 BEGIN_MESSAGE_MAP(CNetProbeApp, CWinApp)
@@ -152,10 +165,12 @@ int NetProbe::getStatus(void){
 }
 
 void NetProbe::stop(void){
+	status = 0;
 }
 
 
 BOOL NetProbe::startReceive(void){
+
 	if(this->status)
 		return false;
 	if(this->protocol == 0){
@@ -163,36 +178,91 @@ BOOL NetProbe::startReceive(void){
 		return false;
 	}
 	if(this->protocol == 1){
-		struct addrinfo aiHints;
-		struct addrinfo *aiList = NULL;
-		int retVal;
-
-		struct sockaddr_in *TCP_Addr;
-		struct sockaddr_in *TCP_PeerAddr;
-		TCP_Addr = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
-		TCP_PeerAddr = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
-		memset(TCP_Addr, 0, sizeof(struct sockaddr_in));
-		memset(TCP_PeerAddr, 0, sizeof(struct sockaddr_in));
-
-
-		memset(&aiHints,0,sizeof(aiHints));
-		aiHints.ai_family = AF_INET;
-		aiHints.ai_socktype = SOCK_STREAM;
-		aiHints.ai_protocol = IPPROTO_TCP;
-		if((retVal = getaddrinfo(this->local, NULL, &aiHints, &aiList))!=0){
-			return false;
-		}
-
-		TCP_Addr->sin_family = AF_INET;
-		TCP_Addr->sin_port = htons(localPort);
-		memcpy(&(TCP_Addr->sin_addr),(aiList->ai_addr->sa_data+2),4);
-
-
-		SOCKET Sockfd = socket(AF_INET, SOCK_STREAM, 0);
-		bind(Sockfd, (struct sockaddr *)TCP_Addr, sizeof(struct sockaddr_in));
-		listen(Sockfd, 5);
-		int addrlen = sizeof(struct sockaddr_in);
-		SOCKET newsfd = accept(Sockfd, (struct sockaddr *)TCP_PeerAddr, &addrlen);
+		AFX_THREADPROC pfn = TCPStart;
+		AfxBeginThread(pfn, this);
+		return true;
 	}
+}
+
+
+char *NetProbe::getLocal(void){
+	return local;
+}
+
+char *NetProbe::getRemote(void){
+	return remote;
+}
+
+int NetProbe::getLocalPort(void){
+	return localPort;
+}
+
+int NetProbe::getRemotePort(void){
+	return remotePort;
+}
+
+void NetProbe::setStatus(int n){
+	status = n;
+}
+
+int NetProbe::getPacketSize(void){
+	return packetSize;
+}
+
+
+UINT __cdecl TCPStart(LPVOID pParam){
+	NetProbe *theProbe = (NetProbe *)pParam;
+	struct addrinfo aiHints;
+	struct addrinfo *aiList = NULL;
+	int retVal;
+
+	struct sockaddr_in *TCP_Addr;
+	struct sockaddr_in *TCP_PeerAddr;
+	TCP_Addr = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
+	TCP_PeerAddr = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
+	memset(TCP_Addr, 0, sizeof(struct sockaddr_in));
+	memset(TCP_PeerAddr, 0, sizeof(struct sockaddr_in));
+
+
+	memset(&aiHints,0,sizeof(aiHints));
+	aiHints.ai_family = AF_INET;
+	aiHints.ai_socktype = SOCK_STREAM;
+	aiHints.ai_protocol = IPPROTO_TCP;
+	if((retVal = getaddrinfo(theProbe->getLocal(), NULL, &aiHints, &aiList))!=0){
+		return false;
+	}
+
+
+	TCP_Addr->sin_family = AF_INET;
+	TCP_Addr->sin_port = htons(theProbe->getLocalPort());
+	memcpy(&(TCP_Addr->sin_addr),(aiList->ai_addr->sa_data+2),4);
+
+	theProbe->timer.Start();
+	theProbe->setStatus(1);
+
+	SOCKET Sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	bind(Sockfd, (struct sockaddr *)TCP_Addr, sizeof(struct sockaddr_in));
+	listen(Sockfd, 5);
+	int addrlen = sizeof(struct sockaddr_in);
+	SOCKET newsfd = accept(Sockfd, (struct sockaddr *)TCP_PeerAddr, &addrlen);
+	closesocket(Sockfd);
+
+	int len = theProbe->getPacketSize();
+	if(len == 0){
+		MessageBox(NULL, "Please input a PacketSize.", "Error", 0);
+		AfxEndThread(-1);
+	}
+	char *buf = (char *)malloc(sizeof(char)*len);
+
+	while(true){
+		recv(newsfd, buf, len, MSG_PEEK);
+		printf("%d s:%d Bytes received.\n", len, theProbe->timer.ElapseduSec());
+		if(theProbe->getStatus() == 0){
+			closesocket(newsfd);
+			break;
+		}
+	}
+
+	AfxEndThread(0);
 }
 
