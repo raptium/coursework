@@ -16,7 +16,9 @@
 #define IDC_HOSTINFO                    1004
 #define IDC_LOOKUP                      1004
 #define IDC_BUTTON2                     1005
+#define IDC_SEND                        1005
 #define IDC_BUTTON3                     1006
+#define IDC_RECV                        1006
 #define IDC_EDIT1                       1007
 #define IDC_LOCAL                       1007
 #define IDC_EDIT2                       1008

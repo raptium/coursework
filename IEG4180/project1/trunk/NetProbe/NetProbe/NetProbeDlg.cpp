@@ -37,6 +37,9 @@ BEGIN_MESSAGE_MAP(CNetProbeDlg, CDialog)
 	ON_EN_CHANGE(IDC_REMOTE, &CNetProbeDlg::OnEnChangeRemote)
 	ON_BN_CLICKED(IDC_TCP, &CNetProbeDlg::OnBnClickedTcp)
 	ON_BN_CLICKED(IDC_UDP, &CNetProbeDlg::OnBnClickedUdp)
+	ON_BN_CLICKED(IDC_RECV, &CNetProbeDlg::OnBnClickedRecv)
+	ON_BN_CLICKED(IDC_SEND, &CNetProbeDlg::OnBnClickedSend)
+	ON_EN_CHANGE(IDC_LPORT, &CNetProbeDlg::OnEnChangeLport)
 END_MESSAGE_MAP()
 
 
@@ -136,4 +139,27 @@ void CNetProbeDlg::OnBnClickedTcp()
 void CNetProbeDlg::OnBnClickedUdp()
 {
 	theProbe.setProtocol(2);
+}
+
+
+void CNetProbeDlg::OnBnClickedRecv()
+{
+	if(theProbe.getStatus()==0){
+		if(theProbe.startReceive() == true)
+			this->SetDlgItemTextA(IDC_RECV, "Stop");
+	}else{
+		theProbe.stop();
+		this->SetDlgItemTextA(IDC_RECV, "Receive");
+	}
+	
+}
+
+void CNetProbeDlg::OnBnClickedSend()
+{
+	// TODO: Add your control notification handler code here
+}
+
+void CNetProbeDlg::OnEnChangeLport()
+{
+	theProbe.setLocalPort(this->GetDlgItemInt(IDC_LPORT));
 }

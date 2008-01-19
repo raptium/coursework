@@ -5,6 +5,7 @@
 #include "NetProbe.h"
 #include "NetProbeDlg.h"
 #include <string.h>
+#include <winsock2.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -146,11 +147,52 @@ void NetProbe::setRemotePort(int n){
 	remotePort = n;
 }
 
-void NetProbe::startReceive(void){
-	if(this->status)
-		return;
-	if(this->protocol == 0){
-		MessageBox(m_pMainWnd,"Please choose a Protocol!.","Error",0);
-	SOCKET Sockfd = socket(AF_INET, SOC
-
+int NetProbe::getStatus(void){
+	return status;
 }
+
+void NetProbe::stop(void){
+}
+
+
+BOOL NetProbe::startReceive(void){
+	if(this->status)
+		return false;
+	if(this->protocol == 0){
+		MessageBox(NULL,"Please choose a Protocol.","Error",0);
+		return false;
+	}
+	if(this->protocol == 1){
+		struct addrinfo aiHints;
+		struct addrinfo *aiList = NULL;
+		int retVal;
+
+		struct sockaddr_in *TCP_Addr;
+		struct sockaddr_in *TCP_PeerAddr;
+		TCP_Addr = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
+		TCP_PeerAddr = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
+		memset(TCP_Addr, 0, sizeof(struct sockaddr_in));
+		memset(TCP_PeerAddr, 0, sizeof(struct sockaddr_in));
+
+
+		memset(&aiHints,0,sizeof(aiHints));
+		aiHints.ai_family = AF_INET;
+		aiHints.ai_socktype = SOCK_STREAM;
+		aiHints.ai_protocol = IPPROTO_TCP;
+		if((retVal = getaddrinfo(this->local, NULL, &aiHints, &aiList))!=0){
+			return false;
+		}
+
+		TCP_Addr->sin_family = AF_INET;
+		TCP_Addr->sin_port = htons(localPort);
+		memcpy(&(TCP_Addr->sin_addr),(aiList->ai_addr->sa_data+2),4);
+
+
+		SOCKET Sockfd = socket(AF_INET, SOCK_STREAM, 0);
+		bind(Sockfd, (struct sockaddr *)TCP_Addr, sizeof(struct sockaddr_in));
+		listen(Sockfd, 5);
+		int addrlen = sizeof(struct sockaddr_in);
+		SOCKET newsfd = accept(Sockfd, (struct sockaddr *)TCP_PeerAddr, &addrlen);
+	}
+}
+

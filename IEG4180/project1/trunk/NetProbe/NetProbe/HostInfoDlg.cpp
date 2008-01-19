@@ -40,6 +40,8 @@ void CHostInfoDlg::OnBnClickedOk()
 {
 	OnOK();
 }
+
+
 void CHostInfoDlg::OnBnClickedLookup()
 {
 	char *ip;
@@ -64,8 +66,9 @@ void CHostInfoDlg::OnBnClickedLookup()
 	GetDlgItemTextA(IDC_HOST,ip,127);
 
 
-	if((retVal=getaddrinfo(ip,NULL,&aiHints,&aiList))!=0){
-		printf("getaddrinfo() failed.\n");
+	if((retVal = getaddrinfo(ip, NULL, &aiHints, &aiList)) != 0){
+		MessageBox("Cannot resovle host.");
+		return;
 	}
 	free(ip);
 
@@ -76,6 +79,7 @@ void CHostInfoDlg::OnBnClickedLookup()
 	memcpy(&addr,(aiList->ai_addr),14);
 	this->SetDlgItemTextA(IDC_IP,inet_ntoa(addr.sin_addr));
 	this->SetDlgItemTextA(IDC_OFFICIAL,aiList->ai_canonname);
+	
 
 	while(1){
 		memcpy(&addr,(aiList->ai_addr),14);

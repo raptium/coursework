@@ -39,4 +39,10 @@ public:
 	afx_msg void OnBnClickedTcp();
 public:
 	afx_msg void OnBnClickedUdp();
+public:
+	afx_msg void OnBnClickedRecv();
+public:
+	afx_msg void OnBnClickedSend();
+public:
+	afx_msg void OnEnChangeLport();
 };

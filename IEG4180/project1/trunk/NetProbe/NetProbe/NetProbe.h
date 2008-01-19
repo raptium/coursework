@@ -35,7 +35,7 @@ extern CNetProbeApp theApp;
 class NetProbe{
 public:
 	void startSend();
-	void startReceive();
+	BOOL startReceive();
 	void stop();
 	void setLocal(char *h);
 	void setRemote(char *h);
@@ -51,6 +51,7 @@ public:
 	int getPacketTransferred(void);
 	int getPacketLost(void);
 	double getTime(void);
+	int getStatus(void);
 
 private:
 	int status;
