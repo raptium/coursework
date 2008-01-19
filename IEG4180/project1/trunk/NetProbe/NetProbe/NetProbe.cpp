@@ -145,3 +145,12 @@ void NetProbe::setLocalPort(int n){
 void NetProbe::setRemotePort(int n){
 	remotePort = n;
 }
+
+void NetProbe::startReceive(void){
+	if(this->status)
+		return;
+	if(this->protocol == 0){
+		MessageBox(m_pMainWnd,"Please choose a Protocol!.","Error",0);
+	SOCKET Sockfd = socket(AF_INET, SOC
+
+}

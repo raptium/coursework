@@ -35,4 +35,8 @@ public:
 	afx_msg void OnEnChangeLocal();
 public:
 	afx_msg void OnEnChangeRemote();
+public:
+	afx_msg void OnBnClickedTcp();
+public:
+	afx_msg void OnBnClickedUdp();
 };

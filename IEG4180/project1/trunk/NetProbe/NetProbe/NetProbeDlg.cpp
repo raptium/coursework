@@ -35,6 +35,8 @@ BEGIN_MESSAGE_MAP(CNetProbeDlg, CDialog)
 	ON_BN_CLICKED(IDEXIT, &CNetProbeDlg::OnBnClickedExit)
 	ON_EN_CHANGE(IDC_LOCAL, &CNetProbeDlg::OnEnChangeLocal)
 	ON_EN_CHANGE(IDC_REMOTE, &CNetProbeDlg::OnEnChangeRemote)
+	ON_BN_CLICKED(IDC_TCP, &CNetProbeDlg::OnBnClickedTcp)
+	ON_BN_CLICKED(IDC_UDP, &CNetProbeDlg::OnBnClickedUdp)
 END_MESSAGE_MAP()
 
 
@@ -124,4 +126,14 @@ void CNetProbeDlg::OnEnChangeRemote()
 	this->GetDlgItemTextA(IDC_REMOTE, tmp, 127);
 	theProbe.setRemote(tmp);
 	free(tmp);
+}
+
+void CNetProbeDlg::OnBnClickedTcp()
+{
+	theProbe.setProtocol(1);
+}
+
+void CNetProbeDlg::OnBnClickedUdp()
+{
+	theProbe.setProtocol(2);
 }
