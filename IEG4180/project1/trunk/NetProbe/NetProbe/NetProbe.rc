@@ -98,7 +98,7 @@ BEGIN
     LTEXT           "1",IDC_STATIC,97,131,8,8
     LTEXT           "1",IDC_STATIC,97,146,8,8
     LTEXT           "1",IDC_STATIC,97,161,8,8
-    LTEXT           "1",IDC_STATIC,97,176,8,8
+    LTEXT           "1",IDC_TE,97,176,8,8
     PUSHBUTTON      "HostInfo",IDC_HOSTINFO,263,108,50,16
     PUSHBUTTON      "Send",IDC_SEND,263,131,50,16
     PUSHBUTTON      "Receive",IDC_RECV,263,154,50,16

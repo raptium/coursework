@@ -58,6 +58,7 @@ public:
 	int getRemotePort(void);
 	void setStatus(int n);
 	int getPacketSize(void);
+	int getInterval(void);
 	ES_FlashTimer timer;
 
 

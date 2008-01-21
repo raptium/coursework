@@ -16,13 +16,8 @@
 
 
 
+
 UINT __cdecl TCPStart(LPVOID pParam);
-
-
-
-
-
-
 
 
 // CNetProbeApp
@@ -209,9 +204,13 @@ int NetProbe::getPacketSize(void){
 	return packetSize;
 }
 
+int NetProbe::getInterval(void){
+	return refreshInterval;
+}
+
 
 UINT __cdecl TCPStart(LPVOID pParam){
-	NetProbe *theProbe = (NetProbe *)pParam;
+	//NetProbe *theProbe = (NetProbe *)pParam;
 	struct addrinfo aiHints;
 	struct addrinfo *aiList = NULL;
 	int retVal;
@@ -228,17 +227,17 @@ UINT __cdecl TCPStart(LPVOID pParam){
 	aiHints.ai_family = AF_INET;
 	aiHints.ai_socktype = SOCK_STREAM;
 	aiHints.ai_protocol = IPPROTO_TCP;
-	if((retVal = getaddrinfo(theProbe->getLocal(), NULL, &aiHints, &aiList))!=0){
+	if((retVal = getaddrinfo(theProbe.getLocal(), NULL, &aiHints, &aiList))!=0){
 		return false;
 	}
 
 
 	TCP_Addr->sin_family = AF_INET;
-	TCP_Addr->sin_port = htons(theProbe->getLocalPort());
+	TCP_Addr->sin_port = htons(theProbe.getLocalPort());
 	memcpy(&(TCP_Addr->sin_addr),(aiList->ai_addr->sa_data+2),4);
 
-	theProbe->timer.Start();
-	theProbe->setStatus(1);
+	theProbe.timer.Start();
+	theProbe.setStatus(1);
 
 	SOCKET Sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	bind(Sockfd, (struct sockaddr *)TCP_Addr, sizeof(struct sockaddr_in));
@@ -247,7 +246,7 @@ UINT __cdecl TCPStart(LPVOID pParam){
 	SOCKET newsfd = accept(Sockfd, (struct sockaddr *)TCP_PeerAddr, &addrlen);
 	closesocket(Sockfd);
 
-	int len = theProbe->getPacketSize();
+	int len = theProbe.getPacketSize();
 	if(len == 0){
 		MessageBox(NULL, "Please input a PacketSize.", "Error", 0);
 		AfxEndThread(-1);
@@ -255,14 +254,16 @@ UINT __cdecl TCPStart(LPVOID pParam){
 	char *buf = (char *)malloc(sizeof(char)*len);
 
 	while(true){
-		recv(newsfd, buf, len, MSG_PEEK);
-		printf("%d s:%d Bytes received.\n", len, theProbe->timer.ElapseduSec());
-		if(theProbe->getStatus() == 0){
+		int numBytes;
+		numBytes = recv(newsfd, buf, len, MSG_PEEK);
+		printf("%d s:%d Bytes received.\n", numBytes, theProbe.timer.ElapseduSec());
+		if(theProbe.getStatus() == 0){
 			closesocket(newsfd);
 			break;
 		}
 	}
 
 	AfxEndThread(0);
+	
 }
 

@@ -11,9 +11,14 @@
 #endif
 
 
+
+typedef struct{
+	CNetProbeDlg *dlg;
+	NetProbe *theProbe;
+} thdInfo;
 // CNetProbeDlg dialog
 
-
+UINT __cdecl UIRefresh(LPVOID pParam);
 
 
 CNetProbeDlg::CNetProbeDlg(CWnd* pParent /*=NULL*/)
@@ -145,9 +150,14 @@ void CNetProbeDlg::OnBnClickedUdp()
 
 void CNetProbeDlg::OnBnClickedRecv()
 {
+	thdInfo param;
+	param.dlg = this;
+	param.theProbe = &theProbe;
 	if(theProbe.getStatus()==0){
-		if(theProbe.startReceive() == true)
+		if(theProbe.startReceive() == true){
 			this->SetDlgItemTextA(IDC_RECV, "Stop");
+			AfxBeginThread(UIRefresh, &param);
+		}
 	}else{
 		theProbe.stop();
 		this->SetDlgItemTextA(IDC_RECV, "Receive");
@@ -168,4 +178,30 @@ void CNetProbeDlg::OnEnChangeLport()
 void CNetProbeDlg::OnEnChangePs()
 {
 	theProbe.setPacketSize(this->GetDlgItemInt(IDC_PS));
+}
+
+UINT __cdecl UIRefresh(LPVOID pParam){
+	CNetProbeDlg *dlg = ((thdInfo *)pParam)->dlg;
+	NetProbe *theProbe = ((thdInfo *)pParam)->theProbe;
+	int count = 0;
+	char t[10];
+
+	while(1){
+
+		while(1){
+			Sleep(10);
+			if(theProbe->timer.Elapsed() > count * theProbe->getInterval())
+				break;
+		}
+
+		sprintf(t, "%.2f sec", theProbe->timer.Elapsed()/1000.0);
+		dlg->SetDlgItemTextA(IDC_TE, t);
+
+		if(theProbe->getStatus() == 0){
+			dlg->SetDlgItemTextA(IDC_RECV, "Receive");
+			AfxEndThread(0);
+		}
+	}
+
+	return 0;
 }
