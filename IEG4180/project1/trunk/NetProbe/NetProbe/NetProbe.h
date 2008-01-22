@@ -34,6 +34,7 @@ extern CNetProbeApp theApp;
 
 class NetProbe{
 public:
+	NetProbe();
 	void startSend();
 	BOOL startReceive();
 	void stop();
@@ -48,7 +49,6 @@ public:
 	void setProtocol(int p);
 	int getTransferRate(void);
 	double getPacketLoss(void);
-	int getPacketTransferred(void);
 	int getPacketLost(void);
 	double getTime(void);
 	int getStatus(void);
@@ -60,6 +60,13 @@ public:
 	int getPacketSize(void);
 	int getInterval(void);
 	ES_FlashTimer timer;
+	void packetRecvd(int n);
+	int getMaxNum(void);
+	int getPacketRecvd(void);
+	double getByteRecvd(void);
+	void byteReceive(int n);
+
+
 
 
 
@@ -75,6 +82,8 @@ private:
 	int numPackets;
 	int packetTransferred;
 	int protocol;
+	int maxPacketNum;
+	double byteRecvd;
 
 	
 };

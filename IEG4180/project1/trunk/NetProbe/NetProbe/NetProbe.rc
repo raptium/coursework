@@ -94,11 +94,11 @@ BEGIN
     RTEXT           "# Packets Transferred:",IDC_STATIC,16,146,76,8
     RTEXT           "# Packets Lost:",IDC_STATIC,41,161,51,8
     RTEXT           "Time Elapsed:",IDC_STATIC,47,176,45,8
-    LTEXT           "1",IDC_STATIC,97,116,8,8
-    LTEXT           "1",IDC_STATIC,97,131,8,8
-    LTEXT           "1",IDC_STATIC,97,146,8,8
-    LTEXT           "1",IDC_STATIC,97,161,8,8
-    LTEXT           "1",IDC_TE,97,176,8,8
+    LTEXT           "1",IDC_DTR,97,116,102,8
+    LTEXT           "1",IDC_PL,97,131,102,8
+    LTEXT           "1",IDC_NPT,97,146,102,8
+    LTEXT           "1",IDC_NPL,97,161,102,8
+    LTEXT           "1",IDC_TE,97,176,102,8
     PUSHBUTTON      "HostInfo",IDC_HOSTINFO,263,108,50,16
     PUSHBUTTON      "Send",IDC_SEND,263,131,50,16
     PUSHBUTTON      "Receive",IDC_RECV,263,154,50,16
