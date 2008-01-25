@@ -19,6 +19,8 @@
 
 UINT __cdecl TCPStartRecv(LPVOID pParam);
 UINT __cdecl UDPStartRecv(LPVOID pParam);
+UINT __cdecl TCPStartSend(LPVOID pParam);
+//UINT __cdecl UDPStartSend(LPVOID pParam);
 
 
 // CNetProbeApp
@@ -126,7 +128,7 @@ NetProbe::NetProbe(){
 	packetTransferred = 0;
 	protocol = 0;
 	maxPacketNum = 0;
-	byteRecvd = 0;
+	byteTransferred = 0;
 }
 
 void NetProbe::setRefreshInterval(int t){
@@ -181,7 +183,7 @@ void NetProbe::stop(void){
 	status = 0;
 	packetTransferred = 0;
 	maxPacketNum = 0;
-	byteRecvd = 0;
+	byteTransferred = 0;
 }
 
 
@@ -200,6 +202,25 @@ BOOL NetProbe::startReceive(void){
 	}else if(this->protocol == 2){
 		AFX_THREADPROC pfn = UDPStartRecv;
 		AfxBeginThread(pfn, this);
+		return true;
+	}
+}
+
+BOOL NetProbe::startSend(void){
+
+	if(this->status)
+		return false;
+	if(this->protocol == 0){
+		MessageBox(NULL,"Please choose a Protocol.","Error",0);
+		return false;
+	}
+	if(this->protocol == 1){
+		AFX_THREADPROC pfn = TCPStartSend;
+		AfxBeginThread(pfn, this);
+		return true;
+	}else if(this->protocol == 2){
+//		AFX_THREADPROC pfn = UDPStartSend;
+//		AfxBeginThread(pfn, this);
 		return true;
 	}
 }
@@ -234,7 +255,7 @@ int NetProbe::getInterval(void){
 }
 
 
-void NetProbe::packetRecvd(int n){
+void NetProbe::packetTransfer(int n){
 	if(n > maxPacketNum)
 		maxPacketNum = n;
 	packetTransferred++;
@@ -246,7 +267,7 @@ int NetProbe::getMaxNum(void){
 	return maxPacketNum;
 }
 
-int NetProbe::getPacketRecvd(void){
+int NetProbe::getPacketTransfer(void){
 	return packetTransferred;
 }
 
@@ -259,19 +280,113 @@ double NetProbe::getPacketLoss(void){
 }
 
 
-double NetProbe::getByteRecvd(void){
-	return byteRecvd;
+double NetProbe::getByteTransfer(void){
+	return byteTransferred;
 }
 
-void NetProbe::byteReceive(int n){
-	this->byteRecvd += n;
+void NetProbe::byteTransfer(int n){
+	this->byteTransferred += n;
 }
+
+int NetProbe::getTransferRate(void){
+	return this->sendingRate;
+}
+
+
+UINT __cdecl TCPStartSend(LPVOID pParam){
+	//NetProbe *theProbe = (NetProbe *)pParam;
+	struct addrinfo aiHints;
+	struct addrinfo *aiList = NULL;
+	int retVal;
+	int flag = 0;
+	long sp;
+
+
+	struct sockaddr_in *TCP_PeerAddr;
+	TCP_PeerAddr = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
+	memset(TCP_PeerAddr, 0, sizeof(struct sockaddr_in));
+
+
+	memset(&aiHints,0,sizeof(aiHints));
+	aiHints.ai_family = AF_INET;
+	aiHints.ai_socktype = SOCK_STREAM;
+	aiHints.ai_protocol = IPPROTO_TCP;
+	if((retVal = getaddrinfo(theProbe.getRemote(), NULL, &aiHints, &aiList))!=0){
+		return false;
+	}
+
+
+	TCP_PeerAddr->sin_family = AF_INET;
+	TCP_PeerAddr->sin_port = htons(theProbe.getRemotePort());
+	memcpy(&(TCP_PeerAddr->sin_addr),(aiList->ai_addr->sa_data+2),4);
+
+	theProbe.timer.Start();
+	theProbe.setStatus(3);
+
+	SOCKET Sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	int retval = connect(Sockfd, (struct sockaddr *)TCP_PeerAddr, sizeof(struct sockaddr_in));
+	if (retval == SOCKET_ERROR){
+		MessageBox(NULL, "connect failed.", "error", 0);
+		retval = WSAGetLastError();
+		theProbe.stop();
+		return 0;
+	}
+
+	char *buf = (char *)malloc(sizeof(char)*4096);
+	memset(buf, 0, sizeof(buf));
+
+	int len = theProbe.getPacketSize();
+	int wait = len * 1000 / theProbe.getTransferRate() - 5;
+	if(wait<0)
+		wait=0;
+
+
+	while(true){
+		int ret;
+		int no;
+		
+		if(flag && (theProbe.getByteTransfer()  / ((theProbe.timer.Elapsed() - sp) / 1000.0)) > theProbe.getTransferRate()){
+			Sleep(wait);
+			continue;
+		}
+
+		ret = send(Sockfd, buf, len, 0);
+		if(ret == SOCKET_ERROR){
+			MessageBox(NULL, "send().", "error", 0);
+			closesocket(Sockfd);
+			theProbe.stop();
+			break;
+		}
+
+		theProbe.packetTransfer(-1);
+		theProbe.byteTransfer(ret);
+
+
+		
+		if(!flag && theProbe.getByteTransfer() != 0){
+			sp = theProbe.timer.Elapsed();
+			flag = 1;
+		}
+
+		if(theProbe.getStatus() == 0){
+			closesocket(Sockfd);
+			break;
+		}
+	}
+
+	AfxEndThread(0);
+	
+}
+
+
+
 
 UINT __cdecl TCPStartRecv(LPVOID pParam){
 	//NetProbe *theProbe = (NetProbe *)pParam;
 	struct addrinfo aiHints;
 	struct addrinfo *aiList = NULL;
 	int retVal;
+
 
 	struct sockaddr_in *TCP_Addr;
 	struct sockaddr_in *TCP_PeerAddr;
@@ -319,8 +434,8 @@ UINT __cdecl TCPStartRecv(LPVOID pParam){
 			break;
 		}
 
-		theProbe.packetRecvd(-1);
-		theProbe.byteReceive(ret);
+		theProbe.packetTransfer(-1);
+		theProbe.byteTransfer(ret);
 
 		if(theProbe.getStatus() == 0){
 			closesocket(newsfd);
@@ -339,6 +454,7 @@ UINT __cdecl UDPStartRecv(LPVOID pParam){
 	struct addrinfo aiHints;
 	struct addrinfo *aiList = NULL;
 	int retVal;
+
 
 	struct sockaddr_in *UDP_Addr;
 	struct sockaddr_in *UDP_PeerAddr;
@@ -383,8 +499,8 @@ UINT __cdecl UDPStartRecv(LPVOID pParam){
 			break;
 		}
 
-		theProbe.packetRecvd(no);
-		theProbe.byteReceive(ret);
+		theProbe.packetTransfer(no);
+		theProbe.byteTransfer(ret);
 
 		if(theProbe.getStatus() == 0){
 			closesocket(Sockfd);

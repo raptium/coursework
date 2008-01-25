@@ -44,6 +44,8 @@ BEGIN_MESSAGE_MAP(CNetProbeDlg, CDialog)
 	ON_EN_CHANGE(IDC_LPORT, &CNetProbeDlg::OnEnChangeLport)
 	ON_EN_CHANGE(IDC_PS, &CNetProbeDlg::OnEnChangePs)
 	ON_EN_CHANGE(IDC_RI, &CNetProbeDlg::OnEnChangeRi)
+	ON_EN_CHANGE(IDC_RPORT, &CNetProbeDlg::OnEnChangeRport)
+	ON_EN_CHANGE(IDC_SR, &CNetProbeDlg::OnEnChangeSr)
 END_MESSAGE_MAP()
 
 
@@ -164,7 +166,17 @@ void CNetProbeDlg::OnBnClickedRecv()
 
 void CNetProbeDlg::OnBnClickedSend()
 {
-	// TODO: Add your control notification handler code here
+	if(theProbe.getStatus()==0){
+		if(theProbe.startSend() == true){
+			this->SetDlgItemTextA(IDC_SEND, "Stop");
+			GetDlgItem(IDC_RECV)->EnableWindow(false);
+			AfxBeginThread(UIRefresh, this);
+		}
+	}else{
+		theProbe.stop();
+		GetDlgItem(IDC_RECV)->EnableWindow(true);
+		this->SetDlgItemTextA(IDC_SEND, "Send");
+	}
 }
 
 void CNetProbeDlg::OnEnChangeLport()
@@ -199,7 +211,7 @@ UINT __cdecl UIRefresh(LPVOID pParam){
 		sprintf(t, "%.2f sec",theProbe.timer.Elapsed()/1000.0);
 		dlg->SetDlgItemTextA(IDC_TE, t);
 
-		sprintf(t, "%d", theProbe.getPacketRecvd());
+		sprintf(t, "%d", theProbe.getPacketTransfer());
 		dlg->SetDlgItemTextA(IDC_NPT, t);
 
 		sprintf(t, "%d", theProbe.getPacketLost());
@@ -213,12 +225,12 @@ UINT __cdecl UIRefresh(LPVOID pParam){
 			AfxEndThread(0);
 		}
 
-		if(!flag && theProbe.getByteRecvd() != 0){
+		if(!flag && theProbe.getByteTransfer() != 0){
 			sp = theProbe.timer.Elapsed();
 			flag = 1;
 		}
 
-		bps = theProbe.getByteRecvd()  / ((theProbe.timer.Elapsed() - sp) / 1000);
+		bps = theProbe.getByteTransfer()  / ((theProbe.timer.Elapsed() - sp) / 1000.0);
 		sprintf(t, "%.2f Bps", bps);
 		dlg->SetDlgItemTextA(IDC_DTR, t);
 	}
@@ -229,4 +241,14 @@ UINT __cdecl UIRefresh(LPVOID pParam){
 void CNetProbeDlg::OnEnChangeRi()
 {
 	theProbe.setRefreshInterval(this->GetDlgItemInt(IDC_RI));
+}
+
+void CNetProbeDlg::OnEnChangeRport()
+{
+	theProbe.setRemotePort(this->GetDlgItemInt(IDC_RPORT));
+}
+
+void CNetProbeDlg::OnEnChangeSr()
+{
+	theProbe.setSendingRate(this->GetDlgItemInt(IDC_SR));
 }

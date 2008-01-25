@@ -49,4 +49,8 @@ public:
 	afx_msg void OnEnChangePs();
 public:
 	afx_msg void OnEnChangeRi();
+public:
+	afx_msg void OnEnChangeRport();
+public:
+	afx_msg void OnEnChangeSr();
 };
