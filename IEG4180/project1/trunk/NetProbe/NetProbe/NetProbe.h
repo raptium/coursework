@@ -8,6 +8,7 @@
 #endif
 
 #include "resource.h"		// main symbols
+#include "NetProbeDlg.h"
 #include "es_TIMER.H"
 
 
@@ -65,10 +66,6 @@ public:
 	int getPacketTransfer(void);
 	double getByteTransfer(void);
 	void byteTransfer(int n);
-
-
-
-
 
 private:
 	int status;

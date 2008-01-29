@@ -179,7 +179,7 @@ int NetProbe::getStatus(void){
 	return status;
 }
 
-void NetProbe::stop(void){
+void NetProbe::stop(){
 	status = 0;
 	packetTransferred = 0;
 	maxPacketNum = 0;
@@ -257,14 +257,14 @@ int NetProbe::getInterval(void){
 
 void NetProbe::packetTransfer(int n){
 	if(n > maxPacketNum)
-		maxPacketNum = n;
+		maxPacketNum = n + 1;
 	packetTransferred++;
 	if(n < 0)
 		maxPacketNum = packetTransferred;
 }
 
 int NetProbe::getMaxNum(void){
-	return maxPacketNum;
+	return maxPacketNum - 1;
 }
 
 int NetProbe::getPacketTransfer(void){
@@ -272,11 +272,11 @@ int NetProbe::getPacketTransfer(void){
 }
 
 int NetProbe::getPacketLost(void){
-	return maxPacketNum + 1 - packetTransferred;
+	return maxPacketNum - packetTransferred;
 }
 
 double NetProbe::getPacketLoss(void){
-	return 1 - (double)packetTransferred / (maxPacketNum + 1);
+	return 1 - (double)packetTransferred / maxPacketNum;
 }
 
 
@@ -337,8 +337,8 @@ UINT __cdecl TCPStartSend(LPVOID pParam){
 
 	int len = theProbe.getPacketSize();
 	int wait = len * 1000 / theProbe.getTransferRate() - 5;
-	if(wait<0)
-		wait=0;
+	if(wait<10)
+		wait=10;
 
 
 	while(true){
@@ -360,8 +360,6 @@ UINT __cdecl TCPStartSend(LPVOID pParam){
 
 		theProbe.packetTransfer(-1);
 		theProbe.byteTransfer(ret);
-
-
 		
 		if(!flag && theProbe.getByteTransfer() != 0){
 			sp = theProbe.timer.Elapsed();
@@ -425,6 +423,11 @@ UINT __cdecl TCPStartRecv(LPVOID pParam){
 		int ret;
 		int no;
 
+		if(theProbe.getStatus() == 0){
+			closesocket(newsfd);
+			break;
+		}
+
 		ret = recv(newsfd, buf, 4096, 0);
 		//memcpy(&no, buf, sizeof(no));
 		if(ret == SOCKET_ERROR || ret == 0){
@@ -436,11 +439,6 @@ UINT __cdecl TCPStartRecv(LPVOID pParam){
 
 		theProbe.packetTransfer(-1);
 		theProbe.byteTransfer(ret);
-
-		if(theProbe.getStatus() == 0){
-			closesocket(newsfd);
-			break;
-		}
 
 	}
 

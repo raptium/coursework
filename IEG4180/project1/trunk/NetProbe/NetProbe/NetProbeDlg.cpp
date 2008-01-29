@@ -208,6 +208,10 @@ UINT __cdecl UIRefresh(LPVOID pParam){
 			}
 		}
 
+		if(theProbe.getStatus() == 0){
+			break;
+		}
+
 		sprintf(t, "%.2f sec",theProbe.timer.Elapsed()/1000.0);
 		dlg->SetDlgItemTextA(IDC_TE, t);
 
@@ -220,11 +224,6 @@ UINT __cdecl UIRefresh(LPVOID pParam){
 		sprintf(t, "%.2f%", theProbe.getPacketLoss()*100);
 		dlg->SetDlgItemTextA(IDC_PL, t);
 
-		if(theProbe.getStatus() == 0){
-			dlg->SetDlgItemTextA(IDC_RECV, "Receive");
-			AfxEndThread(0);
-		}
-
 		if(!flag && theProbe.getByteTransfer() != 0){
 			sp = theProbe.timer.Elapsed();
 			flag = 1;
@@ -233,7 +232,18 @@ UINT __cdecl UIRefresh(LPVOID pParam){
 		bps = theProbe.getByteTransfer()  / ((theProbe.timer.Elapsed() - sp) / 1000.0);
 		sprintf(t, "%.2f Bps", bps);
 		dlg->SetDlgItemTextA(IDC_DTR, t);
+
+		if(theProbe.getStatus() > 2 && theProbe.getPacketTransfer() >= dlg->GetDlgItemInt(IDC_NPS)){
+			theProbe.stop();
+		}
 	}
+
+	dlg->GetDlgItem(IDC_SEND)->EnableWindow(true);
+	dlg->SetDlgItemTextA(IDC_SEND, "Send");
+	dlg->GetDlgItem(IDC_RECV)->EnableWindow(true);
+	dlg->SetDlgItemTextA(IDC_RECV, "Receive");
+
+	AfxEndThread(0);
 
 	return 0;
 }
