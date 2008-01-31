@@ -20,7 +20,7 @@
 UINT __cdecl TCPStartRecv(LPVOID pParam);
 UINT __cdecl UDPStartRecv(LPVOID pParam);
 UINT __cdecl TCPStartSend(LPVOID pParam);
-//UINT __cdecl UDPStartSend(LPVOID pParam);
+UINT __cdecl UDPStartSend(LPVOID pParam);
 
 
 // CNetProbeApp
@@ -219,8 +219,8 @@ BOOL NetProbe::startSend(void){
 		AfxBeginThread(pfn, this);
 		return true;
 	}else if(this->protocol == 2){
-//		AFX_THREADPROC pfn = UDPStartSend;
-//		AfxBeginThread(pfn, this);
+		AFX_THREADPROC pfn = UDPStartSend;
+		AfxBeginThread(pfn, this);
 		return true;
 	}
 }
@@ -336,19 +336,21 @@ UINT __cdecl TCPStartSend(LPVOID pParam){
 	memset(buf, 0, sizeof(buf));
 
 	int len = theProbe.getPacketSize();
-	int wait = len * 1000 / theProbe.getTransferRate() - 5;
-	if(wait<10)
-		wait=10;
-
+	if(theProbe.getTransferRate()){
+		int wait = len * 1000 / theProbe.getTransferRate() - 5;
+		if(wait<10)
+			wait=10;
+	}
 
 	while(true){
 		int ret;
 		int no;
 		
-		if(flag && (theProbe.getByteTransfer()  / ((theProbe.timer.Elapsed() - sp) / 1000.0)) > theProbe.getTransferRate()){
-			Sleep(wait);
-			continue;
-		}
+		if(theProbe.getTransferRate())
+			if(flag && (theProbe.getByteTransfer()  / ((theProbe.timer.Elapsed() - sp) / 1000.0)) > theProbe.getTransferRate()){
+				Sleep(10);
+				continue;
+			}
 
 		ret = send(Sockfd, buf, len, 0);
 		if(ret == SOCKET_ERROR){
@@ -376,6 +378,79 @@ UINT __cdecl TCPStartSend(LPVOID pParam){
 	
 }
 
+UINT __cdecl UDPStartSend(LPVOID pParam){
+	struct addrinfo aiHints;
+	struct addrinfo *aiList = NULL;
+	int retVal;
+	int flag = 0;
+	long sp;
+	long seqN;
+
+	struct sockaddr_in *UDP_PeerAddr;
+	UDP_PeerAddr = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
+	memset(UDP_PeerAddr, 0, sizeof(struct sockaddr_in));
+
+
+	memset(&aiHints,0,sizeof(aiHints));
+	aiHints.ai_family = AF_INET;
+	aiHints.ai_socktype = SOCK_STREAM;
+	aiHints.ai_protocol = IPPROTO_TCP;
+	if((retVal = getaddrinfo(theProbe.getRemote(), NULL, &aiHints, &aiList))!=0){
+		return false;
+	}
+
+
+	UDP_PeerAddr->sin_family = AF_INET;
+	UDP_PeerAddr->sin_port = htons(theProbe.getRemotePort());
+	memcpy(&(UDP_PeerAddr->sin_addr),(aiList->ai_addr->sa_data+2),4);
+
+	theProbe.timer.Start();
+	theProbe.setStatus(4);
+
+	SOCKET Sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+
+	char *buf = (char *)malloc(sizeof(char)*4096);
+	memset(buf, 0, sizeof(buf));
+
+	int len = theProbe.getPacketSize();
+
+
+	seqN = 0;
+	while(true){
+		int ret;
+		
+		if(theProbe.getTransferRate())
+			if(flag && (theProbe.getByteTransfer()  / ((theProbe.timer.Elapsed() - sp) / 1000.0)) > theProbe.getTransferRate()){
+				Sleep(10);
+				continue;
+			}
+
+		memcpy(buf, &seqN, sizeof(seqN));
+		ret = sendto(Sockfd, buf, len, 0, (sockaddr *)UDP_PeerAddr, sizeof(struct addrinfo));
+		if(ret == SOCKET_ERROR){
+			MessageBox(NULL, "sendto().", "error", 0);
+			closesocket(Sockfd);
+			theProbe.stop();
+			break;
+		}
+
+		theProbe.packetTransfer(seqN++);
+		theProbe.byteTransfer(ret);
+		
+		if(!flag && theProbe.getByteTransfer() != 0){
+			sp = theProbe.timer.Elapsed();
+			flag = 1;
+		}
+
+		if(theProbe.getStatus() == 0){
+			closesocket(Sockfd);
+			break;
+		}
+	}
+
+	AfxEndThread(0);
+	
+}
 
 
 

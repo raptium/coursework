@@ -53,4 +53,7 @@ public:
 	afx_msg void OnEnChangeRport();
 public:
 	afx_msg void OnEnChangeSr();
+public:
+	void inputDefault();
+
 };

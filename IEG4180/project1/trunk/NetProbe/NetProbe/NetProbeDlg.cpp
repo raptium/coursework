@@ -61,6 +61,7 @@ BOOL CNetProbeDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
+	inputDefault();
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -87,6 +88,7 @@ void CNetProbeDlg::OnPaint()
 
 		// Draw the icon
 		dc.DrawIcon(x, y, m_hIcon);
+		inputDefault();
 	}
 	else
 	{
@@ -233,7 +235,7 @@ UINT __cdecl UIRefresh(LPVOID pParam){
 		sprintf(t, "%.2f Bps", bps);
 		dlg->SetDlgItemTextA(IDC_DTR, t);
 
-		if(theProbe.getStatus() > 2 && theProbe.getPacketTransfer() >= dlg->GetDlgItemInt(IDC_NPS)){
+		if(dlg->GetDlgItemInt(IDC_NPS) && theProbe.getStatus() > 2 && theProbe.getPacketTransfer() >= dlg->GetDlgItemInt(IDC_NPS)){
 			theProbe.stop();
 		}
 	}
@@ -261,4 +263,26 @@ void CNetProbeDlg::OnEnChangeRport()
 void CNetProbeDlg::OnEnChangeSr()
 {
 	theProbe.setSendingRate(this->GetDlgItemInt(IDC_SR));
+}
+
+
+void CNetProbeDlg::inputDefault(){
+	SetDlgItemTextA(IDC_LOCAL, "localhost");
+	theProbe.setLocal("localhost");
+	SetDlgItemTextA(IDC_REMOTE, "localhost");
+	theProbe.setRemote("localhost");
+	SetDlgItemTextA(IDC_LPORT, "12345");
+	theProbe.setLocalPort(12345);
+	SetDlgItemTextA(IDC_RPORT, "12345");
+	theProbe.setRemotePort(12345);
+	CheckRadioButton(IDC_TCP, IDC_UDP, IDC_TCP);
+	theProbe.setProtocol(1);
+	this->SetDlgItemTextA(IDC_RI, "100");
+	theProbe.setRefreshInterval(100);
+	this->SetDlgItemTextA(IDC_PS, "1024");
+	theProbe.setPacketSize(1024);
+	this->SetDlgItemTextA(IDC_SR, "0");
+	theProbe.setSendingRate(0);
+	this->SetDlgItemTextA(IDC_NPS, "0");
+	theProbe.setNumPackets(0);
 }
