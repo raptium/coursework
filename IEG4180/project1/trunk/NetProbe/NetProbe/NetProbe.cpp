@@ -21,7 +21,7 @@ UINT __cdecl TCPStartRecv(LPVOID pParam);
 UINT __cdecl UDPStartRecv(LPVOID pParam);
 UINT __cdecl TCPStartSend(LPVOID pParam);
 UINT __cdecl UDPStartSend(LPVOID pParam);
-
+void errorMessageBox(void);
 
 // CNetProbeApp
 
@@ -181,6 +181,7 @@ int NetProbe::getStatus(void){
 
 void NetProbe::stop(){
 	status = 0;
+	numPackets = 0;
 	packetTransferred = 0;
 	maxPacketNum = 0;
 	byteTransferred = 0;
@@ -292,6 +293,27 @@ int NetProbe::getTransferRate(void){
 	return this->sendingRate;
 }
 
+void errorMessageBox(void){
+	int e = WSAGetLastError();
+	LPSTR pBuf = NULL;
+	FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER |FORMAT_MESSAGE_IGNORE_INSERTS |FORMAT_MESSAGE_FROM_SYSTEM,
+		NULL,
+		e,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_SYS_DEFAULT),
+		(LPSTR)&pBuf,
+		0 ,
+		NULL);
+	theProbe.stop();
+	switch(e){
+		case 0:
+			AfxMessageBox(pBuf, MB_ICONINFORMATION);
+			break;
+		default:
+			AfxMessageBox(pBuf, MB_ICONERROR);
+	}
+}
+
+
 
 UINT __cdecl TCPStartSend(LPVOID pParam){
 	//NetProbe *theProbe = (NetProbe *)pParam;
@@ -312,7 +334,9 @@ UINT __cdecl TCPStartSend(LPVOID pParam){
 	aiHints.ai_socktype = SOCK_STREAM;
 	aiHints.ai_protocol = IPPROTO_TCP;
 	if((retVal = getaddrinfo(theProbe.getRemote(), NULL, &aiHints, &aiList))!=0){
-		return false;
+		theProbe.stop();
+		errorMessageBox();
+		AfxEndThread(0);
 	}
 
 
@@ -324,23 +348,23 @@ UINT __cdecl TCPStartSend(LPVOID pParam){
 	theProbe.setStatus(3);
 
 	SOCKET Sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	if(Sockfd == INVALID_SOCKET){
+		theProbe.stop();
+		errorMessageBox();
+		AfxEndThread(0);
+	}
+
 	int retval = connect(Sockfd, (struct sockaddr *)TCP_PeerAddr, sizeof(struct sockaddr_in));
 	if (retval == SOCKET_ERROR){
-		MessageBox(NULL, "connect failed.", "error", 0);
-		retval = WSAGetLastError();
 		theProbe.stop();
-		return 0;
+		errorMessageBox();
+		AfxEndThread(0);
 	}
 
 	char *buf = (char *)malloc(sizeof(char)*4096);
 	memset(buf, 0, sizeof(buf));
 
 	int len = theProbe.getPacketSize();
-	if(theProbe.getTransferRate()){
-		int wait = len * 1000 / theProbe.getTransferRate() - 5;
-		if(wait<10)
-			wait=10;
-	}
 
 	while(true){
 		int ret;
@@ -354,9 +378,9 @@ UINT __cdecl TCPStartSend(LPVOID pParam){
 
 		ret = send(Sockfd, buf, len, 0);
 		if(ret == SOCKET_ERROR){
-			MessageBox(NULL, "send().", "error", 0);
-			closesocket(Sockfd);
 			theProbe.stop();
+			closesocket(Sockfd);
+			errorMessageBox();
 			break;
 		}
 
@@ -375,7 +399,7 @@ UINT __cdecl TCPStartSend(LPVOID pParam){
 	}
 
 	AfxEndThread(0);
-	
+	return 0;
 }
 
 UINT __cdecl UDPStartSend(LPVOID pParam){
@@ -396,6 +420,7 @@ UINT __cdecl UDPStartSend(LPVOID pParam){
 	aiHints.ai_socktype = SOCK_STREAM;
 	aiHints.ai_protocol = IPPROTO_TCP;
 	if((retVal = getaddrinfo(theProbe.getRemote(), NULL, &aiHints, &aiList))!=0){
+		errorMessageBox();
 		return false;
 	}
 
@@ -408,17 +433,19 @@ UINT __cdecl UDPStartSend(LPVOID pParam){
 	theProbe.setStatus(4);
 
 	SOCKET Sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+	if(Sockfd == INVALID_SOCKET){
+		theProbe.stop();
+		errorMessageBox();
+		AfxEndThread(0);
+	}
 
 	char *buf = (char *)malloc(sizeof(char)*4096);
 	memset(buf, 0, sizeof(buf));
 
 	int len = theProbe.getPacketSize();
 
-
 	seqN = 0;
 	while(true){
-		int ret;
-		
 		if(theProbe.getTransferRate())
 			if(flag && (theProbe.getByteTransfer()  / ((theProbe.timer.Elapsed() - sp) / 1000.0)) > theProbe.getTransferRate()){
 				Sleep(10);
@@ -426,16 +453,16 @@ UINT __cdecl UDPStartSend(LPVOID pParam){
 			}
 
 		memcpy(buf, &seqN, sizeof(seqN));
-		ret = sendto(Sockfd, buf, len, 0, (sockaddr *)UDP_PeerAddr, sizeof(struct addrinfo));
-		if(ret == SOCKET_ERROR){
-			MessageBox(NULL, "sendto().", "error", 0);
+		retVal = sendto(Sockfd, buf, len, 0, (sockaddr *)UDP_PeerAddr, sizeof(struct addrinfo));
+		if(retVal == SOCKET_ERROR){
 			closesocket(Sockfd);
 			theProbe.stop();
+			errorMessageBox();
 			break;
 		}
 
 		theProbe.packetTransfer(seqN++);
-		theProbe.byteTransfer(ret);
+		theProbe.byteTransfer(retVal);
 		
 		if(!flag && theProbe.getByteTransfer() != 0){
 			sp = theProbe.timer.Elapsed();
@@ -443,6 +470,15 @@ UINT __cdecl UDPStartSend(LPVOID pParam){
 		}
 
 		if(theProbe.getStatus() == 0){
+			seqN = -1;
+			memcpy(buf, &seqN, sizeof(seqN));
+			retVal = sendto(Sockfd, buf, len, 0, (sockaddr *)UDP_PeerAddr, sizeof(struct addrinfo));
+			if(retVal == SOCKET_ERROR){
+				closesocket(Sockfd);
+				theProbe.stop();
+				errorMessageBox();
+				break;
+			}
 			closesocket(Sockfd);
 			break;
 		}
@@ -474,7 +510,8 @@ UINT __cdecl TCPStartRecv(LPVOID pParam){
 	aiHints.ai_socktype = SOCK_STREAM;
 	aiHints.ai_protocol = IPPROTO_TCP;
 	if((retVal = getaddrinfo(theProbe.getLocal(), NULL, &aiHints, &aiList))!=0){
-		return false;
+		errorMessageBox();
+		AfxEndThread(0);
 	}
 
 
@@ -486,34 +523,61 @@ UINT __cdecl TCPStartRecv(LPVOID pParam){
 	theProbe.setStatus(1);
 
 	SOCKET Sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	bind(Sockfd, (struct sockaddr *)TCP_Addr, sizeof(struct sockaddr_in));
-	listen(Sockfd, 5);
+	if(Sockfd == INVALID_SOCKET){
+		theProbe.stop();
+		errorMessageBox();
+		AfxEndThread(0);
+	}
+	retVal = bind(Sockfd, (struct sockaddr *)TCP_Addr, sizeof(struct sockaddr_in));
+	if(retVal == SOCKET_ERROR){
+		closesocket(Sockfd);
+		theProbe.stop();
+		errorMessageBox();
+		AfxEndThread(0);
+	}
+	retVal = listen(Sockfd, 5);
+	if(retVal == SOCKET_ERROR){
+		theProbe.stop();
+		errorMessageBox();
+		AfxEndThread(0);
+	}
 	int addrlen = sizeof(struct sockaddr_in);
 	SOCKET newsfd = accept(Sockfd, (struct sockaddr *)TCP_PeerAddr, &addrlen);
-	closesocket(Sockfd);
+	if(newsfd == INVALID_SOCKET){
+		theProbe.stop();
+		errorMessageBox();
+		AfxEndThread(0);
+	}
+	retVal = closesocket(Sockfd);
+	if(retVal == SOCKET_ERROR){
+		theProbe.stop();
+		errorMessageBox();
+		AfxEndThread(0);
+	}
 
 	char *buf = (char *)malloc(sizeof(char)*4096);
 
 	while(true){
-		int ret;
 		int no;
 
 		if(theProbe.getStatus() == 0){
-			closesocket(newsfd);
-			break;
+			retVal = closesocket(newsfd);
+			if(retVal == SOCKET_ERROR){
+				theProbe.stop();
+				errorMessageBox();
+				AfxEndThread(0);
+			}
 		}
 
-		ret = recv(newsfd, buf, 4096, 0);
-		//memcpy(&no, buf, sizeof(no));
-		if(ret == SOCKET_ERROR || ret == 0){
-			MessageBox(NULL, "recv().", "error", 0);
-			closesocket(newsfd);
+		retVal = recv(newsfd, buf, 4096, 0);
+		if(retVal == SOCKET_ERROR){
 			theProbe.stop();
-			break;
+			errorMessageBox();
+			AfxEndThread(0);
 		}
 
 		theProbe.packetTransfer(-1);
-		theProbe.byteTransfer(ret);
+		theProbe.byteTransfer(retVal);
 
 	}
 
@@ -543,7 +607,8 @@ UINT __cdecl UDPStartRecv(LPVOID pParam){
 	aiHints.ai_socktype = SOCK_STREAM;
 	aiHints.ai_protocol = IPPROTO_TCP;
 	if((retVal = getaddrinfo(theProbe.getLocal(), NULL, &aiHints, &aiList))!=0){
-		return false;
+		errorMessageBox();
+		AfxEndThread(0);
 	}
 
 
@@ -555,25 +620,42 @@ UINT __cdecl UDPStartRecv(LPVOID pParam){
 	theProbe.setStatus(2);
 
 	SOCKET Sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-	bind(Sockfd, (struct sockaddr *)UDP_Addr, sizeof(struct sockaddr_in));
+	if(Sockfd == INVALID_SOCKET){
+		theProbe.stop();
+		errorMessageBox();
+		AfxEndThread(0);
+	}
+
+	retVal = bind(Sockfd, (struct sockaddr *)UDP_Addr, sizeof(struct sockaddr_in));
+	if(retVal == SOCKET_ERROR){
+		closesocket(Sockfd);
+		theProbe.stop();
+		errorMessageBox();
+		AfxEndThread(0);
+	}
 
 	char *buf = (char *)malloc(sizeof(char)*4096);
 
 	while(true){
-		int ret;
 		int no;
 
-		ret = recvfrom(Sockfd, buf, 4096, 0, (sockaddr *)&UDP_PeerAddr, &PeerAddrSize);
-		memcpy(&no, buf, sizeof(no));
-		if(ret == SOCKET_ERROR || ret == 0){
-			ret = WSAGetLastError();
-			MessageBox(NULL, "", "recvfrom() error", 0);
+		retVal = recvfrom(Sockfd, buf, 4096, 0, (sockaddr *)&UDP_PeerAddr, &PeerAddrSize);
+		if(retVal == SOCKET_ERROR){
+			closesocket(Sockfd);
 			theProbe.stop();
-			break;
+			errorMessageBox();
+			AfxEndThread(0);
 		}
+		memcpy(&no, buf, sizeof(no));
 
+		if(no == -1){
+			closesocket(Sockfd);
+			theProbe.stop();
+			errorMessageBox();
+			AfxEndThread(0);
+		}
 		theProbe.packetTransfer(no);
-		theProbe.byteTransfer(ret);
+		theProbe.byteTransfer(retVal);
 
 		if(theProbe.getStatus() == 0){
 			closesocket(Sockfd);
@@ -583,6 +665,6 @@ UINT __cdecl UDPStartRecv(LPVOID pParam){
 	}
 
 	AfxEndThread(0);
-	
+	return 0;
 }
 

@@ -221,9 +221,13 @@ UINT __cdecl UIRefresh(LPVOID pParam){
 		dlg->SetDlgItemTextA(IDC_NPT, t);
 
 		sprintf(t, "%d", theProbe.getPacketLost());
+		if(theProbe.getStatus() > 2)
+			strcpy(t, "0");
 		dlg->SetDlgItemTextA(IDC_NPL, t);
 
 		sprintf(t, "%.2f%", theProbe.getPacketLoss()*100);
+		if(theProbe.getStatus() > 2)
+			strcpy(t, "0");
 		dlg->SetDlgItemTextA(IDC_PL, t);
 
 		if(!flag && theProbe.getByteTransfer() != 0){
@@ -232,6 +236,8 @@ UINT __cdecl UIRefresh(LPVOID pParam){
 		}
 
 		bps = theProbe.getByteTransfer()  / ((theProbe.timer.Elapsed() - sp) / 1000.0);
+		if(bps<0)
+			bps = 0;
 		sprintf(t, "%.2f Bps", bps);
 		dlg->SetDlgItemTextA(IDC_DTR, t);
 

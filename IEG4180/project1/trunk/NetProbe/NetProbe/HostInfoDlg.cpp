@@ -67,7 +67,23 @@ void CHostInfoDlg::OnBnClickedLookup()
 
 
 	if((retVal = getaddrinfo(ip, NULL, &aiHints, &aiList)) != 0){
-		MessageBox("Cannot resovle host.");
+		int e = WSAGetLastError();
+		LPSTR pBuf = NULL;
+		FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER |FORMAT_MESSAGE_IGNORE_INSERTS |FORMAT_MESSAGE_FROM_SYSTEM,
+			NULL,
+			e,
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_SYS_DEFAULT),
+			(LPSTR)&pBuf,
+			0 ,
+			NULL);
+		theProbe.stop();
+		switch(e){
+			case 0:
+				AfxMessageBox(pBuf, MB_ICONINFORMATION);
+				break;
+			default:
+				AfxMessageBox(pBuf, MB_ICONERROR);
+		}
 		return;
 	}
 	free(ip);

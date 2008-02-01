@@ -71,45 +71,45 @@ IDR_MAINFRAME           ICON                    "res\\NetProbe.ico"
 // Dialog
 //
 
-IDD_NETPROBE_DIALOG DIALOGEX 0, 0, 320, 200
+IDD_NETPROBE_DIALOG DIALOGEX 0, 0, 295, 201
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION
 EXSTYLE WS_EX_CONTROLPARENT | WS_EX_APPWINDOW
 CAPTION "NetProbe"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "Exit",IDEXIT,263,177,50,16
-    GROUPBOX        "System Parameters Panel",IDC_STATIC,7,7,306,90
+    DEFPUSHBUTTON   "Exit",IDEXIT,238,178,50,16
+    GROUPBOX        "System Parameters Panel",IDC_STATIC,7,7,281,90
     LTEXT           "Local",IDC_STATIC,15,25,17,8
     LTEXT           "Remote",IDC_STATIC,15,40,26,8
-    RTEXT           "Refresh Interval (ms):",IDC_STATIC,190,22,72,8
-    RTEXT           "Packet Size (Bytes):",IDC_STATIC,197,40,65,8
-    RTEXT           "Sending Rate (Bps):",IDC_STATIC,197,58,65,8
-    RTEXT           "# Packets to Send:",IDC_STATIC,200,76,62,8
+    RTEXT           "Refresh Interval (ms):",IDC_STATIC,165,22,72,8
+    RTEXT           "Packet Size (Bytes):",IDC_STATIC,172,40,65,8
+    RTEXT           "Sending Rate (Bps):",IDC_STATIC,172,58,65,8
+    RTEXT           "# Packets to Send:",IDC_STATIC,175,76,62,8
     GROUPBOX        "Protocol",IDC_STATIC,15,54,93,29
     CONTROL         "TCP",IDC_TCP,"Button",BS_AUTORADIOBUTTON,23,66,29,10
     CONTROL         "UDP",IDC_UDP,"Button",BS_AUTORADIOBUTTON,70,66,29,10
-    GROUPBOX        "Statistics Display Panel",IDC_STATIC,7,100,200,93
+    GROUPBOX        "Statistics Display Panel",IDC_STATIC,7,101,161,93
     RTEXT           "Data Transfer Rate:",IDC_STATIC,26,116,66,8
     RTEXT           "Packet Loss (%):",IDC_STATIC,36,131,56,8
     RTEXT           "# Packets Transferred:",IDC_STATIC,16,146,76,8
     RTEXT           "# Packets Lost:",IDC_STATIC,41,161,51,8
     RTEXT           "Time Elapsed:",IDC_STATIC,47,176,45,8
-    LTEXT           "1",IDC_DTR,97,116,102,8
-    LTEXT           "1",IDC_PL,97,131,102,8
-    LTEXT           "1",IDC_NPT,97,146,102,8
-    LTEXT           "1",IDC_NPL,97,161,102,8
-    LTEXT           "1",IDC_TE,97,176,102,8
-    PUSHBUTTON      "HostInfo",IDC_HOSTINFO,263,108,50,16
-    PUSHBUTTON      "Send",IDC_SEND,263,131,50,16
-    PUSHBUTTON      "Receive",IDC_RECV,263,154,50,16
+    LTEXT           "",IDC_DTR,97,116,62,8
+    LTEXT           "",IDC_PL,97,131,62,8
+    LTEXT           "",IDC_NPT,97,146,62,8
+    LTEXT           "",IDC_NPL,97,161,62,8
+    LTEXT           "",IDC_TE,97,176,62,8
+    PUSHBUTTON      "Send",IDC_SEND,238,131,50,16
+    PUSHBUTTON      "Receive",IDC_RECV,238,154,50,16
     EDITTEXT        IDC_LOCAL,44,23,77,14,ES_AUTOHSCROLL
     EDITTEXT        IDC_LPORT,125,23,29,14,ES_AUTOHSCROLL
     EDITTEXT        IDC_REMOTE,44,38,77,14,ES_AUTOHSCROLL
     EDITTEXT        IDC_RPORT,125,38,29,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_RI,265,19,40,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_PS,265,37,40,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_SR,265,55,40,14,ES_AUTOHSCROLL
-    EDITTEXT        IDC_NPS,265,73,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_RI,241,19,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_PS,241,37,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_SR,241,55,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_NPS,241,73,40,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "HostInfo",IDC_HOSTINFO,238,108,50,16
 END
 
 IDD_HOSTINFO DIALOGEX 0, 0, 185, 121
@@ -117,8 +117,8 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "Host Information"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,7,95,55,17
-    PUSHBUTTON      "Look up",IDC_LOOKUP,7,76,55,17
+    PUSHBUTTON      "OK",IDOK,15,100,45,14
+    DEFPUSHBUTTON   "Look up",IDC_LOOKUP,15,81,45,14
     RTEXT           "Hostname/IP:",IDC_STATIC,18,9,45,8
     RTEXT           "Official Name:",IDC_STATIC,17,26,46,8
     RTEXT           "IP Returned:",IDC_STATIC,21,43,42,8
@@ -180,9 +180,9 @@ BEGIN
     IDD_NETPROBE_DIALOG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 313
+        RIGHTMARGIN, 288
         TOPMARGIN, 7
-        BOTTOMMARGIN, 193
+        BOTTOMMARGIN, 194
     END
 
     IDD_HOSTINFO, DIALOG
