@@ -14,9 +14,10 @@ namespace Customer
         public Customer(string str, int n){
             name = str;
             accountID = n;
-            accounts = new Account.Account[2];
+            accounts = new Account.Account[3];
             accounts[0] = new SavingAccount();
             accounts[1] = new CurrentAccount();
+            accounts[2] = new USDAccount();
         }
 
         public void PrintCustomer()

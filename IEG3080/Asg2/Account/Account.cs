@@ -91,4 +91,12 @@ namespace Account
             this.Name = "Current Account";
         }
     }
+
+    public class USDAccount : Account
+    {
+        public USDAccount()
+        {
+            this.Name = "USD Account";
+        }
+    }
 }
