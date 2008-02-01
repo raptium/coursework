@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bankApp", "bankApp\bankApp.csproj", "{5742FB59-CCB4-4C8E-88AF-E0DAA321C335}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Account", "account\Account.csproj", "{951A073E-F4AF-4316-A550-04D00465F194}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Customer", "customer\Customer.csproj", "{072CB386-1ABE-43CF-8834-CFC868912025}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5742FB59-CCB4-4C8E-88AF-E0DAA321C335}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5742FB59-CCB4-4C8E-88AF-E0DAA321C335}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5742FB59-CCB4-4C8E-88AF-E0DAA321C335}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5742FB59-CCB4-4C8E-88AF-E0DAA321C335}.Release|Any CPU.Build.0 = Release|Any CPU
+		{951A073E-F4AF-4316-A550-04D00465F194}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{951A073E-F4AF-4316-A550-04D00465F194}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{951A073E-F4AF-4316-A550-04D00465F194}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{951A073E-F4AF-4316-A550-04D00465F194}.Release|Any CPU.Build.0 = Release|Any CPU
+		{072CB386-1ABE-43CF-8834-CFC868912025}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{072CB386-1ABE-43CF-8834-CFC868912025}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{072CB386-1ABE-43CF-8834-CFC868912025}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{072CB386-1ABE-43CF-8834-CFC868912025}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
