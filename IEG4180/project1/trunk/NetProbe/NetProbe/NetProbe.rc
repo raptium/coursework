@@ -136,8 +136,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,1
- PRODUCTVERSION 1,0,0,1
+ FILEVERSION 1,7,2,0
+ PRODUCTVERSION 1,7,2,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -152,14 +152,14 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "TODO: <Company name>"
-            VALUE "FileDescription", "TODO: <File description>"
-            VALUE "FileVersion", "1.0.0.1"
+            VALUE "CompanyName", "raptium"
+            VALUE "FileDescription", "IEG4180 Project 1"
+            VALUE "FileVersion", "1.72"
             VALUE "InternalName", "NetProbe.exe"
-            VALUE "LegalCopyright", "TODO: (c) <Company name>.  All rights reserved."
+            VALUE "LegalCopyright", "2008 raptium.cn, Some rights reserved."
             VALUE "OriginalFilename", "NetProbe.exe"
-            VALUE "ProductName", "TODO: <Product name>"
-            VALUE "ProductVersion", "1.0.0.1"
+            VALUE "ProductName", "NetProbe"
+            VALUE "ProductVersion", "1.72"
         END
     END
     BLOCK "VarFileInfo"

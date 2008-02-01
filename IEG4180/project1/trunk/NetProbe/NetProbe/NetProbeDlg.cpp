@@ -214,7 +214,9 @@ UINT __cdecl UIRefresh(LPVOID pParam){
 			break;
 		}
 
-		sprintf(t, "%.2f sec",theProbe.timer.Elapsed()/1000.0);
+		sprintf(t, "%.2f sec",(theProbe.timer.Elapsed() - sp)/1000.0);
+		if(!flag)
+			strcpy(t, "0.00 sec");
 		dlg->SetDlgItemTextA(IDC_TE, t);
 
 		sprintf(t, "%d", theProbe.getPacketTransfer());

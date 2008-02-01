@@ -180,11 +180,21 @@ int NetProbe::getStatus(void){
 }
 
 void NetProbe::stop(){
+	WSADATA wsaData;
+	int iResult;
+
 	status = 0;
 	numPackets = 0;
 	packetTransferred = 0;
 	maxPacketNum = 0;
 	byteTransferred = 0;
+
+	WSACleanup();
+	iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
+	if(iResult != 0){
+		printf("WSAStartup failed: %d\n", iResult);
+		return;
+	}
 }
 
 
@@ -205,6 +215,7 @@ BOOL NetProbe::startReceive(void){
 		AfxBeginThread(pfn, this);
 		return true;
 	}
+	return false;
 }
 
 BOOL NetProbe::startSend(void){
@@ -273,11 +284,19 @@ int NetProbe::getPacketTransfer(void){
 }
 
 int NetProbe::getPacketLost(void){
-	return maxPacketNum - packetTransferred;
+	if(maxPacketNum - packetTransferred > 0)
+		return maxPacketNum - packetTransferred;
+	else
+		return 0;
 }
 
 double NetProbe::getPacketLoss(void){
-	return 1 - (double)packetTransferred / maxPacketNum;
+	double val= 1 - (double)packetTransferred / maxPacketNum;
+
+	if( 0 < val && val <= 1)
+		return val;
+	else
+		return 0;
 }
 
 
@@ -304,13 +323,7 @@ void errorMessageBox(void){
 		0 ,
 		NULL);
 	theProbe.stop();
-	switch(e){
-		case 0:
-			AfxMessageBox(pBuf, MB_ICONINFORMATION);
-			break;
-		default:
-			AfxMessageBox(pBuf, MB_ICONERROR);
-	}
+	AfxMessageBox(pBuf, MB_ICONINFORMATION);
 }
 
 
@@ -485,6 +498,7 @@ UINT __cdecl UDPStartSend(LPVOID pParam){
 	}
 
 	AfxEndThread(0);
+	return 0;
 	
 }
 
@@ -575,6 +589,10 @@ UINT __cdecl TCPStartRecv(LPVOID pParam){
 			errorMessageBox();
 			AfxEndThread(0);
 		}
+		if(retVal == 0){
+			theProbe.stop();
+			AfxEndThread(0);
+		}
 
 		theProbe.packetTransfer(-1);
 		theProbe.byteTransfer(retVal);
@@ -582,6 +600,7 @@ UINT __cdecl TCPStartRecv(LPVOID pParam){
 	}
 
 	AfxEndThread(0);
+	return 0;
 	
 }
 
