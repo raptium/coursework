@@ -497,7 +497,7 @@ UINT __cdecl UDPStartSend(LPVOID pParam){
 			int i;
 			seqN = -1;
 			memcpy(buf, &seqN, sizeof(seqN));
-			for(i=0;i<50;i++){
+			for(i=0;i<1000;i++){
 			retVal = sendto(Sockfd, buf, len, 0, (sockaddr *)UDP_PeerAddr, sizeof(struct addrinfo));
 				if(retVal == SOCKET_ERROR){
 					closesocket(Sockfd);
@@ -685,9 +685,10 @@ UINT __cdecl UDPStartRecv(LPVOID pParam){
 
 	int len = theProbe.getPacketSize();
 	char *buf = (char *)malloc(sizeof(char)*len);
+	long no;
 
 	while(true){
-		long no;
+		
 
 		retVal = recvfrom(Sockfd, buf, len, 0, (sockaddr *)&UDP_PeerAddr, &PeerAddrSize);
 		if(retVal == SOCKET_ERROR){
