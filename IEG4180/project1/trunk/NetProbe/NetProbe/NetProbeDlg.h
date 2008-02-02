@@ -56,4 +56,6 @@ public:
 public:
 	void inputDefault();
 
+public:
+	afx_msg void OnEnChangeNps();
 };

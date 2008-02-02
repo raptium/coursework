@@ -105,7 +105,9 @@ BOOL CNetProbeApp::InitInstance()
 		// TODO: Place code here to handle when the dialog is
 		//  dismissed with Cancel
 	}
-	WSACleanup();
+	iResult = WSACleanup();
+	if(iResult == SOCKET_ERROR)
+		errorMessageBox();
 
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.
@@ -147,6 +149,10 @@ void NetProbe::setSendingRate(int n){
 void NetProbe::setNumPackets(int n){
 	numPackets = n;
 }
+
+int NetProbe::getNumPackets(void){
+	return numPackets;
+}
 	
 void NetProbe::setProtocol(int p){
 	protocol = p;
@@ -179,17 +185,23 @@ int NetProbe::getStatus(void){
 	return status;
 }
 
-void NetProbe::stop(){
+void NetProbe::stop(void){
+	status = 0;
+}
+
+
+void NetProbe::stop(BOOL b){
 	WSADATA wsaData;
 	int iResult;
 
 	status = 0;
-	numPackets = 0;
 	packetTransferred = 0;
 	maxPacketNum = 0;
 	byteTransferred = 0;
 
-	WSACleanup();
+	iResult = WSACleanup();
+	if(iResult == SOCKET_ERROR)
+		errorMessageBox();
 	iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
 	if(iResult != 0){
 		printf("WSAStartup failed: %d\n", iResult);
@@ -269,7 +281,7 @@ int NetProbe::getInterval(void){
 
 void NetProbe::packetTransfer(int n){
 	if(n > maxPacketNum)
-		maxPacketNum = n + 1;
+		maxPacketNum = n;
 	packetTransferred++;
 	if(n < 0)
 		maxPacketNum = packetTransferred;
@@ -323,7 +335,8 @@ void errorMessageBox(void){
 		0 ,
 		NULL);
 	theProbe.stop();
-	AfxMessageBox(pBuf, MB_ICONINFORMATION);
+	if(e)
+		AfxMessageBox(pBuf, MB_ICONINFORMATION);
 }
 
 
@@ -374,6 +387,9 @@ UINT __cdecl TCPStartSend(LPVOID pParam){
 		AfxEndThread(0);
 	}
 
+
+
+
 	char *buf = (char *)malloc(sizeof(char)*4096);
 	memset(buf, 0, sizeof(buf));
 
@@ -388,6 +404,16 @@ UINT __cdecl TCPStartSend(LPVOID pParam){
 				Sleep(10);
 				continue;
 			}
+
+
+		if( theProbe.getNumPackets() && theProbe.getPacketTransfer() >= theProbe.getNumPackets())
+			theProbe.stop();
+
+		if(theProbe.getStatus() == 0){
+			shutdown(Sockfd, SD_SEND);
+			closesocket(Sockfd);
+			break;
+		}
 
 		ret = send(Sockfd, buf, len, 0);
 		if(ret == SOCKET_ERROR){
@@ -405,10 +431,7 @@ UINT __cdecl TCPStartSend(LPVOID pParam){
 			flag = 1;
 		}
 
-		if(theProbe.getStatus() == 0){
-			closesocket(Sockfd);
-			break;
-		}
+
 	}
 
 	AfxEndThread(0);
@@ -459,11 +482,33 @@ UINT __cdecl UDPStartSend(LPVOID pParam){
 
 	seqN = 0;
 	while(true){
+
 		if(theProbe.getTransferRate())
 			if(flag && (theProbe.getByteTransfer()  / ((theProbe.timer.Elapsed() - sp) / 1000.0)) > theProbe.getTransferRate()){
 				Sleep(10);
 				continue;
 			}
+
+
+		if( theProbe.getNumPackets() && theProbe.getPacketTransfer() >= theProbe.getNumPackets())
+			theProbe.stop();
+
+		if(theProbe.getStatus() == 0){
+			int i;
+			seqN = -1;
+			memcpy(buf, &seqN, sizeof(seqN));
+			for(i=0;i<50;i++){
+			retVal = sendto(Sockfd, buf, len, 0, (sockaddr *)UDP_PeerAddr, sizeof(struct addrinfo));
+				if(retVal == SOCKET_ERROR){
+					closesocket(Sockfd);
+					theProbe.stop();
+					errorMessageBox();
+					AfxEndThread(0);
+				}
+			}
+			closesocket(Sockfd);
+			AfxEndThread(0);
+		}
 
 		memcpy(buf, &seqN, sizeof(seqN));
 		retVal = sendto(Sockfd, buf, len, 0, (sockaddr *)UDP_PeerAddr, sizeof(struct addrinfo));
@@ -482,19 +527,9 @@ UINT __cdecl UDPStartSend(LPVOID pParam){
 			flag = 1;
 		}
 
-		if(theProbe.getStatus() == 0){
-			seqN = -1;
-			memcpy(buf, &seqN, sizeof(seqN));
-			retVal = sendto(Sockfd, buf, len, 0, (sockaddr *)UDP_PeerAddr, sizeof(struct addrinfo));
-			if(retVal == SOCKET_ERROR){
-				closesocket(Sockfd);
-				theProbe.stop();
-				errorMessageBox();
-				break;
-			}
-			closesocket(Sockfd);
-			break;
-		}
+
+
+
 	}
 
 	AfxEndThread(0);
@@ -509,6 +544,7 @@ UINT __cdecl TCPStartRecv(LPVOID pParam){
 	struct addrinfo aiHints;
 	struct addrinfo *aiList = NULL;
 	int retVal;
+	int addrlen = sizeof(struct sockaddr_in);
 
 
 	struct sockaddr_in *TCP_Addr;
@@ -555,36 +591,32 @@ UINT __cdecl TCPStartRecv(LPVOID pParam){
 		errorMessageBox();
 		AfxEndThread(0);
 	}
-	int addrlen = sizeof(struct sockaddr_in);
+	
 	SOCKET newsfd = accept(Sockfd, (struct sockaddr *)TCP_PeerAddr, &addrlen);
 	if(newsfd == INVALID_SOCKET){
+		closesocket(Sockfd);
 		theProbe.stop();
 		errorMessageBox();
 		AfxEndThread(0);
 	}
-	retVal = closesocket(Sockfd);
-	if(retVal == SOCKET_ERROR){
-		theProbe.stop();
-		errorMessageBox();
-		AfxEndThread(0);
-	}
+	closesocket(Sockfd);
 
-	char *buf = (char *)malloc(sizeof(char)*4096);
+
+	int len = theProbe.getPacketSize();
+	char *buf = (char *)malloc(sizeof(char)*len);
 
 	while(true){
 		int no;
 
 		if(theProbe.getStatus() == 0){
 			retVal = closesocket(newsfd);
-			if(retVal == SOCKET_ERROR){
-				theProbe.stop();
-				errorMessageBox();
-				AfxEndThread(0);
-			}
+			theProbe.stop();
+			AfxEndThread(0);
 		}
 
-		retVal = recv(newsfd, buf, 4096, 0);
+		retVal = recv(newsfd, buf, len, 0);
 		if(retVal == SOCKET_ERROR){
+			closesocket(newsfd);
 			theProbe.stop();
 			errorMessageBox();
 			AfxEndThread(0);
@@ -593,10 +625,8 @@ UINT __cdecl TCPStartRecv(LPVOID pParam){
 			theProbe.stop();
 			AfxEndThread(0);
 		}
-
 		theProbe.packetTransfer(-1);
 		theProbe.byteTransfer(retVal);
-
 	}
 
 	AfxEndThread(0);
@@ -653,12 +683,13 @@ UINT __cdecl UDPStartRecv(LPVOID pParam){
 		AfxEndThread(0);
 	}
 
-	char *buf = (char *)malloc(sizeof(char)*4096);
+	int len = theProbe.getPacketSize();
+	char *buf = (char *)malloc(sizeof(char)*len);
 
 	while(true){
-		int no;
+		long no;
 
-		retVal = recvfrom(Sockfd, buf, 4096, 0, (sockaddr *)&UDP_PeerAddr, &PeerAddrSize);
+		retVal = recvfrom(Sockfd, buf, len, 0, (sockaddr *)&UDP_PeerAddr, &PeerAddrSize);
 		if(retVal == SOCKET_ERROR){
 			closesocket(Sockfd);
 			theProbe.stop();
@@ -677,8 +708,13 @@ UINT __cdecl UDPStartRecv(LPVOID pParam){
 		theProbe.byteTransfer(retVal);
 
 		if(theProbe.getStatus() == 0){
-			closesocket(Sockfd);
-			break;
+			if(closesocket(Sockfd) == SOCKET_ERROR){
+				theProbe.stop();
+				errorMessageBox();
+				AfxEndThread(0);
+			}
+			theProbe.stop();
+			AfxEndThread(0);
 		}
 
 	}

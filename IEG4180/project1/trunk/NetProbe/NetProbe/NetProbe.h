@@ -38,7 +38,8 @@ public:
 	NetProbe();
 	BOOL startSend();
 	BOOL startReceive();
-	void stop();
+	void stop(void);
+	void stop(BOOL n);
 	void setLocal(char *h);
 	void setRemote(char *h);
 	void setLocalPort(int n);
@@ -66,6 +67,7 @@ public:
 	int getPacketTransfer(void);
 	double getByteTransfer(void);
 	void byteTransfer(int n);
+	int getNumPackets(void);
 
 private:
 	int status;

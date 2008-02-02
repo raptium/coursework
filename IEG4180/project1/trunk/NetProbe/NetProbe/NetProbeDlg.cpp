@@ -46,6 +46,7 @@ BEGIN_MESSAGE_MAP(CNetProbeDlg, CDialog)
 	ON_EN_CHANGE(IDC_RI, &CNetProbeDlg::OnEnChangeRi)
 	ON_EN_CHANGE(IDC_RPORT, &CNetProbeDlg::OnEnChangeRport)
 	ON_EN_CHANGE(IDC_SR, &CNetProbeDlg::OnEnChangeSr)
+	ON_EN_CHANGE(IDC_NPS, &CNetProbeDlg::OnEnChangeNps)
 END_MESSAGE_MAP()
 
 
@@ -199,6 +200,7 @@ UINT __cdecl UIRefresh(LPVOID pParam){
 	double bps;
 	int flag = 0;
 	long sp;
+	int hit = 0;
 
 	while(1){
 
@@ -211,12 +213,17 @@ UINT __cdecl UIRefresh(LPVOID pParam){
 		}
 
 		if(theProbe.getStatus() == 0){
-			break;
+			hit++;
+			if(hit>=5){
+				theProbe.stop(true);
+				break;
+			}
 		}
 
-		sprintf(t, "%.2f sec",(theProbe.timer.Elapsed() - sp)/1000.0);
 		if(!flag)
 			strcpy(t, "0.00 sec");
+		else
+			sprintf(t, "%.2f sec",(theProbe.timer.Elapsed() - sp)/1000.0);
 		dlg->SetDlgItemTextA(IDC_TE, t);
 
 		sprintf(t, "%d", theProbe.getPacketTransfer());
@@ -240,12 +247,8 @@ UINT __cdecl UIRefresh(LPVOID pParam){
 		bps = theProbe.getByteTransfer()  / ((theProbe.timer.Elapsed() - sp) / 1000.0);
 		if(bps<0)
 			bps = 0;
-		sprintf(t, "%.2f Bps", bps);
+		sprintf(t, "%.3f Bps", bps);
 		dlg->SetDlgItemTextA(IDC_DTR, t);
-
-		if(dlg->GetDlgItemInt(IDC_NPS) && theProbe.getStatus() > 2 && theProbe.getPacketTransfer() >= dlg->GetDlgItemInt(IDC_NPS)){
-			theProbe.stop();
-		}
 	}
 
 	dlg->GetDlgItem(IDC_SEND)->EnableWindow(true);
@@ -289,8 +292,13 @@ void CNetProbeDlg::inputDefault(){
 	theProbe.setRefreshInterval(100);
 	this->SetDlgItemTextA(IDC_PS, "1024");
 	theProbe.setPacketSize(1024);
-	this->SetDlgItemTextA(IDC_SR, "0");
-	theProbe.setSendingRate(0);
+	this->SetDlgItemTextA(IDC_SR, "102400");
+	theProbe.setSendingRate(102400);
 	this->SetDlgItemTextA(IDC_NPS, "0");
 	theProbe.setNumPackets(0);
+}
+void CNetProbeDlg::OnEnChangeNps()
+{
+
+	theProbe.setNumPackets(this->GetDlgItemInt(IDC_NPS));
 }
