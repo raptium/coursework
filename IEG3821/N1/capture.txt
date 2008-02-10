@@ -1,0 +1,565 @@
+Tast 2
+c)
+
+R1#sh ip route
+Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     177.51.0.0/28 is subnetted, 1 subnets
+C       177.51.7.0 is directly connected, FastEthernet0/0
+
+
+
+R7#sh ip route
+Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     77.0.0.0/24 is subnetted, 1 subnets
+C       77.51.7.0 is directly connected, FastEthernet0/0
+     177.51.0.0/28 is subnetted, 1 subnets
+C       177.51.7.0 is directly connected, FastEthernet1/0
+
+R8#sh ip route
+Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     177.51.0.0/28 is subnetted, 1 subnets
+C       177.51.7.0 is directly connected, FastEthernet0/0
+
+d)
+R1#sh ip route
+Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     177.51.0.0/28 is subnetted, 1 subnets
+C       177.51.7.0 is directly connected, FastEthernet0/0
+     150.51.0.0/24 is subnetted, 1 subnets
+C       150.51.1.0 is directly connected, Loopback0
+
+R8#sh ip route
+Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     177.51.0.0/28 is subnetted, 1 subnets
+C       177.51.7.0 is directly connected, FastEthernet0/0
+     150.51.0.0/24 is subnetted, 1 subnets
+C       150.51.8.0 is directly connected, Loopback0
+
+e)
+R1#sh ip route
+Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     77.0.0.0/24 is subnetted, 1 subnets
+S       77.51.7.0 [1/0] via 177.51.7.7
+     177.51.0.0/28 is subnetted, 1 subnets
+C       177.51.7.0 is directly connected, FastEthernet0/0
+     150.51.0.0/24 is subnetted, 1 subnets
+C       150.51.1.0 is directly connected, Loopback0
+
+R7#sh ip route
+Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route
+
+Gateway of last resort is 177.51.7.0 to network 0.0.0.0
+
+     77.0.0.0/24 is subnetted, 1 subnets
+C       77.51.7.0 is directly connected, FastEthernet0/0
+     177.51.0.0/28 is subnetted, 1 subnets
+C       177.51.7.0 is directly connected, FastEthernet1/0
+S*   0.0.0.0/0 [1/0] via 177.51.7.0
+
+
+R8#sh ip route
+Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     77.0.0.0/24 is subnetted, 1 subnets
+S       77.51.7.0 [1/0] via 177.51.7.7
+     177.51.0.0/28 is subnetted, 1 subnets
+C       177.51.7.0 is directly connected, FastEthernet0/0
+     150.51.0.0/24 is subnetted, 1 subnets
+C       150.51.8.0 is directly connected, Loopback0
+
+
+
+R7#ping 150.51.1.1 source f0/0
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 150.51.1.1, timeout is 2 seconds:
+Packet sent with a source address of 77.51.7.7
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 12/71/148 ms
+R7#ping 150.51.8.8 source f0/0
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 150.51.8.8, timeout is 2 seconds:
+Packet sent with a source address of 77.51.7.7
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 32/80/144 ms
+
+f)
+R8#show clock
+00:07:07.907 HK Sun Feb 10 2008
+
+R7#show clock
+00:07:14.528 HK Sun Feb 10 2008
+
+R1#show clock
+00:07:29.473 HK Sun Feb 10 2008
+
+
+Task 3
+
+R1#ping 77.51.7.7 source lo0
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 77.51.7.7, timeout is 2 seconds:
+Packet sent with a source address of 150.51.1.1
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 16/74/136 ms
+R1#ping R77 source lo0
+
+Translating "R77"...domain server (177.51.7.8) [OK]
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 77.51.7.7, timeout is 2 seconds:
+Packet sent with a source address of 150.51.1.1
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 16/100/144 ms
+
+Task 4
+c)
+R7#show ip dhcp binding
+Bindings from all pools not associated with VRF:
+IP address          Client-ID/              Lease expiration        Type
+                    Hardware address/
+                    User name
+77.51.7.1           0063.6973.636f.2d30.    Infinite                Automatic
+                    3030.302e.3535.3535.
+                    2e35.3535.352d.4661.
+                    302f.30
+77.51.7.2           0100.0022.2222.22       Infinite                Manual
+77.51.7.3           0100.0033.3333.33       Infinite                Manual
+77.51.7.4           0100.0044.4444.44       Infinite                Manual
+
+Task 5
+a)
+R6#ping 66.51.46.4
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 66.51.46.4, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 4/72/124 ms
+
+
+R6#show ip route
+Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     66.0.0.0/29 is subnetted, 1 subnets
+C       66.51.46.0 is directly connected, Serial1/0
+R6#show frame-relay map
+Serial1/0 (up): ip 66.51.46.4 dlci 604(0x25C,0x94C0), static,
+              CISCO, status defined, active
+
+
+R4#show ip route
+Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route
+
+Gateway of last resort is 77.51.7.7 to network 0.0.0.0
+
+     66.0.0.0/29 is subnetted, 1 subnets
+C       66.51.46.0 is directly connected, Serial1/0
+     77.0.0.0/24 is subnetted, 1 subnets
+C       77.51.7.0 is directly connected, FastEthernet0/0
+S*   0.0.0.0/0 [254/0] via 77.51.7.7
+
+R4#show frame-relay map
+Serial1/0 (up): ip 66.51.46.6 dlci 406(0x196,0x6460), static,
+              CISCO, status defined, active
+
+
+
+
+b)R6#ping 66.51.56.5
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 66.51.56.5, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 32/68/96 ms
+
+R6#show ip route
+Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     66.0.0.0/8 is variably subnetted, 2 subnets, 2 masks
+C       66.51.56.4/30 is directly connected, Serial1/1.51
+C       66.51.46.0/29 is directly connected, Serial1/0
+R6#show frame-re
+R6#show frame-relay map
+Serial1/0 (up): ip 66.51.46.4 dlci 604(0x25C,0x94C0), static,
+              CISCO, status defined, active
+Serial1/1.51 (up): point-to-point dlci, dlci 615(0x267,0x9870), broadcast
+          status defined, active
+
+
+R5#show ip route
+Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route
+
+Gateway of last resort is 77.51.7.7 to network 0.0.0.0
+
+     66.0.0.0/30 is subnetted, 1 subnets
+C       66.51.56.4 is directly connected, Serial1/0.51
+     77.0.0.0/24 is subnetted, 1 subnets
+C       77.51.7.0 is directly connected, FastEthernet0/0
+S*   0.0.0.0/0 [254/0] via 77.51.7.7
+R5#show frame-relay map
+Serial1/0.51 (up): point-to-point dlci, dlci 516(0x204,0x8040), broadcast
+          status defined, active
+
+c)
+R2#show ip route
+Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route
+
+Gateway of last resort is 77.51.7.7 to network 0.0.0.0
+
+     66.0.0.0/29 is subnetted, 1 subnets
+C       66.52.236.0 is directly connected, Serial1/0
+     77.0.0.0/24 is subnetted, 1 subnets
+C       77.51.7.0 is directly connected, FastEthernet0/0
+S*   0.0.0.0/0 [254/0] via 77.51.7.7
+R2#show frame map
+Serial1/0 (up): ip 66.52.236.6 dlci 216(0xD8,0x3480), static,
+              CISCO, status defined, active
+
+R3#show ip route
+Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route
+
+Gateway of last resort is 77.51.7.7 to network 0.0.0.0
+
+     66.0.0.0/29 is subnetted, 1 subnets
+C       66.52.236.0 is directly connected, Serial1/0
+     77.0.0.0/24 is subnetted, 1 subnets
+C       77.51.7.0 is directly connected, FastEthernet0/0
+S*   0.0.0.0/0 [254/0] via 77.51.7.7
+R3#show frame map
+Serial1/0 (up): ip 66.52.236.6 dlci 316(0x13C,0x4CC0), static,
+              CISCO, status defined, active
+
+R6#show ip route
+Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, * - candidate default, U - per-user static route
+       o - ODR, P - periodic downloaded static route
+
+Gateway of last resort is not set
+
+     66.0.0.0/8 is variably subnetted, 3 subnets, 2 masks
+C       66.51.56.4/30 is directly connected, Serial1/1.51
+C       66.51.46.0/29 is directly connected, Serial1/0
+C       66.52.236.0/29 is directly connected, Serial1/1.52
+R6#show frame map
+Serial1/0 (up): ip 66.51.46.4 dlci 604(0x25C,0x94C0), static,
+              CISCO, status defined, active
+Serial1/1.52 (up): ip 66.52.236.2 dlci 612(0x264,0x9840), static,
+              CISCO, status defined, active
+Serial1/1.52 (up): ip 66.52.236.3 dlci 613(0x265,0x9850), static,
+              CISCO, status defined, active
+Serial1/1.51 (up): point-to-point dlci, dlci 615(0x267,0x9870), broadcast
+          status defined, active
+R6#ping 66.52.236.2
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 66.52.236.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 28/64/104 ms
+R6#ping 66.52.236.3
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 66.52.236.3, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 8/56/136 ms
+
+Task 6
+a)
+R2#telnet R8
+Translating "R8"...domain server (177.51.7.8) [OK]
+Trying R8.ie.cuhk.edu.hk (177.51.7.8)... Open
+
+
+User Access Verification
+
+Username: hello
+Password:
+R8>show user
+    Line       User       Host(s)              Idle       Location
+   0 con 0                idle                 02:24:09
+*226 vty 0     hello      idle                 00:00:00 R2.ie.cuhk.edu.hk
+
+  Interface    User               Mode         Idle     Peer Address
+
+R8>exit
+
+[Connection to R8 closed by foreign host]
+
+b)
+R2#telnet R8
+Translating "R8"...domain server (177.51.7.8) [OK]
+Trying R8.ie.cuhk.edu.hk (177.51.7.8)... Open
+
+
+User Access Verification
+
+Username: hello
+Password:
+R8>show user
+    Line       User       Host(s)              Idle       Location
+   0 con 0                idle                 00:09:11
+*226 vty 0     hello      idle                 00:00:00 R177.ie.cuhk.edu.hk
+
+  Interface    User               Mode         Idle     Peer Address
+
+R8>exit
+
+[Connection to R8 closed by foreign host]
+
+
+R7#show ip nat trans
+
+
+
+c)
+R8#telnet R177 3003
+Trying R177.ie.cuhk.edu.hk (177.51.7.7, 3003)... Open
+
+
+User Access Verification
+
+Username: hello
+Password:
+R3>show user
+    Line       User       Host(s)              Idle       Location
+   0 con 0                idle                 00:24:06
+*226 vty 0     hello      idle                 00:00:00 R8.ie.cuhk.edu.hk
+
+  Interface    User               Mode         Idle     Peer Address
+
+R3>exit
+
+[Connection to R177 closed by foreign host]
+R8#telnet R177 3004
+Trying R177.ie.cuhk.edu.hk (177.51.7.7, 3004)... Open
+
+
+User Access Verification
+
+Username: hello
+Password:
+R4>show user
+    Line       User       Host(s)              Idle       Location
+   0 con 0                idle                 00:46:03
+*226 vty 0     hello      idle                 00:00:00 R8.ie.cuhk.edu.hk
+
+  Interface    User               Mode         Idle     Peer Address
+
+R4>exit
+
+[Connection to R177 closed by foreign host]
+R8#
+
+d)
+R2# telnet R8
+Translating "R8"...domain server (177.51.7.8) [OK]
+Trying R8.ie.cuhk.edu.hk (177.51.7.8)... Open
+
+
+User Access Verification
+
+Username: hello
+Password:
+R8>show user
+    Line       User       Host(s)              Idle       Location
+   0 con 0                idle                 00:00:37
+*226 vty 0     hello      idle                 00:00:00 177.51.7.2
+
+  Interface    User               Mode         Idle     Peer Address
+
+R8>exit
+
+[Connection to R8 closed by foreign host]
+
+R8#telnet 177.51.7.2
+Trying 177.51.7.2 ... Open
+
+
+User Access Verification
+
+Username: hello
+Password:
+R2>show user
+    Line       User       Host(s)              Idle       Location
+   0 con 0                R8                   00:00:18
+*226 vty 0     hello      idle                 00:00:00 R8.ie.cuhk.edu.hk
+
+  Interface    User               Mode         Idle     Peer Address
+
+R2>exit
+
+[Connection to 177.51.7.2 closed by foreign host]
+
+
+
+R7(config)#do show ip nat trans
+Pro Inside global      Inside local       Outside local      Outside global
+tcp 177.51.7.2:23      77.51.7.2:23       177.51.7.8:14858   177.51.7.8:14858
+tcp 177.51.7.2:23      77.51.7.2:23       177.51.7.8:19347   177.51.7.8:19347
+tcp 177.51.7.2:45372   77.51.7.2:45372    177.51.7.8:23      177.51.7.8:23
+udp 177.51.7.2:54727   77.51.7.2:54727    177.51.7.8:53      177.51.7.8:53
+--- 177.51.7.2         77.51.7.2          ---                ---
+tcp 177.51.7.7:3003    77.51.7.3:23       ---                ---
+tcp 177.51.7.7:3004    77.51.7.4:23       ---                ---
+
+
+
+Task 7
+R2#telnet R77
+Translating "R77"...domain server (177.51.7.8) [OK]
+Trying R77.ie.cuhk.edu.hk (77.51.7.7)... Open
+
+
+User Access Verification
+
+Username: hello
+Password:
+R7>exit
+
+[Connection to R77 closed by foreign host]
+
+R8#telnet R177
+Trying R177.ie.cuhk.edu.hk (177.51.7.7)... Open
+
+
+User Access Verification
+
+Username: hello
+Password:
+R7>exit
+
+[Connection to R177 closed by foreign host]
+
+R1# telnet R177
+Translating "R177"...domain server (177.51.7.8) [OK]
+Trying R177.ie.cuhk.edu.hk (177.51.7.7)...
+% Connection refused by remote host
+
+
+Task 9
+R7#show snmp community
+
+Community name: ILMI
+Community Index: cisco0
+Community SecurityName: ILMI
+storage-type: read-only  active
+
+
+Community name: HELLOWORLD
+Community Index: cisco1
+Community SecurityName: HELLOWORLD
+storage-type: nonvolatile        active access-list: 3
+

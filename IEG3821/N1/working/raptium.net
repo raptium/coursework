@@ -1,0 +1,155 @@
+# IEG3821 ¡V Lab1
+autostart = false
+ghostios = true
+ghostsize = 128
+mmap = true
+sparsemem = true
+
+[127.0.0.1]
+workingdir = c:\temp\mydir\ieg3821\lab1 
+
+
+[[ETHSW SW]]
+# SW is the switch connecting all Ethernet interface of router
+#
+# Connection:
+#
+# Port 1 [VLAN 177] => R1:F0/0
+# Port 2 [VLAN 77] => R2:F0/0
+# Port 3 [VLAN 77] => R3:F0/0
+# Port 4 [VLAN 77] => R4:F0/0
+# Port 5 [VLAN 77] => R5:F0/0
+# Port 7 [VLAN 77] => R7:F0/0
+# Port 8 [VLAN 177] => R8:F0/0
+# Port 17 [VLAN 177] => R7:F1/0
+#
+# Example: 
+#   Port 88 is connected to VLAN 99
+#   Configuration:
+#     88 = access 99
+# 
+# READ_THE_NETWORK_DIAGRAM_AND
+# FILL_IN_THE_ CONFIGURATION_OF_SW_BELOW
+1 = access 177
+2 = access 77
+3 = access 77
+4 = access 77
+5 = access 77
+7 = access 77
+8 = access 177
+17 = access 177
+
+[[FRSW FR]]
+# FR is the Frame-relay Switch
+#
+# Physical Connection:
+# Port 2: R2:S1/0
+# Port 3: R3:S1/0
+# Port 4: R4:S1/0
+# Port 5: R5:S1/0
+# Port 6: R6:S1/0
+# Port 16: R6:S1/1
+#
+# Frame-relay PVC
+# Port 2: [DLCI#216] => Port 16: [DLCI#612]
+# Port 3: [DLCI#316] => Port 16: [DLCI#613]
+# Port 4: [DLCI#406] => Port 6: [DLCI#604]
+# Port 5: [DLCI#516] => Port 16: [DLCI#615]
+#
+# Example: 
+#   Port 9: [DLCI#918] => Port 8: [DLCI#819]
+#   Configurations:
+#     9:918 = 8:819
+2:216 = 16:612
+3:316 = 16:613
+4:406 = 6:604
+5:516 = 16:615
+
+[[3660]]
+# idlepc depends on machine. 
+# Read the tutorial website on how to evaluate a good value
+idlepc = 0x60529294
+# ¡§F:\MyDir\IEG3821\images¡¨ is the path where the IOS image is put into
+image = c:\temp\MyDir\IEG3821\images\c3660-jk9o3s-mz.124-12.image
+ram = 128
+
+#### R1 ####
+[[ROUTER R1]]
+console = 2001
+model = 3660
+# READ_THE_NETWORK_DIAGRAM_AND
+# FILL_IN_THE_CONFIGURATION_OF_R1_BELOW
+# Example:
+#   R1:F9/0 => SW:Port 99 
+#   R1:S8/1 => FR:Port 81
+#   Configurations:
+#     F9/0 = SW 99
+#     S8/1 = FR 81
+F0/0 = SW 1
+
+#### R2 ####
+[[ROUTER R2]]
+console = 2002
+model = 3660
+# READ_THE_NETWORK_DIAGRAM_AND
+# FILL_IN_THE_CONFIGURATION_OF_R2_BELOW
+F0/0 = SW 2
+S1/0 = FR 2
+
+#### R3 ####
+[[ROUTER R3]]
+console = 2003
+model = 3660
+# READ_THE_NETWORK_DIAGRAM_AND
+# FILL_IN_THE_CONFIGURATION_OF_R3_BELOW
+F0/0 = SW 3
+S1/0 = FR 3
+
+#### R4 ####
+[[ROUTER R4]]
+console = 2004
+model = 3660
+# READ_THE_NETWORK_DIAGRAM_AND
+# FILL_IN_THE_CONFIGURATION_OF_R4_BELOW
+F0/0 = SW 4
+S1/0 = FR 4
+
+
+#### R5 ####
+[[ROUTER R5]]
+console = 2005
+model = 3660
+# READ_THE_NETWORK_DIAGRAM_AND
+# FILL_IN_THE_CONFIGURATION_OF_R5_BELOW
+F0/0 = SW 5
+S1/0 = FR 5
+
+
+#### R6 ####
+[[ROUTER R6]]
+console = 2006
+model = 3660
+# READ_THE_NETWORK_DIAGRAM_AND
+# FILL_IN_THE_CONFIGURATION_OF_R6_BELOW
+S1/0 = FR 6
+S1/1 = FR 16
+
+
+#### R7 ####
+[[ROUTER R7]]
+console = 2007
+model = 3660
+# READ_THE_NETWORK_DIAGRAM_AND
+# FILL_IN_THE_CONFIGURATION_OF_R7_BELOW
+F0/0 = SW 7
+F1/0 = SW 17
+
+
+#### R8 ####
+[[ROUTER R8]]
+console = 2008
+model = 3660
+# READ_THE_NETWORK_DIAGRAM_AND
+# FILL_IN_THE_CONFIGURATION_OF_R8_BELOW
+F0/0 = SW 8
+
