@@ -421,7 +421,9 @@ R8>exit
 
 
 R7#show ip nat trans
-
+Pro Inside global      Inside local       Outside local      Outside global
+udp 177.51.7.7:49997   77.51.7.2:49997    177.51.7.8:53      177.51.7.8:53
+tcp 177.51.7.7:55229   77.51.7.2:55229    177.51.7.8:23      177.51.7.8:23
 
 
 c)
@@ -462,6 +464,13 @@ R4>exit
 
 [Connection to R177 closed by foreign host]
 R8#
+
+R7#show ip nat trans
+Pro Inside global      Inside local       Outside local      Outside global
+tcp 177.51.7.7:3003    77.51.7.3:23       177.51.7.8:34046   177.51.7.8:34046
+tcp 177.51.7.7:3003    77.51.7.3:23       ---                ---
+tcp 177.51.7.7:3004    77.51.7.4:23       ---                ---
+
 
 d)
 R2# telnet R8

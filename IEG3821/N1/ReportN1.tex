@@ -1,0 +1,938 @@
+\documentclass[10pt]{article}
+\usepackage{fontspec,xunicode}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage[a4paper,hmargin=1in,vmargin=1.5in]{geometry}
+\defaultfontfeatures{Mapping=tex-text}
+\XeTeXlinebreaklocale "en"
+\XeTeXlinebreakskip = 0pt plus 1pt
+\setromanfont{Georgia}
+\setmainfont{Georgia}
+\setsansfont{Tahoma}
+%\setmonofont{Lucida Console}
+\setmonofont{Courier New}
+\renewcommand{\thesection}{Task \arabic{section}:}
+\renewcommand{\thesubsection}{\alph{subsection})}
+
+
+\author{GUAN Hao\\05569511\\hguan5@ie.cuhk.edu.hk}
+\title{IEG3821 N1:Introduction of Router Emulator and Fundamentals of IOS\\Laboratory Report}
+\date{\today}
+\begin{document}
+\maketitle
+\section{Construct the Network file of Dynagen}
+According to the network sructure diagram, the modified {\tt lab1.net} is shown following.
+\begin{verbatim*}
+# IEG3821 – Lab1
+# GUAN Hao, hguan5@ie.cuhk.edu.hk
+autostart = false
+ghostios = true
+ghostsize = 128
+mmap = true
+sparsemem = true
+
+[127.0.0.1]
+workingdir = c:\temp\mydir\ieg3821\lab1 
+
+
+[[ETHSW SW]]
+1 = access 177
+2 = access 77
+3 = access 77
+4 = access 77
+5 = access 77
+7 = access 77
+8 = access 177
+17 = access 177
+
+[[FRSW FR]]
+2:216 = 16:612
+3:316 = 16:613
+4:406 = 6:604
+5:516 = 16:615
+
+[[3660]]
+idlepc = 0x60529294
+image = c:\temp\MyDir\IEG3821\images\c3660-jk9o3s-mz.124-12.image
+ram = 128
+
+#### R1 ####
+[[ROUTER R1]]
+console = 2001
+model = 3660
+F0/0 = SW 1
+
+#### R2 ####
+[[ROUTER R2]]
+console = 2002
+model = 3660
+F0/0 = SW 2
+S1/0 = FR 2
+
+#### R3 ####
+[[ROUTER R3]]
+console = 2003
+model = 3660
+F0/0 = SW 3
+S1/0 = FR 3
+
+#### R4 ####
+[[ROUTER R4]]
+console = 2004
+model = 3660
+F0/0 = SW 4
+S1/0 = FR 4
+
+
+#### R5 ####
+[[ROUTER R5]]
+console = 2005
+model = 3660
+F0/0 = SW 5
+S1/0 = FR 5
+
+
+#### R6 ####
+[[ROUTER R6]]
+console = 2006
+model = 3660
+S1/0 = FR 6
+S1/1 = FR 16
+
+
+#### R7 ####
+[[ROUTER R7]]
+console = 2007
+model = 3660
+F0/0 = SW 7
+F1/0 = SW 17
+
+
+#### R8 ####
+[[ROUTER R8]]
+console = 2008
+model = 3660
+F0/0 = SW 8
+
+\end{verbatim*}
+\section{Basic Network Configurations}
+\subsection{hostname and domain name}
+\begin{itemize}
+\item {\bf R1}
+\begin{verbatim*}
+hostname R1
+ip domain name ie.cuhk.edu.hk
+\end{verbatim*}
+\item {\bf R2}
+\begin{verbatim*}
+hostname R2
+ip domain name ie.cuhk.edu.hk
+\end{verbatim*}
+\item {\bf R3}
+\begin{verbatim*}
+hostname R3
+ip domain name ie.cuhk.edu.hk
+\end{verbatim*}
+\item {\bf R4}
+\begin{verbatim*}
+hostname R4
+ip domain name ie.cuhk.edu.hk
+\end{verbatim*}
+\item {\bf R5}
+\begin{verbatim*}
+hostname R5
+ip domain name ie.cuhk.edu.hk
+\end{verbatim*}
+\item {\bf R6}
+\begin{verbatim*}
+hostname R6
+ip domain name ie.cuhk.edu.hk
+\end{verbatim*}
+\item {\bf R7}
+\begin{verbatim*}
+hostname R7
+ip domain name ie.cuhk.edu.hk
+\end{verbatim*}
+\item {\bf R8}
+\begin{verbatim*}
+hostname R8
+ip domain name ie.cuhk.edu.hk
+\end{verbatim*}
+\end{itemize}
+\subsection{Username / Password for remote login}
+\begin{itemize}
+\item {\bf R1..R8}
+\begin{verbatim*}
+username hello password world
+line vty 0 4
+ login local
+!
+\end{verbatim*}
+\end{itemize}
+\subsection{IP Address on LAN interface R1, R7 and R8}
+\begin{itemize}
+\item {\bf R1}
+\begin{verbatim*}
+int f0/0
+ ip addr 177.51.7.1 255.255.255.240
+ no shut
+!
+\end{verbatim*}
+\item {\bf R7}
+\begin{verbatim*}
+int f0/0
+ ip addr 77.51.7.7 255.255.255.0
+ no shut
+!
+int f1/0
+ ip addr 177.51.7.7 255.255.255.240
+ no shut
+!
+\end{verbatim*}
+\item {\bf R8}
+\begin{verbatim*}
+int f0/0
+ ip addr 177.51.7.8 255.255.255.240
+ no shut
+!
+\end{verbatim*}
+\item {\bf Capture}
+\begin{verbatim*}
+R1#sh ip route
+Gateway of last resort is not set
+
+177.51.0.0/28 is subnetted, 1 subnets
+C       177.51.7.0 is directly connected, FastEthernet0/0
+
+R7#sh ip route
+Gateway of last resort is not set
+
+77.0.0.0/24 is subnetted, 1 subnets
+C       77.51.7.0 is directly connected, FastEthernet0/0
+177.51.0.0/28 is subnetted, 1 subnets
+C       177.51.7.0 is directly connected, FastEthernet1/0
+
+R8#sh ip route
+Gateway of last resort is not set
+
+177.51.0.0/28 is subnetted, 1 subnets
+C       177.51.7.0 is directly connected, FastEthernet0/0
+\end{verbatim*}
+\end{itemize}
+\subsection{IP Address on loopback interfaces}
+\begin{itemize}
+\item {\bf R1}
+\begin{verbatim*}
+int lo0
+ ip addr 150.51.1.1 255.255.255.0
+!
+\end{verbatim*}
+\item {\bf R8}
+\begin{verbatim*}
+int lo0
+ ip addr 150.51.8.8 255.255.255.0
+!
+\end{verbatim*}
+\item {\bf Capture}
+\begin{verbatim*}
+R1#sh ip route
+Gateway of last resort is not set
+
+177.51.0.0/28 is subnetted, 1 subnets
+C       177.51.7.0 is directly connected, FastEthernet0/0
+150.51.0.0/24 is subnetted, 1 subnets
+C       150.51.1.0 is directly connected, Loopback0
+
+R8#sh ip route
+Gateway of last resort is not set
+
+177.51.0.0/28 is subnetted, 1 subnets
+C       177.51.7.0 is directly connected, FastEthernet0/0
+150.51.0.0/24 is subnetted, 1 subnets
+C       150.51.8.0 is directly connected, Loopback0
+\end{verbatim*}
+The default link status of the loopback interface is {\em up}.
+\end{itemize}
+\subsection{Default route and Static route}
+\begin{itemize}
+\item {\bf R1}
+\begin{verbatim*}
+ip route 77.51.7.0 255.255.255.0 177.51.7.7
+\end{verbatim*}
+\item {\bf R7}
+\begin{verbatim*}
+ip route 0.0.0.0 0.0.0.0 177.51.7.0
+\end{verbatim*}
+\item {\bf R8}
+\begin{verbatim*}
+ip route 77.51.7.0 255.255.255.0 177.51.7.7
+\end{verbatim*}
+\item {\bf Capture}
+\begin{verbatim*}
+R1#sh ip route
+Gateway of last resort is not set
+
+77.0.0.0/24 is subnetted, 1 subnets
+S       77.51.7.0 [1/0] via 177.51.7.7
+177.51.0.0/28 is subnetted, 1 subnets
+C       177.51.7.0 is directly connected, FastEthernet0/0
+150.51.0.0/24 is subnetted, 1 subnets
+C       150.51.1.0 is directly connected, Loopback0
+
+R7#sh ip route
+Gateway of last resort is 177.51.7.0 to network 0.0.0.0
+
+77.0.0.0/24 is subnetted, 1 subnets
+C       77.51.7.0 is directly connected, FastEthernet0/0
+177.51.0.0/28 is subnetted, 1 subnets
+C       177.51.7.0 is directly connected, FastEthernet1/0
+S*   0.0.0.0/0 [1/0] via 177.51.7.0
+
+
+R8#sh ip route
+Gateway of last resort is not set
+
+77.0.0.0/24 is subnetted, 1 subnets
+S       77.51.7.0 [1/0] via 177.51.7.7
+177.51.0.0/28 is subnetted, 1 subnets
+C       177.51.7.0 is directly connected, FastEthernet0/0
+150.51.0.0/24 is subnetted, 1 subnets
+C       150.51.8.0 is directly connected, Loopback0
+\end{verbatim*}
+\item {\bf Verify and capture}
+\begin{verbatim*}
+R7#ping 150.51.1.1 source f0/0
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 150.51.1.1, timeout is 2 seconds:
+Packet sent with a source address of 77.51.7.7
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 12/71/148 ms
+R7#ping 150.51.8.8 source f0/0
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 150.51.8.8, timeout is 2 seconds:
+Packet sent with a source address of 77.51.7.7
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 32/80/144 ms
+\end{verbatim*}
+\end{itemize}
+\subsection{Configure Timezone, Date and Time, NTP Server address}
+\begin{itemize}
+\item {\bf R8}
+\begin{verbatim*}
+clock timezone HK 8
+ntp master
+\end{verbatim*}
+\item {\bf Capture}
+\begin{verbatim*}
+R8#show clock
+00:07:07.907 HK Sun Feb 10 2008
+\end{verbatim*}
+\item {\bf R1 and R7}
+\begin{verbatim*}
+clock timezone HK 8
+ntp server 177.51.7.8
+\end{verbatim*}
+\item {\bf Verify and capture}
+\begin{verbatim*}
+R7#show clock
+00:07:14.528 HK Sun Feb 10 2008
+R1#show clock
+00:07:29.473 HK Sun Feb 10 2008
+\end{verbatim*}
+\end{itemize}
+\section{Configuration of DNS Server at R8}
+\begin{itemize}
+\item {\bf R8}
+\begin{verbatim*}
+ip dns server
+no ip domain lookup
+ip domain name ie.cuhk.edu.hk
+ip host R1.ie.cuhk.edu.hk 177.51.7.1
+ip host R2.ie.cuhk.edu.hk 77.51.7.2
+ip host R3.ie.cuhk.edu.hk 77.51.7.3
+ip host R4.ie.cuhk.edu.hk 77.51.7.4
+ip host R6-4.ie.cuhk.edu.hk 66.51.46.6
+ip host R6-5.ie.cuhk.edu.hk 66.51.56.6
+ip host R6-23.ie.cuhk.edu.hk 66.52.236.6
+ip host R77.ie.cuhk.edu.hk 77.51.7.7
+ip host R177.ie.cuhk.edu.hk 177.51.7.7
+ip host R8.ie.cuhk.edu.hk 177.51.7.8
+\end{verbatim*}
+\item {\bf R1 and R7}
+\begin{verbatim*}
+ip name-server 177.51.7.8
+\end{verbatim*}
+\item {\bf Verify and capture}
+\begin{verbatim*}
+R1#ping 77.51.7.7 source lo0
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 77.51.7.7, timeout is 2 seconds:
+Packet sent with a source address of 150.51.1.1
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 16/74/136 ms
+R1#ping R77 source lo0
+
+Translating "R77"...domain server (177.51.7.8) [OK]
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 77.51.7.7, timeout is 2 seconds:
+Packet sent with a source address of 150.51.1.1
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 16/100/144 ms
+\end{verbatim*}
+The difference between these two commands is that {\tt ping R77} need DNS server(R8) to resolve the domain name before ping packet is sent. 
+\end{itemize}
+\section{Configuration of DHCP Server and Client}
+\subsection{Manual IP mapping to DHCP client}
+\begin{itemize}
+\item {\bf R7}
+\begin{verbatim*}
+service dhcp
+ip dhcp pool R2
+ host 77.51.7.2 255.255.255.0
+ client-identifier 0100.0022.2222.22
+ domain-name ie.cuhk.edu.hk
+ dns-server 177.51.7.8
+ default-router 77.51.7.7
+ lease infinite
+!
+ip dhcp pool R3
+ host 77.51.7.3 255.255.255.0
+ client-identifier 0100.0033.3333.33
+ domain-name ie.cuhk.edu.hk
+ dns-server 177.51.7.8
+ default-router 77.51.7.7
+ lease infinite
+!
+ip dhcp pool R4
+ host 77.51.7.4 255.255.255.0
+ client-identifier 0100.0044.4444.44
+ domain-name ie.cuhk.edu.hk
+ dns-server 177.51.7.8
+ default-router 77.51.7.7
+ lease infinite
+!
+ip dhcp excluded-address 77.51.7.2 77.51.7.4
+\end{verbatim*}
+\item {\bf R2, R3 and R4}
+\begin{verbatim*}
+int f0/0
+ ip addr dhcp client-id f0/0
+ no shut
+!
+\end{verbatim*}
+\end{itemize}
+\subsection{Dynamic IP mapping to DHCP client}
+\begin{itemize}
+\item {\bf R7}
+\begin{verbatim*}
+ip dhcp pool R5
+ network 77.51.7.0 255.255.255.0
+ default-router 77.51.7.7
+ dns-server 177.51.7.8
+ lease infinite
+!
+\end{verbatim*}
+\item {\bf R5}
+\begin{verbatim*}
+int f0/0
+ ip address dhcp
+ no shut
+!
+\end{verbatim*}
+\end{itemize}
+\subsection{DHCP binding at DHCP Server}
+The table of DHCP binding at the DHCP server(R7).
+\begin{verbatim*}
+R7#show ip dhcp binding
+Bindings from all pools not associated with VRF:
+IP address          Client-ID/              Lease expiration        Type
+                    Hardware address/
+                    User name
+77.51.7.1           0063.6973.636f.2d30.    Infinite                Automatic
+                    3030.302e.3535.3535.
+                    2e35.3535.352d.4661.
+                    302f.30
+77.51.7.2           0100.0022.2222.22       Infinite                Manual
+77.51.7.3           0100.0033.3333.33       Infinite                Manual
+77.51.7.4           0100.0044.4444.44       Infinite                Manual
+\end{verbatim*}
+At R5, the IP addresss obtained by DHCP is {\tt 77.51.7.1}. At the DHCP server(R7), the Client-ID of the IP address released to R5 is {\tt0063.6973.636f.2d30.3030.302e.3535.3535.2e35.3535.352d.4661.302f.30}. Decoding the Client-ID from ASCII code into TEXT, it is {\tt cisco-0000.5555.5555-Fa0/0}.
+\section{Configuration of Frame Relay on Serial Interface}
+\subsection{Configuration of Frame Relay on main serial interface}
+\begin{itemize}
+\item {\bf R4}
+\begin{verbatim*}
+int s1/0
+ ip addr 66.51.46.4 255.255.255.248
+ encapsulation frame-relay
+ frame-relay map ip 66.51.46.6 406
+ no frame-relay inverse-arp
+ no shut
+!
+\end{verbatim*}
+\item {\bf R6}
+\begin{verbatim*}
+int s1/0
+ ip addr 66.51.46.6 255.255.255.248
+ encapsulation frame-relay
+ frame-relay map ip 66.51.46.4 604
+ no frame-relay inverse-arp
+ no shut
+!
+\end{verbatim*}
+\item {\bf Capture}
+\begin{verbatim*}
+R6#show ip route
+Gateway of last resort is not set
+
+66.0.0.0/29 is subnetted, 1 subnets
+C       66.51.46.0 is directly connected, Serial1/0
+R6#show frame-relay map
+Serial1/0 (up): ip 66.51.46.4 dlci 604(0x25C,0x94C0), static,
+                CISCO, status defined, active
+
+R4#show ip route
+Gateway of last resort is 77.51.7.7 to network 0.0.0.0
+
+66.0.0.0/29 is subnetted, 1 subnets
+C       66.51.46.0 is directly connected, Serial1/0
+77.0.0.0/24 is subnetted, 1 subnets
+C       77.51.7.0 is directly connected, FastEthernet0/0
+S*   0.0.0.0/0 [254/0] via 77.51.7.7
+
+R4#show frame-relay map
+Serial1/0 (up): ip 66.51.46.6 dlci 406(0x196,0x6460), static,
+                CISCO, status defined, active
+\end{verbatim*}
+\end{itemize}
+\subsection{Configuration of Frame Relay using point-to-point sub-interface of serial interface}
+\begin{itemize}
+\item {\bf R5}
+\begin{verbatim*}
+int s1/0
+ encapsulation frame-relay
+ no frame-relay inverse-arp
+ no shut
+!
+int s1/0.51 point-to-point
+ ip address 66.51.56.5 255.255.255.252
+ frame-relay interface-dlci 516
+!
+\end{verbatim*}
+\item {\bf R6}
+\begin{verbatim*}
+int s1/1
+ encapsulation frame-relay
+ no frame-relay inverse-arp
+ no shut
+!
+int s1/1.51 point-to-point
+ ip address 66.51.56.6 255.255.255.252
+ frame-relay interface-dlci 615
+!
+\end{verbatim*}
+\item {\bf Capture}
+\begin{verbatim*}
+R6#show ip route
+Gateway of last resort is not set
+
+     66.0.0.0/8 is variably subnetted, 2 subnets, 2 masks
+C       66.51.56.4/30 is directly connected, Serial1/1.51
+C       66.51.46.0/29 is directly connected, Serial1/0
+R6#show frame-relay map
+Serial1/0 (up): ip 66.51.46.4 dlci 604(0x25C,0x94C0), static,
+              CISCO, status defined, active
+Serial1/1.51 (up): point-to-point dlci, dlci 615(0x267,0x9870), broadcast
+          status defined, active
+
+
+R5#show ip route
+Gateway of last resort is 77.51.7.7 to network 0.0.0.0
+
+     66.0.0.0/30 is subnetted, 1 subnets
+C       66.51.56.4 is directly connected, Serial1/0.51
+     77.0.0.0/24 is subnetted, 1 subnets
+C       77.51.7.0 is directly connected, FastEthernet0/0
+S*   0.0.0.0/0 [254/0] via 77.51.7.7
+R5#show frame-relay map
+Serial1/0.51 (up): point-to-point dlci, dlci 516(0x204,0x8040), broadcast
+          status defined, active
+R6#ping 66.51.56.5
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 66.51.56.5, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 32/68/96 ms
+\end{verbatim*}
+\end{itemize}
+\subsection{Configuration of Frame Relay using point-to-multipoint sub-interface of serial interface}
+\begin{itemize}
+\item {\bf R2}
+\begin{verbatim*}
+int s1/0
+ ip addr 66.52.236.2 255.255.255.248
+ encapsulation frame-relay
+ frame-relay map ip 66.52.236.6 216
+ no frame-relay inverse-arp
+ no shut
+!
+\end{verbatim*}
+\item {\bf R3}
+\begin{verbatim*}
+int s1/0
+ ip addr 66.52.236.3 255.255.255.248
+ encapsulation frame-relay
+ frame-relay map ip 66.52.236.6 316
+ no frame-relay inverse-arp
+ no shut
+!
+\end{verbatim*}
+\item {\bf R6}
+\begin{verbatim*}
+int s1/1.52 multipoint
+ ip addr 66.52.236.6 255.255.255.248
+ frame-relay map ip 66.52.236.2 612
+ frame-relay map ip 66.52.236.3 613
+!
+\end{verbatim*}
+\item {\bf Capture}
+\begin{verbatim*}
+R2#show ip route
+Gateway of last resort is 77.51.7.7 to network 0.0.0.0
+
+     66.0.0.0/29 is subnetted, 1 subnets
+C       66.52.236.0 is directly connected, Serial1/0
+     77.0.0.0/24 is subnetted, 1 subnets
+C       77.51.7.0 is directly connected, FastEthernet0/0
+S*   0.0.0.0/0 [254/0] via 77.51.7.7
+R2#show frame map
+Serial1/0 (up): ip 66.52.236.6 dlci 216(0xD8,0x3480), static,
+              CISCO, status defined, active
+
+R3#show ip route
+Gateway of last resort is 77.51.7.7 to network 0.0.0.0
+
+     66.0.0.0/29 is subnetted, 1 subnets
+C       66.52.236.0 is directly connected, Serial1/0
+     77.0.0.0/24 is subnetted, 1 subnets
+C       77.51.7.0 is directly connected, FastEthernet0/0
+S*   0.0.0.0/0 [254/0] via 77.51.7.7
+R3#show frame map
+Serial1/0 (up): ip 66.52.236.6 dlci 316(0x13C,0x4CC0), static,
+              CISCO, status defined, active
+
+R6#show ip route
+Gateway of last resort is not set
+
+     66.0.0.0/8 is variably subnetted, 3 subnets, 2 masks
+C       66.51.56.4/30 is directly connected, Serial1/1.51
+C       66.51.46.0/29 is directly connected, Serial1/0
+C       66.52.236.0/29 is directly connected, Serial1/1.52
+R6#show frame map
+Serial1/0 (up): ip 66.51.46.4 dlci 604(0x25C,0x94C0), static,
+              CISCO, status defined, active
+Serial1/1.52 (up): ip 66.52.236.2 dlci 612(0x264,0x9840), static,
+              CISCO, status defined, active
+Serial1/1.52 (up): ip 66.52.236.3 dlci 613(0x265,0x9850), static,
+              CISCO, status defined, active
+Serial1/1.51 (up): point-to-point dlci, dlci 615(0x267,0x9870), broadcast
+          status defined, active
+R6#ping 66.52.236.2
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 66.52.236.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 28/64/104 ms
+R6#ping 66.52.236.3
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 66.52.236.3, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 8/56/136 ms
+\end{verbatim*}
+\end{itemize}
+\section{Configuration of NAT}
+\subsection{Verification of source IP address from TELNET}
+\begin{verbatim*}
+R2#telnet R8
+Translating "R8"...domain server (177.51.7.8) [OK]
+Trying R8.ie.cuhk.edu.hk (177.51.7.8)... Open
+
+
+User Access Verification
+
+Username: hello
+Password:
+R8>show user
+Line       User       Host(s)              Idle       Location
+0 con 0                idle                 02:24:09
+*226 vty 0     hello      idle                 00:00:00 R2.ie.cuhk.edu.hk
+
+Interface    User               Mode         Idle     Peer Address
+
+R8>exit
+
+[Connection to R8 closed by foreign host]
+\end{verbatim*}
+The source IP address of R2 when telnet to R8 is {\tt 77.51.7.2(R2.ie.cuhk.edu.hk)}.
+\subsection{Configuration of PAT}
+\begin{itemize}
+\item {\bf R7}
+\begin{verbatim*}
+int f0/1
+ ip nat inside
+!
+int f1/0
+ ip nat outside
+!
+access-list 1 permit 77.51.7.0 0.0.0.255
+ip nat inside source list 1 interface FastEthernet1/0 overload
+\end{verbatim*}
+\item {\bf Capture}
+\begin{verbatim*}
+R2#telnet R8
+Translating "R8"...domain server (177.51.7.8) [OK]
+Trying R8.ie.cuhk.edu.hk (177.51.7.8)... Open
+
+
+User Access Verification
+
+Username: hello
+Password:
+R8>show user
+Line       User       Host(s)              Idle       Location
+0 con 0                idle                 00:09:11
+*226 vty 0     hello      idle                 00:00:00 R177.ie.cuhk.edu.hk
+
+Interface    User               Mode         Idle     Peer Address
+
+R8>exit
+
+[Connection to R8 closed by foreign host]
+
+
+R7#show ip nat trans
+Pro Inside global      Inside local       Outside local      Outside global
+udp 177.51.7.7:49997   77.51.7.2:49997    177.51.7.8:53      177.51.7.8:53
+tcp 177.51.7.7:55229   77.51.7.2:55229    177.51.7.8:23      177.51.7.8:23
+\end{verbatim*}
+\end{itemize}
+\subsection{Configuration of Static PAT}
+\begin{itemize}
+\item {\bf R7}
+\begin{verbatim*}
+ip nat inside source static tcp 77.51.7.3 23 177.51.7.7 3003 
+ip nat inside source static tcp 77.51.7.4 23 177.51.7.7 3004
+\end{verbatim*}
+\item {\bf Verify and capture}
+\begin{verbatim*}
+R8#telnet R177 3003
+Trying R177.ie.cuhk.edu.hk (177.51.7.7, 3003)... Open
+
+
+User Access Verification
+
+Username: hello
+Password:
+R3>show user
+Line       User       Host(s)              Idle       Location
+0 con 0                idle                 00:24:06
+*226 vty 0     hello      idle                 00:00:00 R8.ie.cuhk.edu.hk
+
+Interface    User               Mode         Idle     Peer Address
+
+R3>exit
+
+[Connection to R177 closed by foreign host]
+R8#telnet R177 3004
+Trying R177.ie.cuhk.edu.hk (177.51.7.7, 3004)... Open
+
+
+User Access Verification
+
+Username: hello
+Password:
+R4>show user
+Line       User       Host(s)              Idle       Location
+0 con 0                idle                 00:46:03
+*226 vty 0     hello      idle                 00:00:00 R8.ie.cuhk.edu.hk
+
+Interface    User               Mode         Idle     Peer Address
+
+R4>exit
+
+[Connection to R177 closed by foreign host]
+R8#
+
+R7#show ip nat trans
+Pro Inside global      Inside local       Outside local      Outside global
+tcp 177.51.7.7:3003    77.51.7.3:23       177.51.7.8:34046   177.51.7.8:34046
+tcp 177.51.7.7:3003    77.51.7.3:23       ---                ---
+tcp 177.51.7.7:3004    77.51.7.4:23       ---                ---
+\end{verbatim*}
+\end{itemize}
+\subsection{Configuration of Static NAT}
+\begin{itemize}
+\item {\bf R7}
+\begin{verbatim*}
+ip nat inside source static 77.51.7.2 177.51.7.2
+\end{verbatim*}
+\item {\bf Verify and capture}
+\begin{verbatim*}
+R2# telnet R8
+Translating "R8"...domain server (177.51.7.8) [OK]
+Trying R8.ie.cuhk.edu.hk (177.51.7.8)... Open
+
+
+User Access Verification
+
+Username: hello
+Password:
+R8>show user
+Line       User       Host(s)              Idle       Location
+0 con 0                idle                 00:00:37
+*226 vty 0     hello      idle                 00:00:00 177.51.7.2
+
+Interface    User               Mode         Idle     Peer Address
+
+R8>exit
+
+[Connection to R8 closed by foreign host]
+
+R8#telnet 177.51.7.2
+Trying 177.51.7.2 ... Open
+
+
+User Access Verification
+
+Username: hello
+Password:
+R2>show user
+Line       User       Host(s)              Idle       Location
+0 con 0                R8                   00:00:18
+*226 vty 0     hello      idle                 00:00:00 R8.ie.cuhk.edu.hk
+
+Interface    User               Mode         Idle     Peer Address
+
+R2>exit
+
+[Connection to 177.51.7.2 closed by foreign host]
+
+
+
+R7(config)#do show ip nat trans
+Pro Inside global      Inside local       Outside local      Outside global
+tcp 177.51.7.2:23      77.51.7.2:23       177.51.7.8:14858   177.51.7.8:14858
+tcp 177.51.7.2:23      77.51.7.2:23       177.51.7.8:19347   177.51.7.8:19347
+tcp 177.51.7.2:45372   77.51.7.2:45372    177.51.7.8:23      177.51.7.8:23
+udp 177.51.7.2:54727   77.51.7.2:54727    177.51.7.8:53      177.51.7.8:53
+--- 177.51.7.2         77.51.7.2          ---                ---
+tcp 177.51.7.7:3003    77.51.7.3:23       ---                ---
+tcp 177.51.7.7:3004    77.51.7.4:23       ---                ---
+\end{verbatim*}
+\end{itemize}
+\section{Configuration of Network Security}
+\begin{itemize}
+\item {\bf R7}
+\begin{verbatim*}
+access-list 2 permit 177.51.7.8
+access-list 2 permit 77.51.7.0 0.0.0.255
+line vty 0 4
+ access-class 2 in
+!
+\end{verbatim*}
+\item {\bf Verify and capture}
+\begin{verbatim*}
+R2#telnet R77
+Translating "R77"...domain server (177.51.7.8) [OK]
+Trying R77.ie.cuhk.edu.hk (77.51.7.7)... Open
+
+
+User Access Verification
+
+Username: hello
+Password:
+R7>exit
+
+[Connection to R77 closed by foreign host]
+
+R8#telnet R177
+Trying R177.ie.cuhk.edu.hk (177.51.7.7)... Open
+
+
+User Access Verification
+
+Username: hello
+Password:
+R7>exit
+
+[Connection to R177 closed by foreign host]
+
+R1# telnet R177
+Translating "R177"...domain server (177.51.7.8) [OK]
+Trying R177.ie.cuhk.edu.hk (177.51.7.7)...
+% Connection refused by remote host
+\end{verbatim*}
+\end{itemize}
+\section{Configuration of System logging}
+\begin{itemize}
+\item {\bf R7}
+\begin{verbatim*}
+logging facility sys9
+logging 77.51.7.250
+\end{verbatim*}
+\item {\bf Verify and capture}
+\begin{verbatim*}
+R7#show logging
+Syslog logging: enabled (11 messages dropped, 0 messages rate-limited,
+                0 flushes, 0 overruns, xml disabled, filtering disabled)
+    Console logging: level debugging, 21 messages logged, xml disabled,
+                     filtering disabled
+    Monitor logging: level debugging, 0 messages logged, xml disabled,
+                     filtering disabled
+    Buffer logging: disabled, xml disabled,
+                    filtering disabled
+    Logging Exception size (4096 bytes)
+    Count and timestamp logging messages: disabled
+
+No active filter modules.
+
+    Trap logging: level informational, 25 message lines logged
+        Logging to 77.51.7.250 (udp port 514, audit disabled, link up), 25 message lines logged, xml disabled,
+               filtering disabled
+\end{verbatim*}
+\end{itemize}
+\section{Configuration of SNMP support}
+\begin{itemize}
+\item {\bf R7}
+\begin{verbatim*}
+access-list 3 permit 77.51.7.3
+access-list 3 permit 77.51.7.2
+snmp-server community HELLOWORLD RO 3
+\end{verbatim*}
+\item {\bf Verify and capture}
+\begin{verbatim*}
+R7#show snmp community
+
+Community name: ILMI
+Community Index: cisco0
+Community SecurityName: ILMI
+storage-type: read-only  active
+
+
+Community name: HELLOWORLD
+Community Index: cisco1
+Community SecurityName: HELLOWORLD
+storage-type: nonvolatile        active access-list: 3
+\end{verbatim*}
+\end{itemize}
+\newpage
+\appendix
+\section{Declaration}
+I declare that the assignment here submitted is original except for source material explicitly acknowledged, and that the same or related material has not been previously submitted for another course. I also acknowledge that I am aware of University policy and regulations on honesty in academic work, and of the disciplinary guidelines and procedures applicable to breaches of such policy and regulations, as contained in the website \url{http://www.cuhk.edu.hk/policy/academichonesty/}
+\vspace*{3cm}
+\end{document}
