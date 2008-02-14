@@ -58,7 +58,7 @@ namespace rBank
             {
                 if (amount <= balance)
                 {
-                    balance += amount;
+                    balance -= amount;
                     return 0;
                 }
                 else
