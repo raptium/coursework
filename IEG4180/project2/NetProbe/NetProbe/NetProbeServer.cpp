@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "es_TIMER.h"
 #include <string.h>
 #include <winsock2.h> 
 #include <iostream>
@@ -287,14 +288,26 @@ int NetProbeServer::detectProtocol(void){
 }
 
 DWORD WINAPI NetProbeServer::threadTCPSend(LPVOID lpInstance){
+	// create a new thread and send packet to the client
+	// the sending prarameters will be sent by the client 
+	// at the beginning of comunication
+
 	int addrlen = sizeof(struct sockaddr_in);
-	struct sockaddr_in *TCP_PeerAddr = new struct sockaddr_in;
+	struct sockaddr_in *PeerAddr = new struct sockaddr_in;
 	int retVal;
 	NetProbeServer *Server = (NetProbeServer *)lpInstance;
+	// statistics variables
+	int packetsSent; // number of packets sent
+	//double bytesSent; // total bytes received
+	ES_FlashTimer timer;
+	/*****************/
+	double T;
+	u_long sleepT;
 
-	u_long iMode = 0;
 
-	SOCKET newsfd = accept(Server->tcpfd, (struct sockaddr *)TCP_PeerAddr, &addrlen);
+
+
+	SOCKET newsfd = accept(Server->tcpfd, (struct sockaddr *)PeerAddr, &addrlen);
 	if(newsfd == INVALID_SOCKET){
 		errorMessageBox();
 		AfxEndThread(-1);
@@ -302,16 +315,14 @@ DWORD WINAPI NetProbeServer::threadTCPSend(LPVOID lpInstance){
 
 	cout << "New TCP connection." << endl;
 
+	u_long iMode = 0;
 	retVal = ioctlsocket(newsfd, FIONBIO, &iMode);
 	if(retVal == SOCKET_ERROR){
 		errorMessageBox();
 		return -1;
 	}
 
-
-	char *buf = new char[1024];
-	int len = 1024;
-
+	char *buf = new char[12];
 	retVal = recv(newsfd, buf, 12, 0);
 	if(retVal == SOCKET_ERROR){
 		closesocket(newsfd);
@@ -325,9 +336,22 @@ DWORD WINAPI NetProbeServer::threadTCPSend(LPVOID lpInstance){
 	memcpy(&SendingRate, buf + 4, 4);
 	memcpy(&NumPackets, buf + 8, 4);
 
-	/*
+	cout << "Packet Size: " << PacketSize << endl;
+	cout << "Sending Rate: " << SendingRate << endl;
+	cout << "Number of Packets to Send: " <<  NumPackets << endl;
+	
+	T = (double)PacketSize / SendingRate;
+
+	timer.Start(); // Start the timer
+	packetsSent = 0;
+
+	delete buf;
+	buf = new char[PacketSize];
 	while(1){
-		retVal = recv(newsfd, buf, len, 0);
+		if(NumPackets && packetsSent >= NumPackets)
+			break;
+	
+		retVal = send(newsfd, buf, PacketSize, 0);
 		if(retVal == SOCKET_ERROR){
 			closesocket(newsfd);
 			errorMessageBox();
@@ -335,15 +359,14 @@ DWORD WINAPI NetProbeServer::threadTCPSend(LPVOID lpInstance){
 		}
 		if(retVal == 0)
 			break;
-		cout << retVal << " Bytes received." << endl;
-		for(int i=0;i<retVal;i++)
-			cout << (int *)buf[i] << " ";
-	}
-	*/
 
-	cout << "Packet Size: " << PacketSize << endl;
-	cout << "Sending Rate: " << SendingRate << endl;
-	cout << "Number of Packets to Send: " <<  NumPackets << endl;
+		packetsSent++;
+		if(SendingRate){
+			sleepT = packetsSent * T * 1000 - timer.Elapsed();
+			if(sleepT > 0)
+				Sleep(sleepT);
+		}
+	}
 
 	closesocket(newsfd);
 	
