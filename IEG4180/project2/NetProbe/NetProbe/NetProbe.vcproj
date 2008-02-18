@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="NetProbe"
+	Name="NetProbeServer"
 	ProjectGUID="{623C1FA8-7B43-4536-8CD0-6A65A79F476D}"
 	RootNamespace="NetProbe"
 	Keyword="Win32Proj"

@@ -119,10 +119,10 @@ void errorMessageBox(){
 		(LPSTR)&pBuf,
 		0 ,
 		NULL);
-	/*
-	if(e)
-		AfxMessageBox(pBuf, MB_ICONINFORMATION);
-		*/
+	
+	//if(e)
+	//	AfxMessageBox(pBuf, MB_ICONINFORMATION);
+		
 }
 
 int Init(void){
@@ -182,8 +182,8 @@ struct sockaddr_in * NetProbeServer::createSockAddr(char *host, int port){
 NetProbeServer::NetProbeServer(const char *tcp_h, int tcp_p, const char *udp_h, int udp_p){
 
 	/*
-	tcp_host = new char[strlen(tcp_h)+1];
 	udp_host = new char[strlen(udp_h)+1];
+	tcp_host = new char[strlen(tcp_h)+1];
 	strcpy_s(tcp_host, sizeof(tcp_host), tcp_h);
 	strcpy_s(udp_host, sizeof(udp_host), udp_h);
 	tcp_port = tcp_p;
@@ -242,7 +242,7 @@ int NetProbeServer::UDPReady(void){
 		return -1;
 	}
 
-	retVal = bind(Sockfd, (struct sockaddr *)TCP_Addr, sizeof(struct sockaddr_in));
+	retVal = bind(Sockfd, (struct sockaddr *)UDP_Addr, sizeof(struct sockaddr_in));
 	if(retVal == SOCKET_ERROR){
 		closesocket(Sockfd);
 		errorMessageBox();
@@ -255,6 +255,21 @@ int NetProbeServer::UDPReady(void){
 		return -1;
 	}
 
+	/*
+
+	DWORD dwBytesReturned = 0;
+	BOOL bNewBehavior = false;
+	DWORD status;
+
+	// disable  new behavior using
+	// IOCTL: SIO_UDP_CONNRESET
+	retVal = WSAIoctl(Sockfd, SIO_UDP_CONNRESET, &bNewBehavior, sizeof(bNewBehavior), NULL, 0, &dwBytesReturned, NULL, NULL);
+	if (retVal == SOCKET_ERROR){
+		errorMessageBox();
+		return -1;
+	}
+
+	*/
 	udpfd = Sockfd;
 
 	return 0;
@@ -303,7 +318,6 @@ DWORD WINAPI NetProbeServer::threadTCPSend(LPVOID lpInstance){
 	/*****************/
 	double T;
 	u_long sleepT;
-
 
 
 
@@ -375,7 +389,88 @@ DWORD WINAPI NetProbeServer::threadTCPSend(LPVOID lpInstance){
 }
 
 DWORD WINAPI NetProbeServer::threadUDPSend(LPVOID lpInstance){
+	// create a new thread and send packet to the client
+	// the sending prarameters will be sent by the client 
+	// at the beginning of comunication
+
+
+
+	int addrlen = sizeof(struct sockaddr_in);
+	struct sockaddr_in *Addr = new struct sockaddr_in;
+	struct sockaddr_in *PeerAddr = new struct sockaddr_in;
+	int retVal;
+	NetProbeServer *Server = (NetProbeServer *)lpInstance;
+	// statistics variables
+	int packetsSent; // number of packets sent
+	//double bytesSent; // total bytes received
+	ES_FlashTimer timer;
+	/*****************/
+	double T;
+	u_long sleepT;
+
+
+	char *buf = new char[12];
+	retVal = recvfrom(Server->udpfd, buf, 12, 0, (sockaddr *)PeerAddr, &addrlen);
+	if(retVal == SOCKET_ERROR){
+		errorMessageBox();
+		AfxEndThread(0);
+	}
+
 	cout << "New UDP connection." << endl;
+
+
+	int PacketSize;
+	int SendingRate;
+	int NumPackets;
+	memcpy(&PacketSize, buf, 4);
+	memcpy(&SendingRate, buf + 4, 4);
+	memcpy(&NumPackets, buf + 8, 4);
+
+	cout << "Packet Size: " << PacketSize << endl;
+	cout << "Sending Rate: " << SendingRate << endl;
+	cout << "Number of Packets to Send: " <<  NumPackets << endl;
+
+
+	FD_SET Peer;
+
+	
+	T = (double)PacketSize / SendingRate;
+
+	timer.Start(); // Start the timer
+	packetsSent = 0;
+
+	delete buf;
+	buf = new char[PacketSize];
+	while(1){
+		if(NumPackets && packetsSent >= NumPackets)
+			break;
+
+		FD_ZERO(&Peer);
+
+		FD_SET(Server->udpfd, &Peer);
+		retVal = select(Server->udpfd, NULL, &Peer, NULL, NULL);
+
+		if(retVal && FD_ISSET(Server->udpfd, &Peer)){
+			memcpy(buf, &packetsSent, sizeof(packetsSent));
+			retVal = sendto(Server->udpfd, buf, PacketSize, 0, (const sockaddr *)PeerAddr, addrlen);
+			if(retVal == SOCKET_ERROR){
+				errorMessageBox();
+				AfxEndThread(0);
+			}
+			if(retVal == 0)
+				break;
+
+			packetsSent++;
+		}
+
+		if(SendingRate){
+			sleepT = packetsSent * T * 1000 - timer.Elapsed();
+			if(sleepT > 0)
+				Sleep(sleepT);
+		}
+
+	}
+	
 	AfxEndThread(0);
 	return 0;
 }
@@ -389,13 +484,15 @@ int main(int argc, char const *argv[]){
 	if(Init() == -1)
 		return -1;
 
+	/*
 	if(argc!=5){
 		cerr << "Invalid parameters." << endl;
 		return -1;
 	}
 
 	NetProbeServer *Server = new NetProbeServer(argv[1], atoi(argv[2]), argv[3], atoi(argv[4]));
-		
+	*/
+	NetProbeServer *Server = new NetProbeServer("localhost", 12345, "localhost", 12345);
 
 
 	//bind
