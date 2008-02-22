@@ -36,6 +36,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ball.cs" />
     <Compile Include="Controller.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="GameView.cs">
@@ -49,7 +50,6 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Model.cs" />
-    <Compile Include="Settings.cs" />
     <Compile Include="SuperPang.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="MainForm.resx">
@@ -66,28 +66,21 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
     <Compile Include="View.cs">
       <SubType>Component</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="images\backgroud.jpg" />
+    <None Include="Resources\backgroud.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="images\Hero.bmp" />
+    <None Include="Resources\doraemon.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
-    <None Include="Resources\Hero.bmp" />
+    <None Include="Resources\chara_haro_a.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\tiny.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

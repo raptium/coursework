@@ -16,14 +16,18 @@ namespace SuperPang
 		protected Random ran_gen = new Random();
 
 
-		public GameObject(Rectangle initLocationInfo,double initOrientation,double initVelocity_x,double initVelocity_y,Model model) : base()
+		public GameObject(Rectangle initLocationInfo,
+            double initOrientation,
+            double initVelocity_x,
+            double initVelocity_y,
+            Model model) :
+            base()
 		{
 			locationInfo = initLocationInfo;
 			orientation = initOrientation;
 			velocity_x = initVelocity_x;			
 			velocity_y = initVelocity_y;			
 			this.model = model;
-			
 		}
 
 		public Rectangle getLocationInfo()
@@ -41,7 +45,7 @@ namespace SuperPang
 			return this.locationInfo.IntersectsWith(other);		
 		}
 
-		public abstract void move(int max_height,int max_width);
+		public abstract void move(int max_width, int max_height);
 
     }
 }

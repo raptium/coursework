@@ -80,9 +80,11 @@ namespace SuperPang
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.ClientSize = new System.Drawing.Size(1018, 637);
-            this.Cursor = System.Windows.Forms.Cursors.PanNW;
+            this.ClientSize = new System.Drawing.Size(1018, 595);
+            this.Cursor = System.Windows.Forms.Cursors.Default;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.KeyPreview = true;
+            this.MaximizeBox = false;
             this.Menu = this.MainMenu;
             this.Name = "MainForm";
             this.Text = "SuperPang";

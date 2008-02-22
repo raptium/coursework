@@ -14,8 +14,6 @@ namespace SuperPang
         //declare view and model in Form application.
         private Model currentModel = null;
         private Panel currentView = null;
-        //add the view to Form
-        //this.Controls.Add(currentView);
 
         public MainForm()
         {
@@ -53,5 +51,6 @@ namespace SuperPang
             this.Controls.Add(currentView);
             this.currentView = currentView;
         }
+
     }
 }
