@@ -7,112 +7,12 @@
 
 using namespace std;
 
-
-
-
-
-/*
-
-UINT __cdecl TCPStart(LPVOID pParam){
-	//NetProbe *theProbe = (NetProbe *)pParam;
-	struct addrinfo aiHints;
-	struct addrinfo *aiList = NULL;
-	int retVal;
-	int addrlen = sizeof(struct sockaddr_in);
-
-
-	struct sockaddr_in *TCP_Addr;
-	struct sockaddr_in *TCP_PeerAddr;
-	TCP_Addr = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
-	TCP_PeerAddr = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in));
-	memset(TCP_Addr, 0, sizeof(struct sockaddr_in));
-	memset(TCP_PeerAddr, 0, sizeof(struct sockaddr_in));
-
-
-	memset(&aiHints,0,sizeof(aiHints));
-	aiHints.ai_family = AF_INET;
-	aiHints.ai_socktype = SOCK_STREAM;
-	aiHints.ai_protocol = IPPROTO_TCP;
-	if((retVal = getaddrinfo(theProbe.getLocal(), NULL, &aiHints, &aiList))!=0){
-		errorMessageBox();
-		AfxEndThread(0);
-	}
-
-
-	TCP_Addr->sin_family = AF_INET;
-	TCP_Addr->sin_port = htons(theProbe.getLocalPort());
-	memcpy(&(TCP_Addr->sin_addr),(aiList->ai_addr->sa_data+2),4);
-
-	theProbe.timer.Start();
-	theProbe.setStatus(1);
-
-	SOCKET Sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if(Sockfd == INVALID_SOCKET){
-		theProbe.stop();
-		errorMessageBox();
-		AfxEndThread(0);
-	}
-	retVal = bind(Sockfd, (struct sockaddr *)TCP_Addr, sizeof(struct sockaddr_in));
-	if(retVal == SOCKET_ERROR){
-		closesocket(Sockfd);
-		theProbe.stop();
-		errorMessageBox();
-		AfxEndThread(0);
-	}
-	retVal = listen(Sockfd, 5);
-	if(retVal == SOCKET_ERROR){
-		theProbe.stop();
-		errorMessageBox();
-		AfxEndThread(0);
-	}
-	
-	SOCKET newsfd = accept(Sockfd, (struct sockaddr *)TCP_PeerAddr, &addrlen);
-	if(newsfd == INVALID_SOCKET){
-		closesocket(Sockfd);
-		theProbe.stop();
-		errorMessageBox();
-		AfxEndThread(0);
-	}
-	closesocket(Sockfd);
-
-
-	int len = theProbe.getPacketSize();
-	char *buf = (char *)malloc(sizeof(char)*len);
-
-	while(true){
-		int no;
-
-		if(theProbe.getStatus() == 0){
-			retVal = closesocket(newsfd);
-			theProbe.stop();
-			AfxEndThread(0);
-		}
-
-		retVal = recv(newsfd, buf, len, 0);
-		if(retVal == SOCKET_ERROR){
-			closesocket(newsfd);
-			theProbe.stop();
-			errorMessageBox();
-			AfxEndThread(0);
-		}
-		if(retVal == 0){
-			theProbe.stop();
-			AfxEndThread(0);
-		}
-		theProbe.packetTransfer(-1);
-		theProbe.byteTransfer(retVal);
-	}
-
-	AfxEndThread(0);
-	return 0;
-	
-}
-*/
-
 void errorMessageBox(){
 	int e = WSAGetLastError();
 	LPSTR pBuf = NULL;
-	FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER |FORMAT_MESSAGE_IGNORE_INSERTS |FORMAT_MESSAGE_FROM_SYSTEM,
+	FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_IGNORE_INSERTS |
+		FORMAT_MESSAGE_FROM_SYSTEM,
 		NULL,
 		e,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_SYS_DEFAULT),
@@ -120,8 +20,8 @@ void errorMessageBox(){
 		0 ,
 		NULL);
 	
-	//if(e)
-	//	AfxMessageBox(pBuf, MB_ICONINFORMATION);
+	if(e)
+		AfxMessageBox(pBuf, MB_ICONINFORMATION);
 		
 }
 
@@ -210,17 +110,24 @@ int NetProbeServer::TCPReady(void){
 		errorMessageBox();
 		return -1;
 	}
+	cout << "-> TCP : Created Socket" << endl;
+
 	retVal = bind(Sockfd, (struct sockaddr *)TCP_Addr, sizeof(struct sockaddr_in));
 	if(retVal == SOCKET_ERROR){
 		closesocket(Sockfd);
 		errorMessageBox();
 		return -1;
 	}
+	cout  << "-> TCP : Binded Socket" << endl;
+
 	retVal = listen(Sockfd, 5);
 	if(retVal == SOCKET_ERROR){
 		errorMessageBox();
 		return -1;
 	}
+	cout << "-> TCP : Waiting Connection" << endl;
+
+
 	retVal = ioctlsocket(Sockfd, FIONBIO, &iMode);
 	if(retVal == SOCKET_ERROR){
 		errorMessageBox();
@@ -241,6 +148,13 @@ int NetProbeServer::UDPReady(void){
 		errorMessageBox();
 		return -1;
 	}
+	cout <<	"-> UDP : Created Socket" << endl;
+
+	BOOL bOptVal = TRUE;
+	int bOptLen = sizeof(BOOL);
+	if (setsockopt(Sockfd, SOL_SOCKET, SO_REUSEADDR, (char*)&bOptVal, bOptLen) == SOCKET_ERROR) {
+		errorMessageBox();
+	}
 
 	retVal = bind(Sockfd, (struct sockaddr *)UDP_Addr, sizeof(struct sockaddr_in));
 	if(retVal == SOCKET_ERROR){
@@ -248,15 +162,16 @@ int NetProbeServer::UDPReady(void){
 		errorMessageBox();
 		return -1;
 	}
+	cout << "-> UDP : Binded Socket" << endl;
 
+	/*
 	retVal = ioctlsocket(Sockfd, FIONBIO, &iMode);
 	if(retVal == SOCKET_ERROR){
 		errorMessageBox();
 		return -1;
 	}
-
-	/*
-
+	*/
+	
 	DWORD dwBytesReturned = 0;
 	BOOL bNewBehavior = false;
 	DWORD status;
@@ -268,8 +183,8 @@ int NetProbeServer::UDPReady(void){
 		errorMessageBox();
 		return -1;
 	}
-
-	*/
+	
+	cout << "-> UDP : Waiting Incoming Data" << endl;
 	udpfd = Sockfd;
 
 	return 0;
@@ -281,6 +196,7 @@ int NetProbeServer::detectProtocol(void){
 	int retVal;
 
 	FD_ZERO(&Peer);
+
 
 	FD_SET(tcpfd, &Peer);
 	FD_SET(udpfd, &Peer);
@@ -317,7 +233,7 @@ DWORD WINAPI NetProbeServer::threadTCPSend(LPVOID lpInstance){
 	ES_FlashTimer timer;
 	/*****************/
 	double T;
-	u_long sleepT;
+	double sleepT;
 
 
 
@@ -326,8 +242,7 @@ DWORD WINAPI NetProbeServer::threadTCPSend(LPVOID lpInstance){
 		errorMessageBox();
 		AfxEndThread(-1);
 	}
-
-	cout << "New TCP connection." << endl;
+	cout << "-> TCP : Accepted Sender" << endl;
 
 	u_long iMode = 0;
 	retVal = ioctlsocket(newsfd, FIONBIO, &iMode);
@@ -350,13 +265,15 @@ DWORD WINAPI NetProbeServer::threadTCPSend(LPVOID lpInstance){
 	memcpy(&SendingRate, buf + 4, 4);
 	memcpy(&NumPackets, buf + 8, 4);
 
-	cout << "Packet Size: " << PacketSize << endl;
-	cout << "Sending Rate: " << SendingRate << endl;
-	cout << "Number of Packets to Send: " <<  NumPackets << endl;
+	cout << "=> Packet Size: " << PacketSize << endl;
+	cout << "=> Sending Rate: " << SendingRate << endl;
+	cout << "=> Number of Packets to Send: " <<  NumPackets << endl;
 	
 	T = (double)PacketSize / SendingRate;
 
 	timer.Start(); // Start the timer
+	cout << "-> TCP : Sending Data" << endl;
+
 	packetsSent = 0;
 
 	delete buf;
@@ -393,30 +310,28 @@ DWORD WINAPI NetProbeServer::threadUDPSend(LPVOID lpInstance){
 	// the sending prarameters will be sent by the client 
 	// at the beginning of comunication
 
-
-
 	int addrlen = sizeof(struct sockaddr_in);
 	struct sockaddr_in *Addr = new struct sockaddr_in;
 	struct sockaddr_in *PeerAddr = new struct sockaddr_in;
 	int retVal;
 	NetProbeServer *Server = (NetProbeServer *)lpInstance;
+
 	// statistics variables
 	int packetsSent; // number of packets sent
-	//double bytesSent; // total bytes received
 	ES_FlashTimer timer;
 	/*****************/
 	double T;
-	u_long sleepT;
-
+	double sleepT;
 
 	char *buf = new char[12];
 	retVal = recvfrom(Server->udpfd, buf, 12, 0, (sockaddr *)PeerAddr, &addrlen);
 	if(retVal == SOCKET_ERROR){
+		if(WSAGetLastError() == WSAECONNRESET)
+			AfxEndThread(0);
 		errorMessageBox();
 		AfxEndThread(0);
 	}
-
-	cout << "New UDP connection." << endl;
+	cout << "-> UDP : Get new Client" << endl;
 
 
 	int PacketSize;
@@ -426,17 +341,20 @@ DWORD WINAPI NetProbeServer::threadUDPSend(LPVOID lpInstance){
 	memcpy(&SendingRate, buf + 4, 4);
 	memcpy(&NumPackets, buf + 8, 4);
 
-	cout << "Packet Size: " << PacketSize << endl;
-	cout << "Sending Rate: " << SendingRate << endl;
-	cout << "Number of Packets to Send: " <<  NumPackets << endl;
+	cout << "=> Packet Size: " << PacketSize << endl;
+	cout << "=> Sending Rate: " << SendingRate << endl;
+	cout << "=> Number of Packets to Send: " <<  NumPackets << endl;
 
+	if(!SendingRate)
+		SendingRate = 1024 * 1024 * 15;
 
 	FD_SET Peer;
-
 	
 	T = (double)PacketSize / SendingRate;
 
 	timer.Start(); // Start the timer
+	cout << "-> UDP : Sending Packets" << endl;
+
 	packetsSent = 0;
 
 	delete buf;
@@ -446,9 +364,8 @@ DWORD WINAPI NetProbeServer::threadUDPSend(LPVOID lpInstance){
 			break;
 
 		FD_ZERO(&Peer);
-
 		FD_SET(Server->udpfd, &Peer);
-		retVal = select(Server->udpfd, NULL, &Peer, NULL, NULL);
+		retVal = select(0, NULL, &Peer, NULL, NULL);
 
 		if(retVal && FD_ISSET(Server->udpfd, &Peer)){
 			memcpy(buf, &packetsSent, sizeof(packetsSent));
@@ -479,20 +396,18 @@ DWORD WINAPI NetProbeServer::threadUDPSend(LPVOID lpInstance){
 
 
 int main(int argc, char const *argv[]){
+	NetProbeServer *Server;
 
 	//initialization
 	if(Init() == -1)
 		return -1;
 
-	/*
+	
 	if(argc!=5){
-		cerr << "Invalid parameters." << endl;
-		return -1;
-	}
-
-	NetProbeServer *Server = new NetProbeServer(argv[1], atoi(argv[2]), argv[3], atoi(argv[4]));
-	*/
-	NetProbeServer *Server = new NetProbeServer("localhost", 12345, "localhost", 12345);
+		Server = new NetProbeServer("localhost", 12345, "localhost", 12345);
+	}else
+		Server = new NetProbeServer(argv[1], atoi(argv[2]), argv[3], atoi(argv[4]));
+	
 
 
 	//bind
