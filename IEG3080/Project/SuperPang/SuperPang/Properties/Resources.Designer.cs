@@ -67,9 +67,23 @@ namespace SuperPang.Properties {
             }
         }
         
-        internal static System.Drawing.Bitmap Hero {
+        internal static System.Drawing.Bitmap chara_haro_a {
             get {
-                object obj = ResourceManager.GetObject("Hero", resourceCulture);
+                object obj = ResourceManager.GetObject("chara_haro_a", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap doraemon {
+            get {
+                object obj = ResourceManager.GetObject("doraemon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap tiny {
+            get {
+                object obj = ResourceManager.GetObject("tiny", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
