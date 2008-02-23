@@ -29,9 +29,9 @@ namespace SuperPang
             locationInfo.Y += (int)velocity_y;
             velocity_y += 0.04 * 40;
 
-            if (this.locationInfo.Y <= 10)
+            if (this.locationInfo.Y <= 0)
             {
-                this.locationInfo.Y = 10;
+                this.locationInfo.Y = 0;
                 velocity_y = -0.91 * velocity_y;
             }
             if (this.locationInfo.Y >= max_height)

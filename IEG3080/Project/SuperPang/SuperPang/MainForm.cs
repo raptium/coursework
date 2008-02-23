@@ -19,6 +19,7 @@ namespace SuperPang
         {
             InitializeComponent();
             this.Icon = Properties.Resources.MacPro;
+            this.BackgroundImage = Properties.Resources.backgroud;
         }
 
         private void menuExit_Click(object sender, EventArgs e)

@@ -50,7 +50,8 @@ namespace SuperPang
             GraphicManager = BufferedGraphicsManager.Current;
             GraphicManager.MaximumBuffer =  new Size(this.Width + 1, this.Height + 1);
             ManagedBackBuffer = GraphicManager.Allocate(this.CreateGraphics(), ClientRectangle);
-            //g.SmoothingMode = SmoothingMode.AntiAlias;
+            ManagedBackBuffer.Graphics.SmoothingMode = SmoothingMode.HighQuality;
+            ManagedBackBuffer.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
             //g.CompositingMode = CompositingMode.SourceCopy;
 
         }
