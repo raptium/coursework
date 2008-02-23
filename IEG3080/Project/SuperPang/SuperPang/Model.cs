@@ -17,10 +17,6 @@ namespace SuperPang
         private Controller currentController;
         private Hero myHero;
         private Ball myBall;
-        //void move(); //put the event into the method...
-        //void turnLeft(); //put the event into the method¡K
-        //View createView();
-        //void createController();
 
         // timer object to update myself
         private Timer timer;
@@ -53,7 +49,6 @@ namespace SuperPang
             currentView = new GameView(this, currentController);
 
             currentView.SetBounds(0, 0, 800, 500);
-            //currentView.BackgroundImage = Properties.Resources.backgroud;
             form.switchView(currentView);
         }
 

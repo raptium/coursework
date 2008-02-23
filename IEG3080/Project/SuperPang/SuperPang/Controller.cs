@@ -15,7 +15,8 @@ namespace SuperPang
         public void keyUpHandler(object sender, System.Windows.Forms.KeyEventArgs e)
         {
             String inputKey = e.KeyCode.ToString();
-            model.stopHero();
+            if(inputKey.Equals("Left") || inputKey.Equals("Right"))
+                model.stopHero();
             
         }
 
@@ -30,6 +31,8 @@ namespace SuperPang
                 model.moveHero(1);
             else if (inputKey.Equals("Down"))
                 model.stopHero();
+            else if (inputKey.Equals("Space"))
+                model.getHero().jump();
         }
     }
 

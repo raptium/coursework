@@ -60,7 +60,7 @@ namespace SuperPang
         public override void update(Model model)
         {
             Invalidate();
-            model.getHero().move(800 - 50, 500 - 100);
+            model.getHero().move(800 - 50, 500 - 160);
             model.getBall().move(800 - 96, 500 - 110);
             //makeHero(model.getHero());
             //makeBall(model.getBall());
