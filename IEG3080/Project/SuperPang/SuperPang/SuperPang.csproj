@@ -9,6 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SuperPang</RootNamespace>
     <AssemblyName>SuperPang</AssemblyName>
+    <ApplicationIcon>Resources\MacPro.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -36,6 +37,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AboutBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AboutBox.Designer.cs">
+      <DependentUpon>AboutBox.cs</DependentUpon>
+    </Compile>
     <Compile Include="Ball.cs" />
     <Compile Include="Controller.cs" />
     <Compile Include="GameObject.cs" />
@@ -52,6 +59,10 @@
     <Compile Include="Model.cs" />
     <Compile Include="SuperPang.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="AboutBox.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>AboutBox.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>MainForm.cs</DependentUpon>
@@ -83,7 +94,28 @@
     <None Include="Resources\tiny.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Hero.bmp" />
+    <None Include="Resources\nano.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Hero.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\iPhone .ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MacBook_White.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MacBook_Air.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MacBook_Black.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MacBook_Pro.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\MacPro.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

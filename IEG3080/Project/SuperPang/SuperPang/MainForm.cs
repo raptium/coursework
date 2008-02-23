@@ -18,6 +18,7 @@ namespace SuperPang
         public MainForm()
         {
             InitializeComponent();
+            this.Icon = Properties.Resources.MacPro;
         }
 
         private void menuExit_Click(object sender, EventArgs e)
@@ -50,6 +51,12 @@ namespace SuperPang
 
             this.Controls.Add(currentView);
             this.currentView = currentView;
+        }
+
+        private void menuAbout_Click(object sender, EventArgs e)
+        {
+            AboutBox box = new AboutBox();
+            box.ShowDialog();
         }
 
     }

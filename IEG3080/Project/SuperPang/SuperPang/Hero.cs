@@ -24,7 +24,7 @@ namespace SuperPang
         public override void move(int max_width, int max_height)
         {
             locationInfo.X += (int)velocity_x;
-            velocity_x *= 0.95;
+            //velocity_x *= 0.95;
 
             if (this.locationInfo.Y <= 0)
                 this.locationInfo.Y = 1;
@@ -38,21 +38,27 @@ namespace SuperPang
 
         public void moveLeft()
         {
+            /*
             this.velocity_x -= 5;
             if (velocity_x <= -20)
                 velocity_x = -20;
+             */
+            this.velocity_x = -15;
         }
 
         public void moveRight()
         {
+            /*
             this.velocity_x += 5;
             if (velocity_x >= 20)
                 velocity_x = 20;
+             */
+            this.velocity_x = 15;
         }
 
         public void stop()
         {
-            //this.velocity_x = 0;
+            this.velocity_x = 0;
         }
     }
 }

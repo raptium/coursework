@@ -52,16 +52,15 @@ namespace SuperPang
         {
             currentView = new GameView(this, currentController);
 
-            currentView.SetBounds(0, 0, 1024, 680);
-            currentView.BackgroundImage = Properties.Resources.backgroud;
+            currentView.SetBounds(0, 0, 800, 500);
+            //currentView.BackgroundImage = Properties.Resources.backgroud;
             form.switchView(currentView);
-
         }
 
         public void initGame()
         {
-            Rectangle heroPos = new Rectangle(form.Width / 2, form.Height / 2, 20, 30);
-            Rectangle ballPos = new Rectangle(form.Width / 2, form.Height / 2, 20, 30);
+            Rectangle heroPos = new Rectangle(form.Width / 2, form.Height - 180, 20, 30);
+            Rectangle ballPos = new Rectangle(form.Width / 2, form.Height - 400, 20, 30);
             myHero = new Hero(heroPos, 0, 0, 0, this);
             myBall = new Ball(ballPos, 0, -15, 0, this);
         }

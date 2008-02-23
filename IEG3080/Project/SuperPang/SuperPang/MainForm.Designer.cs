@@ -34,7 +34,7 @@ namespace SuperPang
             this.menuStart = new System.Windows.Forms.MenuItem();
             this.menuExit = new System.Windows.Forms.MenuItem();
             this.menuItem4 = new System.Windows.Forms.MenuItem();
-            this.menuItem5 = new System.Windows.Forms.MenuItem();
+            this.menuAbout = new System.Windows.Forms.MenuItem();
             this.SuspendLayout();
             // 
             // MainMenu
@@ -67,21 +67,23 @@ namespace SuperPang
             // 
             this.menuItem4.Index = 1;
             this.menuItem4.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItem5});
+            this.menuAbout});
             this.menuItem4.Text = "&Help";
             // 
-            // menuItem5
+            // menuAbout
             // 
-            this.menuItem5.Index = 0;
-            this.menuItem5.Text = "&About";
+            this.menuAbout.Index = 0;
+            this.menuAbout.Text = "&About";
+            this.menuAbout.Click += new System.EventHandler(this.menuAbout_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.ClientSize = new System.Drawing.Size(1018, 595);
+            this.ClientSize = new System.Drawing.Size(794, 467);
             this.Cursor = System.Windows.Forms.Cursors.Default;
+            this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.KeyPreview = true;
             this.MaximizeBox = false;
@@ -99,7 +101,7 @@ namespace SuperPang
         private System.Windows.Forms.MenuItem menuStart;
         private System.Windows.Forms.MenuItem menuExit;
         private System.Windows.Forms.MenuItem menuItem4;
-        private System.Windows.Forms.MenuItem menuItem5;
+        private System.Windows.Forms.MenuItem menuAbout;
 
     }
 }

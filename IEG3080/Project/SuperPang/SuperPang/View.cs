@@ -17,8 +17,9 @@ namespace SuperPang
             this.controller = controller;
 
             model.ModelUpdateEvent += new Model.ViewUpdater(this.update);
-            this.Height = 690;
-            this.Width = 1024;
+            this.Width = 800;
+            this.Height = 520;
+            
 
             g = this.CreateGraphics();
 

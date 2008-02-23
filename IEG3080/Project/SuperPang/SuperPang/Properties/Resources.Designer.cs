@@ -81,6 +81,55 @@ namespace SuperPang.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap Hero {
+            get {
+                object obj = ResourceManager.GetObject("Hero", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap MacBook_Air {
+            get {
+                object obj = ResourceManager.GetObject("MacBook_Air", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap MacBook_Black {
+            get {
+                object obj = ResourceManager.GetObject("MacBook_Black", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap MacBook_Pro {
+            get {
+                object obj = ResourceManager.GetObject("MacBook_Pro", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap MacBook_White {
+            get {
+                object obj = ResourceManager.GetObject("MacBook_White", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Icon MacPro {
+            get {
+                object obj = ResourceManager.GetObject("MacPro", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap nano {
+            get {
+                object obj = ResourceManager.GetObject("nano", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap tiny {
             get {
                 object obj = ResourceManager.GetObject("tiny", resourceCulture);

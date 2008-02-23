@@ -119,13 +119,34 @@
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="backgroud" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\images\backgroud.jpg;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+    <value>..\Resources\backgroud.jpg;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="chara_haro_a" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\chara_haro_a.gif;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="doraemon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\doraemon.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Hero" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Hero.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MacBook_Air" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\MacBook_Air.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MacBook_Black" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\MacBook_Black.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MacBook_Pro" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\MacBook_Pro.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MacBook_White" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\MacBook_White.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MacPro" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\MacPro.ico;System.Drawing.Icon, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="nano" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\nano.png;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="tiny" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\tiny.bmp;System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
