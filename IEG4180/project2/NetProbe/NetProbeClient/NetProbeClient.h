@@ -50,7 +50,7 @@ private:
 
 public:
 	NetProbe(CNetProbeClientDlg *dialog, char *host, int port);
-	
+	CWinThread *wThread;
 	static DWORD WINAPI threadUpdateUI(LPVOID lpInstance);
 	static DWORD WINAPI threadTCP(LPVOID lpInstance);
 	static DWORD WINAPI threadUDP(LPVOID lpInstance);

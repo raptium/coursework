@@ -136,13 +136,15 @@ DWORD WINAPI NetProbe::threadUpdateUI(LPVOID lpInstance){
 	char t[10];
 	double bps;
 	int flag = 0;
-	long sp;
 	int hit = 0;
 	CNetProbeClientDlg *dlg = pClass->theDlg;
 
 	int refreshInterval = dlg->GetDlgItemInt(IDC_RI);
+	DWORD rCode;
 
 	while(1){
+		if(pClass->wThread->m_hThread == (HANDLE)0xfeeefeee)
+			break;
 
 		while(1){
 			Sleep(10);
@@ -158,10 +160,10 @@ DWORD WINAPI NetProbe::threadUpdateUI(LPVOID lpInstance){
 		sprintf(t, "%d", pClass->packetsTransferred);
 		dlg->SetDlgItemTextA(IDC_NPT, t);
 
-		sprintf(t, "%d", pClass->maxPacketNum - pClass->packetsTransferred);
+		sprintf(t, "%d", pClass->maxPacketNum + 1 - pClass->packetsTransferred);
 		dlg->SetDlgItemTextA(IDC_NPL, t);
 
-		sprintf(t, "%.2f%", pClass->packetsTransferred / (double)pClass->maxPacketNum * 100.0);
+		sprintf(t, "%.2f%", pClass->packetsTransferred / (pClass->maxPacketNum + 1.0) * 100.0);
 		dlg->SetDlgItemTextA(IDC_PL, t);
 
 		bps = pClass->bytesTransferred  / (pClass->timer.Elapsed() / 1000.0);

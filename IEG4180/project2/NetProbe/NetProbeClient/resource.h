@@ -8,6 +8,7 @@
 #define IDC_PANEL1                      1000
 #define IDC_HOSTNAME                    1001
 #define IDC_PORT                        1002
+#define IDC_PROTOCOL                    1003
 #define IDC_TCP                         1003
 #define IDC_UDP                         1004
 #define IDC_BLOCKING                    1005

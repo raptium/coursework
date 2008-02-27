@@ -109,6 +109,6 @@ void CNetProbeClientDlg::OnBnClickedConnect()
 	GetDlgItemTextA(IDC_HOSTNAME, hostname, 256);
 	NetProbe *theProbe = new NetProbe(this, hostname, GetDlgItemInt(IDC_PORT));
 
-	AfxBeginThread((AFX_THREADPROC)theProbe->threadTCP, theProbe);
+	theProbe->wThread = AfxBeginThread((AFX_THREADPROC)theProbe->threadTCP, theProbe);
 	AfxBeginThread((AFX_THREADPROC)theProbe->threadUpdateUI, theProbe);
 }
