@@ -128,6 +128,7 @@ NetProbe::NetProbe(CNetProbeClientDlg *dialog, char *host, int port){
 	bytesTransferred = 0;
 	packetsTransferred = 0;
 	maxPacketNum = -1;
+	status = 0;
 }
 
 DWORD WINAPI NetProbe::threadUpdateUI(LPVOID lpInstance){
@@ -135,24 +136,23 @@ DWORD WINAPI NetProbe::threadUpdateUI(LPVOID lpInstance){
 	int count = 0;
 	char t[10];
 	double bps;
-	int flag = 0;
-	int hit = 0;
 	CNetProbeClientDlg *dlg = pClass->theDlg;
 
 	int refreshInterval = dlg->GetDlgItemInt(IDC_RI);
-	DWORD rCode;
 
 	while(1){
-		if(pClass->wThread->m_hThread == (HANDLE)0xfeeefeee)
-			break;
-
 		while(1){
 			Sleep(10);
-			if(pClass->timer.Elapsed() > count * refreshInterval){
+			if(pClass->status == -1)
+				break;
+			if(pClass->timer.Elapsed() > count * refreshInterval && pClass->status != 0){
 				count = pClass->timer.Elapsed() / refreshInterval + 1;
 				break;
 			}
 		}
+
+		if(pClass->status == -1)
+			break;
 
 		sprintf(t, "%.2f sec", pClass->timer.Elapsed()/1000.0);
 		dlg->SetDlgItemTextA(IDC_TE, t);
@@ -163,17 +163,20 @@ DWORD WINAPI NetProbe::threadUpdateUI(LPVOID lpInstance){
 		sprintf(t, "%d", pClass->maxPacketNum + 1 - pClass->packetsTransferred);
 		dlg->SetDlgItemTextA(IDC_NPL, t);
 
-		sprintf(t, "%.2f%", pClass->packetsTransferred / (pClass->maxPacketNum + 1.0) * 100.0);
+		sprintf(t, "%.2f%", 100.0 - pClass->packetsTransferred / (pClass->maxPacketNum + 1.0) * 100.0);
 		dlg->SetDlgItemTextA(IDC_PL, t);
 
 		bps = pClass->bytesTransferred  / (pClass->timer.Elapsed() / 1000.0);
+
 		if(bps<0)
 			bps = 0;
 		sprintf(t, "%.3f Bps", bps);
 		dlg->SetDlgItemTextA(IDC_DTR, t);
+
+
 	}
 
-
+	pClass->theDlg->SetDlgItemTextA(IDCONNECT, "Connect");
 	AfxEndThread(0);
 
 	return 0;
@@ -186,12 +189,14 @@ DWORD WINAPI NetProbe::threadTCP(LPVOID lpInstance){
 
 	SOCKET Sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if(Sockfd == INVALID_SOCKET){
+		pClass->stop();
 		errorMessageBox();
 		return -1;
 	}
 
 	retVal = connect(Sockfd, (const sockaddr *)pClass->Server_Addr, sizeof(struct sockaddr));
 	if(retVal == SOCKET_ERROR){
+		pClass->stop();
 		closesocket(Sockfd);
 		errorMessageBox();
 		return -1;
@@ -205,28 +210,29 @@ DWORD WINAPI NetProbe::threadTCP(LPVOID lpInstance){
 	NumPackets = pClass->theDlg->GetDlgItemInt(IDC_NPS);
 
 	char *buf = new char[PacketSize];
-	
-
 	memcpy(buf, &PacketSize, 4);
 	memcpy(buf + 4, &SendingRate, 4);
 	memcpy(buf + 8, &NumPackets, 4);
 	retVal = send(Sockfd, buf, 12, 0);
 	if(retVal == SOCKET_ERROR){
+		pClass->stop();
 		closesocket(Sockfd);
 		errorMessageBox();
 		return -1;
 	}
 
 	pClass->timer.Start();
+	pClass->status = 1;
 	while(1){
 
 		retVal = recv(Sockfd, buf, PacketSize, 0);
 		if(retVal == SOCKET_ERROR){
+			pClass->stop();
 			closesocket(Sockfd);
 			errorMessageBox();
 			AfxEndThread(0);
 		}
-		if(retVal == 0)
+		if(retVal == 0 || pClass->status == -1)
 			break;
 
 		pClass->bytesTransferred += retVal;
@@ -237,4 +243,66 @@ DWORD WINAPI NetProbe::threadTCP(LPVOID lpInstance){
 	closesocket(Sockfd);
 
 	return 0;
+}
+
+DWORD WINAPI NetProbe::threadUDP(LPVOID lpInstance){
+	int retVal;
+	int seqN;
+
+	NetProbe *pClass = (NetProbe *)lpInstance;
+
+	SOCKET Sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+	if(Sockfd == INVALID_SOCKET){
+		errorMessageBox();
+		return -1;
+	}
+
+	int PacketSize;
+	int SendingRate;
+	int NumPackets;
+	PacketSize = pClass->theDlg->GetDlgItemInt(IDC_PS);
+	SendingRate = pClass->theDlg->GetDlgItemInt(IDC_SR);
+	NumPackets = pClass->theDlg->GetDlgItemInt(IDC_NPS);
+
+	char *buf = new char[PacketSize];
+	memcpy(buf, &PacketSize, 4);
+	memcpy(buf + 4, &SendingRate, 4);
+	memcpy(buf + 8, &NumPackets, 4);
+	retVal = sendto(Sockfd, buf, 12, 0, (const sockaddr *)pClass->Server_Addr, sizeof(struct sockaddr_in));
+	if(retVal == SOCKET_ERROR){
+		pClass->stop();
+		closesocket(Sockfd);
+		errorMessageBox();
+		return -1;
+	}
+
+	pClass->timer.Start();
+	pClass->status = 2;
+	while(1){
+
+		retVal = recvfrom(Sockfd, buf, PacketSize, 0, NULL, NULL);
+		if(retVal == SOCKET_ERROR){
+			pClass->stop();
+			closesocket(Sockfd);
+			errorMessageBox();
+			AfxEndThread(0);
+		}
+		if(retVal == 0 || pClass->status == -1)
+			break;
+
+		memcpy(&seqN, buf, sizeof(seqN));
+		pClass->bytesTransferred += retVal;
+		pClass->packetsTransferred++;
+		pClass->maxPacketNum = seqN;
+
+		if(NumPackets && pClass->maxPacketNum == NumPackets - 1)
+			break;
+	}
+
+	closesocket(Sockfd);
+	return 0;
+}
+
+void NetProbe::stop(){
+	status = -1;
 }

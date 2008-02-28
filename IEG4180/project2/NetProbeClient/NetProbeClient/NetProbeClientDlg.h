@@ -10,7 +10,7 @@ class CNetProbeClientDlg : public CDialog
 {
 // Construction
 public:
-	CNetProbeClientDlg(CWnd* pParent = NULL);	// standard constructor
+	CNetProbeClientDlg(CWnd* pParent = NULL);	// standard 
 
 // Dialog Data
 	enum { IDD = IDD_NETPROBECLIENT_DIALOG };
@@ -31,29 +31,7 @@ protected:
 public:
 	afx_msg void OnBnClickedExit();
 public:
-	CEdit textbox_hostname;
-public:
-	CEdit textbox_port;
-public:
-	CEdit textbox_refreshInterval;
-public:
 	afx_msg void OnEnChangePs();
-public:
-	CEdit textbox_packetSize;
-public:
-	CEdit textbox_sendingRate;
-public:
-	CEdit textbox_packets2Send;
-public:
-	CStatic label_transferRate;
-public:
-	CStatic label_packetLoss;
-public:
-	CStatic label_packetsTransferred;
-public:
-	CStatic label_packetsLost;
-public:
-	CStatic label_timeElapsed;
 public:
 	afx_msg void OnBnClickedConnect();
 };

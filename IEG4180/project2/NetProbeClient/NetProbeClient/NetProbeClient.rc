@@ -39,7 +39,7 @@ BEGIN
     EDITTEXT        IDC_HOSTNAME,53,16,88,14,ES_AUTOHSCROLL
     EDITTEXT        IDC_PORT,53,32,88,14,ES_AUTOHSCROLL
     GROUPBOX        "Protocol",IDC_STATIC,14,53,63,42
-    CONTROL         "TCP",IDC_TCP,"Button",BS_AUTORADIOBUTTON | WS_GROUP,21,67,29,10
+    CONTROL         "TCP",IDC_TCP,"Button",BS_AUTORADIOBUTTON,21,67,29,10
     CONTROL         "UDP",IDC_UDP,"Button",BS_AUTORADIOBUTTON,21,79,29,10
     GROUPBOX        "I/O Mode",IDC_STATIC,83,53,63,42
     CONTROL         "Blocking",IDC_BLOCKING,"Button",BS_AUTORADIOBUTTON | WS_GROUP,91,67,41,10
@@ -58,11 +58,11 @@ BEGIN
     LTEXT           "# Packets Transferred:",IDC_STATIC,15,150,76,8
     LTEXT           "# Packets Lost:",IDC_STATIC,40,163,51,8
     LTEXT           "Time Elapsed:",IDC_STATIC,46,176,45,8
-    LTEXT           "Static",IDC_DTR,97,124,67,8
-    LTEXT           "Static",IDC_PL,97,137,67,8
-    LTEXT           "Static",IDC_NPT,97,150,67,8
-    LTEXT           "Static",IDC_NPL,97,163,67,8
-    LTEXT           "Static",IDC_TE,97,176,67,8
+    LTEXT           "Static",IDC_DTR,92,124,67,8
+    LTEXT           "Static",IDC_PL,92,137,67,8
+    LTEXT           "Static",IDC_NPT,92,150,67,8
+    LTEXT           "Static",IDC_NPL,92,163,67,8
+    LTEXT           "Static",IDC_TE,92,176,67,8
     PUSHBUTTON      "Connect",IDCONNECT,237,156,50,16
 END
 

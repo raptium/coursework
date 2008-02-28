@@ -24,17 +24,6 @@ CNetProbeClientDlg::CNetProbeClientDlg(CWnd* pParent /*=NULL*/)
 void CNetProbeClientDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_HOSTNAME, textbox_hostname);
-	DDX_Control(pDX, IDC_PORT, textbox_port);
-	DDX_Control(pDX, IDC_RI, textbox_refreshInterval);
-	DDX_Control(pDX, IDC_PS, textbox_packetSize);
-	DDX_Control(pDX, IDC_SR, textbox_sendingRate);
-	DDX_Control(pDX, IDC_NPS, textbox_packets2Send);
-	DDX_Control(pDX, IDC_DTR, label_transferRate);
-	DDX_Control(pDX, IDC_PL, label_packetLoss);
-	DDX_Control(pDX, IDC_NPT, label_packetsTransferred);
-	DDX_Control(pDX, IDC_NPL, label_packetsLost);
-	DDX_Control(pDX, IDC_TE, label_timeElapsed);
 }
 
 BEGIN_MESSAGE_MAP(CNetProbeClientDlg, CDialog)
@@ -58,6 +47,17 @@ BOOL CNetProbeClientDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
 	// TODO: Add extra initialization here
+
+
+	this->SetDlgItemTextA(IDC_RI, "100");
+	this->SetDlgItemTextA(IDC_PS, "1024");
+	this->SetDlgItemTextA(IDC_SR, "102400");
+	this->SetDlgItemTextA(IDC_NPS, "0");
+	this->SetDlgItemTextA(IDC_HOSTNAME, "localhost");
+	this->SetDlgItemTextA(IDC_PORT, "12345");
+	this->CheckRadioButton(IDC_TCP, IDC_UDP, IDC_TCP);
+	this->CheckRadioButton(IDC_BLOCKING, IDC_MSG, IDC_BLOCKING);
+
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -105,10 +105,34 @@ void CNetProbeClientDlg::OnBnClickedExit()
 }
 void CNetProbeClientDlg::OnBnClickedConnect()
 {
+	static NetProbe *theProbe = NULL;
 	char hostname[256];
-	GetDlgItemTextA(IDC_HOSTNAME, hostname, 256);
-	NetProbe *theProbe = new NetProbe(this, hostname, GetDlgItemInt(IDC_PORT));
 
-	theProbe->wThread = AfxBeginThread((AFX_THREADPROC)theProbe->threadTCP, theProbe);
-	AfxBeginThread((AFX_THREADPROC)theProbe->threadUpdateUI, theProbe);
+	if(theProbe == NULL){
+		GetDlgItemTextA(IDC_HOSTNAME, hostname, 256);
+		theProbe = new NetProbe(this, hostname, GetDlgItemInt(IDC_PORT));
+		if(GetCheckedRadioButton(IDC_TCP, IDC_UDP) == IDC_TCP){
+			if(GetCheckedRadioButton(IDC_BLOCKING, IDC_MSG) == IDC_BLOCKING)
+				theProbe->wThread = AfxBeginThread((AFX_THREADPROC)theProbe->threadTCP, theProbe);
+			else{
+
+			}
+		}
+		else{
+			if(GetCheckedRadioButton(IDC_BLOCKING, IDC_MSG) == IDC_BLOCKING)
+				theProbe->wThread = AfxBeginThread((AFX_THREADPROC)theProbe->threadUDP, theProbe);
+			else{
+			
+			}
+		}
+		AfxBeginThread((AFX_THREADPROC)theProbe->threadUpdateUI, theProbe);
+		SetDlgItemTextA(IDCONNECT, "Stop");
+	}else{
+		theProbe->stop();
+		Sleep(20);
+		delete theProbe;
+		theProbe = NULL;
+		SetDlgItemTextA(IDCONNECT, "Connect");
+		
+	}
 }

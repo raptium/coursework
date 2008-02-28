@@ -46,6 +46,7 @@ private:
 	int packetsTransferred;
 	int maxPacketNum;
 	ES_FlashTimer timer;
+	int status;
 
 
 public:
@@ -54,4 +55,5 @@ public:
 	static DWORD WINAPI threadUpdateUI(LPVOID lpInstance);
 	static DWORD WINAPI threadTCP(LPVOID lpInstance);
 	static DWORD WINAPI threadUDP(LPVOID lpInstance);
+	void stop();
 };
