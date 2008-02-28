@@ -49,6 +49,7 @@ BOOL CNetProbeClientDlg::OnInitDialog()
 	// TODO: Add extra initialization here
 
 
+	
 	this->SetDlgItemTextA(IDC_RI, "100");
 	this->SetDlgItemTextA(IDC_PS, "1024");
 	this->SetDlgItemTextA(IDC_SR, "102400");
@@ -105,15 +106,17 @@ void CNetProbeClientDlg::OnBnClickedExit()
 }
 void CNetProbeClientDlg::OnBnClickedConnect()
 {
-	static NetProbe *theProbe = NULL;
 	char hostname[256];
+	static NetProbe *theProbe = NULL;
 
 	if(theProbe == NULL){
 		GetDlgItemTextA(IDC_HOSTNAME, hostname, 256);
 		theProbe = new NetProbe(this, hostname, GetDlgItemInt(IDC_PORT));
 		if(GetCheckedRadioButton(IDC_TCP, IDC_UDP) == IDC_TCP){
-			if(GetCheckedRadioButton(IDC_BLOCKING, IDC_MSG) == IDC_BLOCKING)
-				theProbe->wThread = AfxBeginThread((AFX_THREADPROC)theProbe->threadTCP, theProbe);
+			if(GetCheckedRadioButton(IDC_BLOCKING, IDC_MSG) == IDC_BLOCKING){
+				theProbe->TCPConnect(theProbe);
+				AfxBeginThread((AFX_THREADPROC)theProbe->threadTCPReceive, theProbe);
+			}
 			else{
 
 			}
@@ -135,4 +138,14 @@ void CNetProbeClientDlg::OnBnClickedConnect()
 		SetDlgItemTextA(IDCONNECT, "Connect");
 		
 	}
+}
+
+LRESULT CNetProbeClientDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
+{
+	if(message == WM_WINSOCK){
+
+
+	}
+
+	return CDialog::WindowProc(message, wParam, lParam);
 }

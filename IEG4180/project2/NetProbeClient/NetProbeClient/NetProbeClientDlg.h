@@ -34,4 +34,6 @@ public:
 	afx_msg void OnEnChangePs();
 public:
 	afx_msg void OnBnClickedConnect();
+protected:
+	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 };

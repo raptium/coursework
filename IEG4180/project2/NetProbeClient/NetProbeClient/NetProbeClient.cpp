@@ -173,7 +173,6 @@ DWORD WINAPI NetProbe::threadUpdateUI(LPVOID lpInstance){
 		sprintf(t, "%.3f Bps", bps);
 		dlg->SetDlgItemTextA(IDC_DTR, t);
 
-
 	}
 
 	pClass->theDlg->SetDlgItemTextA(IDCONNECT, "Connect");
@@ -182,53 +181,61 @@ DWORD WINAPI NetProbe::threadUpdateUI(LPVOID lpInstance){
 	return 0;
 }
 
-DWORD WINAPI NetProbe::threadTCP(LPVOID lpInstance){
+int NetProbe::TCPConnect(LPVOID lpInstance){
 	int retVal;
 
 	NetProbe *pClass = (NetProbe *)lpInstance;
 
-	SOCKET Sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if(Sockfd == INVALID_SOCKET){
+	pClass->Sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	if(pClass->Sockfd == INVALID_SOCKET){
 		pClass->stop();
 		errorMessageBox();
 		return -1;
 	}
 
-	retVal = connect(Sockfd, (const sockaddr *)pClass->Server_Addr, sizeof(struct sockaddr));
+	retVal = connect(pClass->Sockfd, (const sockaddr *)pClass->Server_Addr, sizeof(struct sockaddr));
 	if(retVal == SOCKET_ERROR){
 		pClass->stop();
-		closesocket(Sockfd);
+		closesocket(pClass->Sockfd);
 		errorMessageBox();
 		return -1;
 	}
 
-	int PacketSize;
-	int SendingRate;
-	int NumPackets;
-	PacketSize = pClass->theDlg->GetDlgItemInt(IDC_PS);
-	SendingRate = pClass->theDlg->GetDlgItemInt(IDC_SR);
-	NumPackets = pClass->theDlg->GetDlgItemInt(IDC_NPS);
 
-	char *buf = new char[PacketSize];
-	memcpy(buf, &PacketSize, 4);
-	memcpy(buf + 4, &SendingRate, 4);
-	memcpy(buf + 8, &NumPackets, 4);
-	retVal = send(Sockfd, buf, 12, 0);
+	pClass->PacketSize = pClass->theDlg->GetDlgItemInt(IDC_PS);
+	pClass->SendingRate = pClass->theDlg->GetDlgItemInt(IDC_SR);
+	pClass->NumPackets = pClass->theDlg->GetDlgItemInt(IDC_NPS);
+
+	char *buf = new char[12];
+	memcpy(buf, &pClass->PacketSize, 4);
+	memcpy(buf + 4, &pClass->SendingRate, 4);
+	memcpy(buf + 8, &pClass->NumPackets, 4);
+	retVal = send(pClass->Sockfd, buf, 12, 0);
 	if(retVal == SOCKET_ERROR){
 		pClass->stop();
-		closesocket(Sockfd);
+		closesocket(pClass->Sockfd);
 		errorMessageBox();
 		return -1;
 	}
+
+	return 0;
+}
+
+DWORD WINAPI NetProbe::threadTCPReceive(LPVOID lpInstance){
+	int retVal;
+
+	NetProbe *pClass = (NetProbe *)lpInstance;
 
 	pClass->timer.Start();
 	pClass->status = 1;
+
+	char *buf = new char[pClass->PacketSize];
 	while(1){
 
-		retVal = recv(Sockfd, buf, PacketSize, 0);
+		retVal = recv(pClass->Sockfd, buf, pClass->PacketSize, 0);
 		if(retVal == SOCKET_ERROR){
 			pClass->stop();
-			closesocket(Sockfd);
+			closesocket(pClass->Sockfd);
 			errorMessageBox();
 			AfxEndThread(0);
 		}
@@ -240,8 +247,7 @@ DWORD WINAPI NetProbe::threadTCP(LPVOID lpInstance){
 		pClass->maxPacketNum++;
 	}
 
-	closesocket(Sockfd);
-
+	closesocket(pClass->Sockfd);
 	return 0;
 }
 
@@ -305,4 +311,10 @@ DWORD WINAPI NetProbe::threadUDP(LPVOID lpInstance){
 
 void NetProbe::stop(){
 	status = -1;
+}
+
+int NetProbe::MsgDrivenReady(){
+	const long WM_WINSOCK = WM_USER + 1;
+
+	WSAAsyncSelect(Sockfd, theDlg->m_hWnd, WM_WINSOCK, FD_READ | FD_CLOSE);
 }

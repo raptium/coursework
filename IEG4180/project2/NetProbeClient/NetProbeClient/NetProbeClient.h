@@ -40,20 +40,26 @@ class NetProbe
 private: 
 	struct sockaddr_in *Server_Addr;
 	struct sockaddr_in *createSockAddr(char *host, int port);
-	SOCKET tcpfd, udpfd;
+	SOCKET Sockfd;
 	CNetProbeClientDlg *theDlg;
 	double bytesTransferred;
 	int packetsTransferred;
 	int maxPacketNum;
 	ES_FlashTimer timer;
 	int status;
+	int PacketSize;
+	int SendingRate;
+	int NumPackets;
 
 
 public:
 	NetProbe(CNetProbeClientDlg *dialog, char *host, int port);
 	CWinThread *wThread;
-	static DWORD WINAPI threadUpdateUI(LPVOID lpInstance);
-	static DWORD WINAPI threadTCP(LPVOID lpInstance);
-	static DWORD WINAPI threadUDP(LPVOID lpInstance);
 	void stop();
+	static DWORD WINAPI threadUpdateUI(LPVOID lpInstance);
+	int TCPConnect(LPVOID lpInstance);
+	static DWORD WINAPI threadTCPReceive(LPVOID lpInstance);
+	static DWORD WINAPI threadUDP(LPVOID lpInstance);
+	int MsgDrivenReady();
+	
 };
