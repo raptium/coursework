@@ -10,7 +10,8 @@ class CNetProbeClientDlg : public CDialog
 {
 // Construction
 public:
-	CNetProbeClientDlg(CWnd* pParent = NULL);	// standard 
+	CNetProbeClientDlg(CWnd* pParent = NULL);	// standard
+	static const long WM_WINSOCK = WM_USER + 1;
 
 // Dialog Data
 	enum { IDD = IDD_NETPROBECLIENT_DIALOG };
@@ -36,4 +37,7 @@ public:
 	afx_msg void OnBnClickedConnect();
 protected:
 	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
+	LPVOID pNetProbe;
+
+
 };

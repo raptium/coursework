@@ -15,6 +15,7 @@
  *
  */
 
+#define INTEGER_64_AVAILABLE 1
 #ifndef     __ES_TIMER_H
 #define     __ES_TIMER_H
 

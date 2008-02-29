@@ -59,6 +59,8 @@ BOOL CNetProbeClientDlg::OnInitDialog()
 	this->CheckRadioButton(IDC_TCP, IDC_UDP, IDC_TCP);
 	this->CheckRadioButton(IDC_BLOCKING, IDC_MSG, IDC_BLOCKING);
 
+	pNetProbe = NULL;
+
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -104,48 +106,64 @@ void CNetProbeClientDlg::OnBnClickedExit()
 {
 	exit(0);
 }
+
 void CNetProbeClientDlg::OnBnClickedConnect()
 {
 	char hostname[256];
-	static NetProbe *theProbe = NULL;
+	NetProbe *theProbe;
 
-	if(theProbe == NULL){
+	if(pNetProbe == NULL){
 		GetDlgItemTextA(IDC_HOSTNAME, hostname, 256);
-		theProbe = new NetProbe(this, hostname, GetDlgItemInt(IDC_PORT));
+		pNetProbe = new NetProbe(this, hostname, GetDlgItemInt(IDC_PORT));
+		theProbe = (NetProbe *)pNetProbe;
 		if(GetCheckedRadioButton(IDC_TCP, IDC_UDP) == IDC_TCP){
-			if(GetCheckedRadioButton(IDC_BLOCKING, IDC_MSG) == IDC_BLOCKING){
-				theProbe->TCPConnect(theProbe);
+			theProbe->TCPConnect(theProbe);
+			if(GetCheckedRadioButton(IDC_BLOCKING, IDC_MSG) == IDC_BLOCKING)
 				AfxBeginThread((AFX_THREADPROC)theProbe->threadTCPReceive, theProbe);
-			}
-			else{
-
-			}
+			else
+				theProbe->MsgDrivenReady();
 		}
 		else{
+			theProbe->UDPConnect(theProbe);
 			if(GetCheckedRadioButton(IDC_BLOCKING, IDC_MSG) == IDC_BLOCKING)
-				theProbe->wThread = AfxBeginThread((AFX_THREADPROC)theProbe->threadUDP, theProbe);
-			else{
-			
-			}
+				AfxBeginThread((AFX_THREADPROC)theProbe->threadUDPReceive, theProbe);
+			else
+				theProbe->MsgDrivenReady();
 		}
 		AfxBeginThread((AFX_THREADPROC)theProbe->threadUpdateUI, theProbe);
 		SetDlgItemTextA(IDCONNECT, "Stop");
 	}else{
+		theProbe = (NetProbe *)pNetProbe;
 		theProbe->stop();
-		Sleep(20);
+		Sleep(100);
 		delete theProbe;
-		theProbe = NULL;
+		pNetProbe = NULL;
 		SetDlgItemTextA(IDCONNECT, "Connect");
-		
 	}
+
 }
 
 LRESULT CNetProbeClientDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 {
+	NetProbe *pClass = (NetProbe *)pNetProbe;
 	if(message == WM_WINSOCK){
-
+		if(pClass == NULL)
+			return 0;
+		int event = WSAGETSELECTEVENT(lParam);
+		int wsaerr = WSAGETSELECTERROR(lParam);
+		switch(event){
+			case FD_READ:
+				pClass->OnRead();
+				return 0;
+			case FD_CLOSE:
+				pClass->OnClose();
+				pNetProbe = NULL;
+				return 0;
+		}
 
 	}
 
 	return CDialog::WindowProc(message, wParam, lParam);
 }
+
+

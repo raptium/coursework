@@ -59,7 +59,10 @@ public:
 	static DWORD WINAPI threadUpdateUI(LPVOID lpInstance);
 	int TCPConnect(LPVOID lpInstance);
 	static DWORD WINAPI threadTCPReceive(LPVOID lpInstance);
-	static DWORD WINAPI threadUDP(LPVOID lpInstance);
+	int UDPConnect(LPVOID lpInstance);
+	static DWORD WINAPI threadUDPReceive(LPVOID lpInstance);
 	int MsgDrivenReady();
+	void OnRead();
+	void OnClose();
 	
 };
