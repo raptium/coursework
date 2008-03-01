@@ -58,11 +58,11 @@ BEGIN
     LTEXT           "# Packets Transferred:",IDC_STATIC,15,150,76,8
     LTEXT           "# Packets Lost:",IDC_STATIC,40,163,51,8
     LTEXT           "Time Elapsed:",IDC_STATIC,46,176,45,8
-    LTEXT           "Static",IDC_DTR,92,124,67,8
-    LTEXT           "Static",IDC_PL,92,137,67,8
-    LTEXT           "Static",IDC_NPT,92,150,67,8
-    LTEXT           "Static",IDC_NPL,92,163,67,8
-    LTEXT           "Static",IDC_TE,92,176,67,8
+    LTEXT           "",IDC_DTR,92,124,67,8
+    LTEXT           "",IDC_PL,92,137,67,8
+    LTEXT           "",IDC_NPT,92,150,67,8
+    LTEXT           "",IDC_NPL,92,163,67,8
+    LTEXT           "",IDC_TE,92,176,67,8
     PUSHBUTTON      "Connect",IDCONNECT,237,156,50,16
 END
 

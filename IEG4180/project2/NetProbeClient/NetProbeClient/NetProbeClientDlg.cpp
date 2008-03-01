@@ -117,14 +117,16 @@ void CNetProbeClientDlg::OnBnClickedConnect()
 		pNetProbe = new NetProbe(this, hostname, GetDlgItemInt(IDC_PORT));
 		theProbe = (NetProbe *)pNetProbe;
 		if(GetCheckedRadioButton(IDC_TCP, IDC_UDP) == IDC_TCP){
-			theProbe->TCPConnect(theProbe);
+			if(theProbe->TCPConnect(theProbe))
+				return;
 			if(GetCheckedRadioButton(IDC_BLOCKING, IDC_MSG) == IDC_BLOCKING)
 				AfxBeginThread((AFX_THREADPROC)theProbe->threadTCPReceive, theProbe);
 			else
 				theProbe->MsgDrivenReady();
 		}
 		else{
-			theProbe->UDPConnect(theProbe);
+			if(theProbe->UDPConnect(theProbe))
+				return;
 			if(GetCheckedRadioButton(IDC_BLOCKING, IDC_MSG) == IDC_BLOCKING)
 				AfxBeginThread((AFX_THREADPROC)theProbe->threadUDPReceive, theProbe);
 			else

@@ -277,6 +277,7 @@ int NetProbe::UDPConnect(LPVOID lpInstance){
 		return -1;
 	}
 
+	return 0;
 }
 
 DWORD WINAPI NetProbe::threadUDPReceive(LPVOID lpInstance){

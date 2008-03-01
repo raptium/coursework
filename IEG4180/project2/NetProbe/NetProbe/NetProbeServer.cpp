@@ -37,10 +37,6 @@ int Init(void){
 class NetProbeServer{
 
 private: 
-	char *tcp_host;
-	char *udp_host;
-	int tcp_port;
-	int udp_port;
 	struct sockaddr_in *TCP_Addr;
 	struct sockaddr_in *UDP_Addr;
 	struct sockaddr_in *createSockAddr(char *host, int port);
@@ -345,8 +341,8 @@ DWORD WINAPI NetProbeServer::threadUDPSend(LPVOID lpInstance){
 	cout << "=> Sending Rate: " << SendingRate << endl;
 	cout << "=> Number of Packets to Send: " <<  NumPackets << endl;
 
-	if(!SendingRate)
-		SendingRate = 1024 * 1024 * 15;
+	//if(!SendingRate)
+	//	SendingRate = 1024 * 1024 * 15;
 
 	FD_SET Peer;
 	
