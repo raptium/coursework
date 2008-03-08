@@ -1,0 +1,91 @@
+# IEG3821 ¡V Lab2
+autostart = false
+ghostios = true
+ghostsize = 64
+mmap = true
+sparsemem = true
+
+[127.0.0.1]
+workingdir = C:\temp\raptium\MyDir\IEG3821\Lab2\
+
+
+[[3640]]
+# idlepc depends on machine. 
+# Read the tutorial website on how to evaluate a good value
+#idlepc = 0x60974fd4
+## idlepc = 0x6043ade0
+# idlepc = 0x6103dc74
+idlepc = 0x6103dc74
+image = C:\temp\raptium\MyDir\IEG3821\images\c3640-telco-mz.124-13.image
+ram = 64
+
+#### R1 ####
+[[ROUTER R1]]
+console = 2001
+model = 3640
+
+#### R2 ####
+[[ROUTER R2]]
+console = 2002
+model = 3640
+
+#### R3 ####
+[[ROUTER R3]]
+console = 2003
+model = 3640
+
+#### R4 ####
+[[ROUTER R4]]
+console = 2004
+model = 3640
+
+#### R5 ####
+[[ROUTER R5]]
+console = 2005
+model = 3640
+
+#### R6 ####
+[[ROUTER R6]]
+console = 2006
+model = 3640
+
+#### R7 ####
+[[ROUTER R7]]
+console = 2007
+model = 3640
+
+#### R8 ####
+[[ROUTER R8]]
+console = 2008
+model = 3640
+
+#### SW1 ####
+[[ROUTER SW1]]
+console = 2011
+model = 3640
+slot1 = NM-16ESW
+
+F1/1 = R1 F0/0
+F1/2 = R2 F0/0
+F1/3 = R3 F0/0
+F1/4 = R4 F0/0
+F1/5 = R5 F0/0
+F1/6 = R6 F0/0
+F1/8 = R8 F0/0
+F1/11 = SW2 F1/11
+F1/12 = SW2 F1/12
+F1/13 = SW2 F1/13
+F1/14 = SW2 F1/14
+
+#### SW2 ####
+[[ROUTER SW2]]
+console = 2012
+model = 3640
+slot1 = NM-16ESW
+
+F1/2 = R2 F1/0
+F1/3 = R3 F1/0
+F1/4 = R4 F1/0
+F1/5 = R5 F1/0
+F1/6 = R6 F1/0
+F1/7 = R7 F1/0
