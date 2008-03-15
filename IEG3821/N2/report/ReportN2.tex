@@ -1,0 +1,1304 @@
+\documentclass[10pt]{article}
+\usepackage{fontspec,xunicode}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage[a4paper,hmargin=1in,vmargin=1.5in]{geometry}
+\defaultfontfeatures{Mapping=tex-text}
+\XeTeXlinebreaklocale "en"
+\XeTeXlinebreakskip = 0pt plus 1pt
+\setromanfont{Georgia}
+\setmainfont{Georgia}
+\setsansfont{Tahoma}
+%\setmonofont{Lucida Console}
+\setmonofont{Courier New}
+\renewcommand{\thesection}{Task \arabic{section}:}
+\renewcommand{\thesubsection}{\alph{subsection})}
+
+
+\author{GUAN Hao\\05569511\\hguan5@ie.cuhk.edu.hk}
+\title{IEG3821 N2:LAN Switching\\Laboratory Report}
+\date{\today}
+\begin{document}
+\maketitle
+\setcounter{section}{-1}
+\section{Configuration of hostname}
+Run {\tt hostname} on each router and switch.
+\section{Configuration of VLAN on SW1}
+\begin{itemize}
+\item {\bf SW1}
+\begin{verbatim*}
+vlan database
+ vlan 12 name VLAN_12
+ vlan 23 name VLAN_23
+ vlan 34 name VLAN_34
+ vlan 45 name VLAN_45
+ vlan 56 name VLAN_56
+!
+\end{verbatim*}
+\end{itemize}
+\section{Configuration of Etherchannel}
+\begin{itemize}
+\item {\bf SW1}
+\begin{verbatim*}
+interface FastEthernet1/11
+ channel-group 1 mode on
+!
+interface FastEthernet1/12
+ channel-group 1 mode on
+!
+interface FastEthernet1/13
+ channel-group 2 mode on
+!
+interface FastEthernet1/14
+ channel-group 2 mode on
+!
+\end{verbatim*}
+\item {\bf SW2}
+\begin{verbatim*}
+interface FastEthernet1/11
+ channel-group 1 mode on
+!
+interface FastEthernet1/12
+ channel-group 1 mode on
+!
+interface FastEthernet1/13
+ channel-group 2 mode on
+!
+interface FastEthernet1/14
+ channel-group 2 mode on
+!
+\end{verbatim*}
+\end{itemize}
+\section{VLAN Trunk}
+\begin{itemize}
+\item {\bf SW1 \& SW2}
+\begin{verbatim*}
+interface FastEthernet1/11
+ switchport mode trunk
+!
+interface FastEthernet1/12
+ switchport mode trunk
+!
+interface FastEthernet1/13
+ switchport mode trunk
+!
+interface FastEthernet1/14
+ switchport mode trunk
+!
+\end{verbatim*}
+\item {\bf Capture}
+\begin{verbatim*}
+SW1#sh interfaces trunk
+
+Port      Mode         Encapsulation  Status        Native vlan
+Po1       on           802.1q         trunking      1
+Po2       on           802.1q         trunking      1
+
+Port      Vlans allowed on trunk
+Po1       1-1005
+Po2       1-1005
+
+Port      Vlans allowed and active in management domain
+Po1       1,12,23,34,45,56
+Po2       1,12,23,34,45,56
+
+Port      Vlans in spanning tree forwarding state and not pruned
+Po1       1,12,23,34,45,56
+Po2       1,12,23,34,45,56
+
+SW2#sh interfaces trunk
+
+Port      Mode         Encapsulation  Status        Native vlan
+Po1       on           802.1q         trunking      1
+Po2       on           802.1q         trunking      1
+
+Port      Vlans allowed on trunk
+Po1       1-1005
+Po2       1-1005
+
+Port      Vlans allowed and active in management domain
+Po1       1
+Po2       1
+
+Port      Vlans in spanning tree forwarding state and not pruned
+Po1       none
+Po2       none
+\end{verbatim*}
+\item The trunk interfaces on SW1 are active in management domain and in spanning tree forwarding state while the trunk interfaces on SW2 are not.
+\end{itemize}
+\section{VLAN Trunking Protocol(VTP)}
+
+\subsection{}
+\begin{itemize}
+\item {\bf SW1}
+\begin{verbatim*}
+vlan database
+ vtp server
+ vtp domain Hello
+ vtp password World
+!
+\end{verbatim*}
+\item {\bf SW2}
+\begin{verbatim*}
+vlan database
+ vtp client
+ vtp domain Hello
+ vtp password World
+!
+\end{verbatim*}
+\item {\bf Capture}
+\begin{verbatim*}
+W2#sh vtp status
+VTP Version                     : 2
+Configuration Revision          : 0
+Maximum VLANs supported locally : 256
+Number of existing VLANs        : 10
+VTP Operating Mode              : Client
+VTP Domain Name                 : Hello
+VTP Pruning Mode                : Disabled
+VTP V2 Mode                     : Disabled
+VTP Traps Generation            : Disabled
+MD5 digest                      : 0x10 0xBB 0x02 0x06 0xE6 0x70 0x70 0xB4
+Configuration last modified by 0.0.0.0 at 3-1-02 00:07:04
+SW2#sh vlan-switch brief
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Fa1/0, Fa1/1, Fa1/2, Fa1/3
+                                                Fa1/4, Fa1/5, Fa1/6, Fa1/7
+                                                Fa1/8, Fa1/9, Fa1/10, Fa1/15
+12   VLAN_12                          active
+23   VLAN_23                          active
+34   VLAN_34                          active
+45   VLAN_45                          active
+56   VLAN_56                          active
+1002 fddi-default                     active
+1003 token-ring-default               active
+1004 fddinet-default                  active
+1005 trnet-default                    active
+SW2#sh int trunk
+
+Port      Mode         Encapsulation  Status        Native vlan
+Po1       on           802.1q         trunking      1
+Po2       on           802.1q         trunking      1
+
+Port      Vlans allowed on trunk
+Po1       1-1005
+Po2       1-1005
+
+Port      Vlans allowed and active in management domain
+Po1       1,12,23,34,45,56
+Po2       1,12,23,34,45,56
+
+Port      Vlans in spanning tree forwarding state and not pruned
+Po1       1,12,23,34,45,56
+Po2       none
+\end{verbatim*}
+\end{itemize}
+\subsection{}
+\begin{itemize}
+\item The route will complain that SW2 is on client mode and the vlan setting can not be saved. To and VLAN\_67 to the domain, we have to run the command on SW1 since it is the vtp server.
+\begin{verbatim*}
+SW2(vlan)#vlan 67 name VLAN_67
+VLAN 67 added:
+Name: VLAN_67
+SW2(vlan)#exit
+In CLIENT state, no apply attempted.
+Exiting....
+\end{verbatim*}
+\item {\bf Capture}
+\begin{verbatim*}
+SW2#sh vlan-switch br
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Fa1/0, Fa1/1, Fa1/2, Fa1/3
+                                                Fa1/4, Fa1/5, Fa1/6, Fa1/7
+                                                Fa1/8, Fa1/9, Fa1/10, Fa1/15
+12   VLAN_12                          active
+23   VLAN_23                          active
+34   VLAN_34                          active
+45   VLAN_45                          active
+56   VLAN_56                          active
+67   VLAN_67                          active
+1002 fddi-default                     active
+1003 token-ring-default               active
+1004 fddinet-default                  active
+1005 trnet-default                    active
+\end{verbatim*}
+\end{itemize}
+\section{Configuration of VLAN on switch port}
+\begin{itemize}
+\item {\bf SW1}
+\begin{verbatim*}
+interface FastEthernet1/1
+ switchport access vlan 12
+!
+interface FastEthernet1/2
+ switchport access vlan 23
+!
+interface FastEthernet1/3
+ switchport access vlan 34
+!
+interface FastEthernet1/4
+ switchport access vlan 45
+!
+interface FastEthernet1/5
+ switchport access vlan 56
+!
+interface FastEthernet1/6
+ switchport access vlan 67
+!
+
+\end{verbatim*}
+\item {\bf SW2}
+\begin{verbatim*}
+nterface FastEthernet1/2
+ switchport access vlan 12
+!
+interface FastEthernet1/3
+ switchport access vlan 23
+!
+interface FastEthernet1/4
+ switchport access vlan 34
+!
+interface FastEthernet1/5
+ switchport access vlan 45
+!
+interface FastEthernet1/6
+ switchport access vlan 56
+!
+interface FastEthernet1/7
+ switchport access vlan 67
+!
+\end{verbatim*}
+\item {\bf Capture}
+\begin{verbatim*}
+SW1#sh interfaces status
+
+Port    Name               Status       Vlan       Duplex Speed Type
+Fa1/0                      notconnect   1            auto    auto 10/100BaseTX
+Fa1/1                      connected    12         a-full   a-100 10/100BaseTX
+Fa1/2                      connected    23         a-full   a-100 10/100BaseTX
+Fa1/3                      connected    34         a-full   a-100 10/100BaseTX
+Fa1/4                      connected    45         a-full   a-100 10/100BaseTX
+Fa1/5                      connected    56         a-full   a-100 10/100BaseTX
+Fa1/6                      connected    67         a-full   a-100 10/100BaseTX
+Fa1/7                      notconnect   1            auto    auto 10/100BaseTX
+Fa1/8                      connected    1          a-full   a-100 10/100BaseTX
+Fa1/9                      notconnect   1            auto    auto 10/100BaseTX
+Fa1/10                     notconnect   1            auto    auto 10/100BaseTX
+Fa1/11                     connected    trunk      a-full   a-100 10/100BaseTX
+Fa1/12                     connected    trunk      a-full   a-100 10/100BaseTX
+Fa1/13                     connected    trunk      a-full   a-100 10/100BaseTX
+Fa1/14                     connected    trunk      a-full   a-100 10/100BaseTX
+Fa1/15                     notconnect   1            auto    auto 10/100BaseTX
+Po1                        connected    trunk      a-full   a-100 10/100BaseTX
+Po2                        connected    trunk      a-full   a-100 10/100BaseTX
+
+
+SW2#sh interfaces status
+
+Port    Name               Status       Vlan       Duplex Speed Type
+Fa1/0                      notconnect   1            auto    auto 10/100BaseTX
+Fa1/1                      notconnect   1            auto    auto 10/100BaseTX
+Fa1/2                      connected    12         a-full   a-100 10/100BaseTX
+Fa1/3                      connected    23         a-full   a-100 10/100BaseTX
+Fa1/4                      connected    34         a-full   a-100 10/100BaseTX
+Fa1/5                      connected    45         a-full   a-100 10/100BaseTX
+Fa1/6                      connected    56         a-full   a-100 10/100BaseTX
+Fa1/7                      connected    67         a-full   a-100 10/100BaseTX
+Fa1/8                      notconnect   1            auto    auto 10/100BaseTX
+Fa1/9                      notconnect   1            auto    auto 10/100BaseTX
+Fa1/10                     notconnect   1            auto    auto 10/100BaseTX
+Fa1/11                     connected    trunk      a-full   a-100 10/100BaseTX
+Fa1/12                     connected    trunk      a-full   a-100 10/100BaseTX
+Fa1/13                     connected    trunk      a-full   a-100 10/100BaseTX
+Fa1/14                     connected    trunk      a-full   a-100 10/100BaseTX
+Fa1/15                     notconnect   1            auto    auto 10/100BaseTX
+Po1                        connected    trunk      a-full   a-100 10/100BaseTX
+Po2                        connected    trunk      a-full   a-100 10/100BaseTX
+\end{verbatim*}
+\end{itemize}
+\section{Configuration of IP address on Routers}
+\begin{itemize}
+\item {\bf R1}
+\begin{verbatim*}
+int f0/0
+ ip addr 200.51.12.1 255.255.255.0
+!
+\end{verbatim*}
+\item {\bf R2}
+\begin{verbatim*}
+int f0/0
+ ip addr 200.51.23.2 255.255.255.0
+!
+int f1/0
+ ip addr 200.51.12.2 255.255.255.0
+!
+\end{verbatim*}
+\item {\bf R3}
+\begin{verbatim*}
+int f0/0
+ ip addr 200.51.34.3 255.255.255.0
+!
+int f1/0
+ ip addr 200.51.23.3 255.255.255.0
+!
+\end{verbatim*}
+\item {\bf R4}
+\begin{verbatim*}
+int f0/0
+ ip addr 200.51.45.4 255.255.255.0
+!
+int f1/0
+ ip addr 200.51.34.4 255.255.255.0
+!
+\end{verbatim*}
+\item {\bf R5}
+\begin{verbatim*}
+int f0/0
+ ip addr 200.51.56.5 255.255.255.0
+!
+int f1/0
+ ip addr 200.51.45.5 255.255.255.0
+!
+\end{verbatim*}
+\item {\bf R6}
+\begin{verbatim*}
+int f0/0
+ ip addr 200.51.67.6 255.255.255.0
+!
+int f1/0
+ ip addr 200.51.56.6 255.255.255.0
+!
+\end{verbatim*}
+\item {\bf R7}
+\begin{verbatim*}
+int f1/0
+ ip addr 200.51.67.7 255.255.255.0
+!
+\end{verbatim*}
+\item {Verify \& Capture}
+\begin{verbatim*}
+R1#sh ip int br
+Interface                  IP-Address      OK? Method Status                Protocol
+FastEthernet0/0            200.51.12.1     YES manual up                    up  
+
+R2#sh ip int br
+Interface                  IP-Address      OK? Method Status                Protocol
+FastEthernet0/0            200.51.23.2     YES manual up                    up  
+FastEthernet1/0            200.51.12.2     YES manual up                    up  
+
+R3#sh ip int br
+Interface                  IP-Address      OK? Method Status                Protocol
+FastEthernet0/0            200.51.34.3     YES manual up                    up  
+FastEthernet1/0            200.51.23.3     YES manual up                    up  
+
+R4#sh ip int br
+Interface                  IP-Address      OK? Method Status                Protocol
+FastEthernet0/0            200.51.45.4     YES manual up                    up  
+FastEthernet1/0            200.51.34.4     YES manual up                    up  
+
+R5#sh ip int br
+Interface                  IP-Address      OK? Method Status                Protocol
+FastEthernet0/0            200.51.56.5     YES manual up                    up  
+FastEthernet1/0            200.51.45.5     YES manual up                    up  
+
+R6#sh ip int br
+Interface                  IP-Address      OK? Method Status                Protocol
+FastEthernet0/0            200.51.67.6     YES manual up                    up  
+FastEthernet1/0            200.51.56.6     YES manual up                    up  
+
+R7#sh ip int br
+Interface                  IP-Address      OK? Method Status                Protocol
+FastEthernet1/0            200.51.67.7     YES manual up                    up  
+
+
+R1#ping 200.51.12.2
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.51.12.2, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 8/42/84 ms
+
+R2#ping 200.51.23.3
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.51.23.3, timeout is 2 seconds:
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 8/34/68 ms
+
+
+R3#ping 200.51.34.4
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.51.34.4, timeout is 2 seconds:
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 8/39/60 ms
+
+R4#ping 200.51.45.5
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.51.45.5, timeout is 2 seconds:
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 20/42/80 ms
+
+R5#ping 200.51.56.6
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.51.56.6, timeout is 2 seconds:
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 16/36/64 ms
+
+R6#ping 200.51.67.7
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.51.67.7, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 8/20/44 ms
+\end{verbatim*}
+\end{itemize}
+\section{Configuration of trunk between switch and router}
+\subsection{}
+\begin{itemize}
+\item {\bf SW1}
+\begin{verbatim*}
+interface FastEthernet1/8
+ switchport trunk allowed vlan 1,2,12,23,34,45,56,67,1002-1005
+ switchport mode trunk
+!
+\end{verbatim*}
+\item {\bf Capture}
+\begin{verbatim*}
+SW1#sh interfaces trunk
+
+Port      Mode         Encapsulation  Status        Native vlan
+Fa1/8     on           802.1q         trunking      1
+Po1       on           802.1q         trunking      1
+Po2       on           802.1q         trunking      1
+
+Port      Vlans allowed on trunk
+Fa1/8     1-2,12,23,34,45,56,67,1002-1005
+Po1       1-1005
+Po2       1-1005
+
+Port      Vlans allowed and active in management domain
+Fa1/8     1,12,23,34,45,56,67
+Po1       1,12,23,34,45,56,67
+Po2       1,12,23,34,45,56,67
+
+Port      Vlans in spanning tree forwarding state and not pruned
+Fa1/8     1
+Po1       1,12,23,34,45,56,67
+Po2       1,12,23,34,45,56,67
+\end{verbatim*}
+\end{itemize}
+\subsection{}
+\begin{itemize}
+\item {\bf R8}
+\begin{verbatim*}
+interface FastEthernet0/0
+ no ip address
+!
+interface FastEthernet0/0.12
+ encapsulation dot1Q 12
+ ip address 200.51.12.8 255.255.255.0
+!
+interface FastEthernet0/0.23
+ encapsulation dot1Q 23
+ ip address 200.51.23.8 255.255.255.0
+!
+interface FastEthernet0/0.34
+ encapsulation dot1Q 34
+ ip address 200.51.34.8 255.255.255.0
+!
+interface FastEthernet0/0.45
+ encapsulation dot1Q 45
+ ip address 200.51.45.8 255.255.255.0
+!
+interface FastEthernet0/0.56
+ encapsulation dot1Q 56
+ ip address 200.51.56.8 255.255.255.0
+!
+interface FastEthernet0/0.67
+ encapsulation dot1Q 67
+ ip address 200.51.67.8 255.255.255.0
+!         
+\end{verbatim*}
+\item {\bf Capture}
+\begin{verbatim*}
+R8#sh ip int br
+Interface                  IP-Address      OK? Method Status                Protocol
+FastEthernet0/0            unassigned      YES NVRAM  up                    up  
+FastEthernet0/0.12         200.51.12.8     YES NVRAM  up                    up  
+FastEthernet0/0.23         200.51.23.8     YES NVRAM  up                    up  
+FastEthernet0/0.34         200.51.34.8     YES NVRAM  up                    up  
+FastEthernet0/0.45         200.51.45.8     YES NVRAM  up                    up  
+FastEthernet0/0.56         200.51.56.8     YES NVRAM  up                    up  
+FastEthernet0/0.67         200.51.67.8     YES NVRAM  up                    up  
+\end{verbatim*}
+\item {\bf Verify \& Capture}
+\begin{verbatim*}
+R8#ping 200.51.12.1
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.51.12.1, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 8/24/52 ms
+R8#ping 200.51.12.2
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.51.12.2, timeout is 2 seconds:
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 12/53/72 ms
+R8#ping 200.51.23.2
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.51.23.2, timeout is 2 seconds:
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 16/26/36 ms
+R8#ping 200.51.23.3
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.51.23.3, timeout is 2 seconds:
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 28/42/56 ms
+R8#ping 200.51.34.3
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.51.34.3, timeout is 2 seconds:
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 20/29/40 ms
+R8#ping 200.51.34.4
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.51.34.4, timeout is 2 seconds:
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 8/40/64 ms
+R8#ping 200.51.45.4
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.51.45.4, timeout is 2 seconds:
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 20/30/44 ms
+R8#ping 200.51.45.5
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.51.45.5, timeout is 2 seconds:
+..!!!
+Success rate is 60 percent (3/5), round-trip min/avg/max = 12/32/44 ms
+R8#ping 200.51.56.5
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.51.56.5, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 12/39/84 ms
+R8#ping 200.51.56.6
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.51.56.6, timeout is 2 seconds:
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 12/39/92 ms
+R8#ping 200.51.67.6
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.51.67.6, timeout is 2 seconds:
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 4/27/40 ms
+R8#ping 200.51.67.7
+
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 200.51.67.7, timeout is 2 seconds:
+.!!!!
+Success rate is 80 percent (4/5), round-trip min/avg/max = 16/33/52 ms
+\end{verbatim*}
+\end{itemize}
+\section{Spanning Tree}
+\subsection{Bridge priority}
+\begin{itemize}
+\item {\bf Capture}
+\begin{verbatim*}
+SW1#sh spanning-tree vlan 12
+
+VLAN12 is executing the ieee compatible Spanning Tree protocol
+Bridge Identifier has priority 8192, address cc08.08ac.0001
+Configured hello time 2, max age 20, forward delay 15
+We are the root of the spanning tree
+Topology change flag not set, detected flag not set
+Number of topology changes 6 last change occurred 01:08:41 ago
+from FastEthernet1/8
+Times:  hold 1, topology change 35, notification 2
+hello 2, max age 20, forward delay 15
+Timers: hello 0, topology change 0, notification 0, aging 300
+
+Port 42 (FastEthernet1/1) of VLAN12 is forwarding
+Port path cost 19, Port priority 128, Port Identifier 128.42.
+Designated root has priority 8192, address cc08.08ac.0001
+Designated bridge has priority 8192, address cc08.08ac.0001
+Designated port id is 128.42, designated path cost 0
+Timers: message age 0, forward delay 0, hold 0
+Number of transitions to forwarding state: 1
+BPDU: sent 3339, received 0
+
+Port 49 (FastEthernet1/8) of VLAN12 is forwarding
+Port path cost 19, Port priority 128, Port Identifier 128.49.
+Designated root has priority 8192, address cc08.08ac.0001
+Designated bridge has priority 8192, address cc08.08ac.0001
+Designated port id is 128.49, designated path cost 0
+Timers: message age 0, forward delay 0, hold 0
+Number of transitions to forwarding state: 1
+BPDU: sent 2075, received 0
+
+Port 321 (Port-channel1) of VLAN12 is forwarding
+Port path cost 12, Port priority 128, Port Identifier 129.65.
+Designated root has priority 8192, address cc08.08ac.0001
+Designated bridge has priority 8192, address cc08.08ac.0001
+Designated port id is 129.65, designated path cost 0
+Timers: message age 0, forward delay 0, hold 0
+Number of transitions to forwarding state: 1
+BPDU: sent 3952, received 1
+
+Port 322 (Port-channel2) of VLAN12 is forwarding
+Port path cost 12, Port priority 128, Port Identifier 129.66.
+Designated root has priority 8192, address cc08.08ac.0001
+Designated bridge has priority 8192, address cc08.08ac.0001
+Designated port id is 129.66, designated path cost 0
+Timers: message age 0, forward delay 0, hold 0
+Number of transitions to forwarding state: 1
+BPDU: sent 3941, received 1
+
+
+SW2#sh spanning-tree vlan 12
+
+VLAN12 is executing the ieee compatible Spanning Tree protocol
+Bridge Identifier has priority 32768, address cc09.08ac.0001
+Configured hello time 2, max age 20, forward delay 15
+Current root has priority 8192, address cc08.08ac.0001
+Root port is 321 (Port-channel1), cost of root path is 12
+Topology change flag not set, detected flag not set
+Number of topology changes 1 last change occurred 01:48:50 ago
+from FastEthernet1/2
+Times:  hold 1, topology change 35, notification 2
+hello 2, max age 20, forward delay 15
+Timers: hello 0, topology change 0, notification 0, aging 300
+
+Port 43 (FastEthernet1/2) of VLAN12 is forwarding
+Port path cost 19, Port priority 128, Port Identifier 128.43.
+Designated root has priority 8192, address cc08.08ac.0001
+Designated bridge has priority 32768, address cc09.08ac.0001
+Designated port id is 128.43, designated path cost 12
+Timers: message age 0, forward delay 0, hold 0
+Number of transitions to forwarding state: 1
+BPDU: sent 3271, received 0
+
+Port 321 (Port-channel1) of VLAN12 is forwarding
+Port path cost 12, Port priority 128, Port Identifier 129.65.
+Designated root has priority 8192, address cc08.08ac.0001
+Designated bridge has priority 8192, address cc08.08ac.0001
+Designated port id is 129.65, designated path cost 0
+Timers: message age 2, forward delay 0, hold 0
+Number of transitions to forwarding state: 1
+BPDU: sent 1, received 3671
+
+Port 322 (Port-channel2) of VLAN12 is blocking
+Port path cost 12, Port priority 128, Port Identifier 129.66.
+Designated root has priority 8192, address cc08.08ac.0001
+Designated bridge has priority 8192, address cc08.08ac.0001
+Designated port id is 129.66, designated path cost 0
+Timers: message age 1, forward delay 0, hold 0
+Number of transitions to forwarding state: 0
+BPDU: sent 1, received 3652
+\end{verbatim*}
+\item The root bridge of VLAN 12 is SW1.
+\end{itemize}
+\subsection{Port priority}
+\begin{itemize}
+\item {\bf SW1}
+\begin{verbatim*}
+interface Port-channel1
+ spanning-tree vlan 12 port-priority 64
+!
+\end{verbatim*}
+\item {\bf Capture}
+\begin{verbatim*}
+SW2#sh spanning-tree vlan 12
+
+VLAN12 is executing the ieee compatible Spanning Tree protocol
+Bridge Identifier has priority 32768, address cc09.08ac.0001
+Configured hello time 2, max age 20, forward delay 15
+Current root has priority 8192, address cc08.08ac.0001
+Root port is 322 (Port-channel2), cost of root path is 12
+Topology change flag set, detected flag not set
+Number of topology changes 3 last change occurred 00:00:11 ago
+from Port-channel2
+Times:  hold 1, topology change 35, notification 2
+hello 2, max age 20, forward delay 15
+Timers: hello 0, topology change 0, notification 0, aging 300
+
+Port 43 (FastEthernet1/2) of VLAN12 is forwarding
+Port path cost 19, Port priority 128, Port Identifier 128.43.
+Designated root has priority 8192, address cc08.08ac.0001
+Designated bridge has priority 32768, address cc09.08ac.0001
+Designated port id is 128.43, designated path cost 12
+Timers: message age 0, forward delay 0, hold 0
+Number of transitions to forwarding state: 1
+BPDU: sent 3610, received 0
+
+Port 321 (Port-channel1) of VLAN12 is blocking
+Port path cost 12, Port priority 128, Port Identifier 129.65.
+Designated root has priority 8192, address cc08.08ac.0001
+Designated bridge has priority 8192, address cc08.08ac.0001
+Designated port id is 133.65, designated path cost 0
+Timers: message age 2, forward delay 0, hold 0
+Number of transitions to forwarding state: 1
+BPDU: sent 1, received 4008
+
+Port 322 (Port-channel2) of VLAN12 is forwarding
+Port path cost 12, Port priority 128, Port Identifier 129.66.
+Designated root has priority 8192, address cc08.08ac.0001
+Designated bridge has priority 8192, address cc08.08ac.0001
+Designated port id is 129.66, designated path cost 0
+Timers: message age 2, forward delay 0, hold 0
+Number of transitions to forwarding state: 1
+BPDU: sent 3, received 3990
+\end{verbatim*}
+\end{itemize}
+\subsection{Port path cost}
+\begin{itemize}
+\item {\bf SW2}
+\begin{verbatim*}
+interface Port-channel1
+ spanning-tree vlan 12 cost 10
+!
+\end{verbatim*}
+\item {\bf Capture}
+\begin{verbatim*}
+SW2#sh spanning-tree vlan 12
+
+VLAN12 is executing the ieee compatible Spanning Tree protocol
+Bridge Identifier has priority 32768, address cc09.08ac.0001
+Configured hello time 2, max age 20, forward delay 15
+Current root has priority 8192, address cc08.08ac.0001
+Root port is 321 (Port-channel1), cost of root path is 10
+Topology change flag set, detected flag not set
+Number of topology changes 5 last change occurred 00:00:28 ago
+from Port-channel1
+Times:  hold 1, topology change 35, notification 2
+hello 2, max age 20, forward delay 15
+Timers: hello 0, topology change 0, notification 0, aging 300
+
+Port 43 (FastEthernet1/2) of VLAN12 is forwarding
+Port path cost 19, Port priority 128, Port Identifier 128.43.
+Designated root has priority 8192, address cc08.08ac.0001
+Designated bridge has priority 32768, address cc09.08ac.0001
+Designated port id is 128.43, designated path cost 10
+Timers: message age 0, forward delay 0, hold 0
+Number of transitions to forwarding state: 1
+BPDU: sent 3713, received 0
+
+Port 321 (Port-channel1) of VLAN12 is forwarding
+Port path cost 10, Port priority 128, Port Identifier 129.65.
+Designated root has priority 8192, address cc08.08ac.0001
+Designated bridge has priority 8192, address cc08.08ac.0001
+Designated port id is 133.65, designated path cost 0
+Timers: message age 2, forward delay 0, hold 0
+Number of transitions to forwarding state: 2
+BPDU: sent 3, received 4111
+
+Port 322 (Port-channel2) of VLAN12 is blocking
+Port path cost 12, Port priority 128, Port Identifier 129.66.
+Designated root has priority 8192, address cc08.08ac.0001
+Designated bridge has priority 8192, address cc08.08ac.0001
+Designated port id is 129.66, designated path cost 0
+Timers: message age 1, forward delay 0, hold 0
+Number of transitions to forwarding state: 1
+BPDU: sent 3, received 4092
+\end{verbatim*}
+\end{itemize}
+\section{Traffic Load balancing on Trunk Port by Spanning Tree}
+\begin{itemize}
+	\item {\bf SW1}
+	\begin{verbatim*}
+		interface Port-channel1
+		 spanning-tree vlan 23 port-priority 192
+		 spanning-tree vlan 34 port-priority 64
+		 spanning-tree vlan 45 port-priority 192
+		 spanning-tree vlan 56 port-priority 64
+		 spanning-tree vlan 67 port-priority 192
+		!
+	\end{verbatim*}
+	\item {\bf Capture}
+	\begin{verbatim*}
+		SW1#sh spanning-tree interface p1 br
+
+		Vlan                                        Designated
+		Name                 Port ID Prio Cost  Sts Cost  Bridge ID            Port ID
+		-------------------- ------- ---- ----- --- ----- -------------------- -------
+		VLAN1                129.65   128    12 FWD     0  8192 cc08.08ac.0000 129.65
+		VLAN12                65.65    64    12 FWD     0  8192 cc08.08ac.0001  65.65
+		VLAN23               193.65   192    12 FWD     0  8192 cc08.08ac.0002 193.65
+		VLAN34                65.65    64    12 FWD     0  8192 cc08.08ac.0003  65.65
+		VLAN45               193.65   192    12 FWD     0   256 cc08.08ac.0004 193.65
+		VLAN56                65.65    64    12 FWD     0   256 cc08.08ac.0005  65.65
+		VLAN67               193.65   192    12 FWD     0   256 cc08.08ac.0006 193.65
+		SW1#sh spanning-tree interface p2 br
+
+		Vlan                                        Designated
+		Name                 Port ID Prio Cost  Sts Cost  Bridge ID            Port ID
+		-------------------- ------- ---- ----- --- ----- -------------------- -------
+		VLAN1                129.66   128    12 FWD     0  8192 cc08.08ac.0000 129.66
+		VLAN12               129.66   128    12 FWD     0  8192 cc08.08ac.0001 129.66
+		VLAN23               129.66   128    12 FWD     0  8192 cc08.08ac.0002 129.66
+		VLAN34               129.66   128    12 FWD     0  8192 cc08.08ac.0003 129.66
+		VLAN45               129.66   128    12 FWD     0   256 cc08.08ac.0004 129.66
+		VLAN56               129.66   128    12 FWD     0   256 cc08.08ac.0005 129.66
+		VLAN67               129.66   128    12 FWD     0   256 cc08.08ac.0006 129.66
+
+
+		SW2#sh spanning-tree int p1 br
+
+		Vlan                                        Designated
+		Name                 Port ID Prio Cost  Sts Cost  Bridge ID            Port ID
+		-------------------- ------- ---- ----- --- ----- -------------------- -------
+		VLAN1                129.65   128    12 FWD     0  8192 cc08.08ac.0000 129.65
+		VLAN12               129.65   128    10 FWD     0  8192 cc08.08ac.0001  65.65
+		VLAN23               129.65   128    12 BLK     0  8192 cc08.08ac.0002 193.65
+		VLAN34               129.65   128    12 FWD     0  8192 cc08.08ac.0003  65.65
+		VLAN45               129.65   128    12 BLK     0   256 cc08.08ac.0004 193.65
+		VLAN56               129.65   128    12 FWD     0   256 cc08.08ac.0005  65.65
+		VLAN67               129.65   128    12 BLK     0   256 cc08.08ac.0006 193.65
+		SW2#sh spanning-tree int p2 br
+
+		Vlan                                        Designated
+		Name                 Port ID Prio Cost  Sts Cost  Bridge ID            Port ID
+		-------------------- ------- ---- ----- --- ----- -------------------- -------
+		VLAN1                129.66   128    12 BLK     0  8192 cc08.08ac.0000 129.66
+		VLAN12               129.66   128    12 BLK     0  8192 cc08.08ac.0001 129.66
+		VLAN23               129.66   128    12 FWD     0  8192 cc08.08ac.0002 129.66
+		VLAN34               129.66   128    12 BLK     0  8192 cc08.08ac.0003 129.66
+		VLAN45               129.66   128    12 FWD     0   256 cc08.08ac.0004 129.66
+		VLAN56               129.66   128    12 BLK     0   256 cc08.08ac.0005 129.66
+		VLAN67               129.66   128    12 FWD     0   256 cc08.08ac.0006 129.66
+	\end{verbatim*}
+\end{itemize}
+\section{Configuration of Switch Virtual Interface(SVI)}
+\begin{itemize}
+	\item {\bf SW1}
+	\begin{verbatim*}
+		interface Vlan12
+		 ip address 200.51.12.11 255.255.255.0
+		!
+		interface Vlan23
+		 ip address 200.51.23.11 255.255.255.0
+		!
+		interface Vlan34
+		 ip address 200.51.34.11 255.255.255.0
+		!
+		interface Vlan45
+		 ip address 200.51.45.11 255.255.255.0
+		!
+		interface Vlan56
+		 ip address 200.51.56.11 255.255.255.0
+		!
+		interface Vlan67
+		 ip address 200.51.67.11 255.255.255.0
+		!
+	\end{verbatim*}
+	\item {\bf SW2}
+	\begin{verbatim*}
+		interface Vlan12
+		 ip address 200.51.12.12 255.255.255.0
+		!
+		interface Vlan23
+		 ip address 200.51.23.12 255.255.255.0
+		!
+		interface Vlan34
+		 ip address 200.51.34.12 255.255.255.0
+		!
+		interface Vlan45
+		 ip address 200.51.45.12 255.255.255.0
+		!
+		interface Vlan56
+		 ip address 200.51.56.12 255.255.255.0
+		!
+		interface Vlan67
+		 ip address 200.51.67.12 255.255.255.0
+		!
+	\end{verbatim*}
+	\item {\bf Capture}
+	\begin{verbatim*}
+		SW1#sh ip rout
+		Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+		D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+		N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+		E1 - OSPF external type 1, E2 - OSPF external type 2
+		i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+		ia - IS-IS inter area, * - candidate default, U - per-user static route
+		o - ODR, P - periodic downloaded static route
+
+		Gateway of last resort is not set
+
+		C    200.51.23.0/24 is directly connected, Vlan23
+		C    200.51.67.0/24 is directly connected, Vlan67
+		C    200.51.34.0/24 is directly connected, Vlan34
+		C    200.51.12.0/24 is directly connected, Vlan12
+		C    200.51.45.0/24 is directly connected, Vlan45
+		C    200.51.56.0/24 is directly connected, Vlan56
+
+		SW2#sh ip rout
+		*Mar  1 03:02:25.927: %SYS-5-CONFIG_I: Configured from console by console
+		Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+		D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+		N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+		E1 - OSPF external type 1, E2 - OSPF external type 2
+		i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+		ia - IS-IS inter area, * - candidate default, U - per-user static route
+		o - ODR, P - periodic downloaded static route
+
+		Gateway of last resort is not set
+
+		C    200.51.23.0/24 is directly connected, Vlan23
+		C    200.51.67.0/24 is directly connected, Vlan67
+		C    200.51.34.0/24 is directly connected, Vlan34
+		C    200.51.12.0/24 is directly connected, Vlan12
+		C    200.51.45.0/24 is directly connected, Vlan45
+		C    200.51.56.0/24 is directly connected, Vlan56
+
+
+		SW1#ping 200.51.12.1
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.12.1, timeout is 2 seconds:
+		!!!!!
+		Success rate is 100 percent (5/5), round-trip min/avg/max = 12/27/44 ms
+		SW1#ping 200.51.12.2
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.12.2, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 4/24/52 ms
+		SW1#ping 200.51.23.2
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.23.2, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 16/33/72 ms
+		SW1#ping 200.51.23.3
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.23.3, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 20/45/68 ms
+		SW1#ping 200.51.34.3
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.34.3, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 12/33/44 ms
+		SW1#ping 200.51.34.4
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.34.4, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 32/44/60 ms
+		SW1#ping 200.51.45.4
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.45.4, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 20/44/92 ms
+		SW1#ping 200.51.45.5
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.45.5, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 8/21/36 ms
+		SW1#ping 200.51.56.5
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.56.5, timeout is 2 seconds:
+		!!!!!
+		Success rate is 100 percent (5/5), round-trip min/avg/max = 12/20/28 ms
+		SW1#ping 200.51.56.6
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.56.6, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 16/40/68 ms
+		SW1#ping 200.51.67.6
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.67.6, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 12/27/52 ms
+		SW1#ping 200.51.67.7
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.67.7, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 4/20/32 ms
+
+		SW2#ping 200.51.12.1
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.12.1, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 24/41/64 ms
+		SW2#ping 200.51.12.2
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.12.2, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 16/46/72 ms
+		SW2#ping 200.51.23.2
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.23.2, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 4/24/64 ms
+		SW2#ping 200.51.23.3
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.23.3, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 32/44/60 ms
+		SW2#ping 200.51.34.3
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.34.3, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 12/33/68 ms
+		SW2#ping 200.51.34.4
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.34.4, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 20/37/68 ms
+		SW2#ping 200.51.45.4
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.45.4, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 12/32/76 ms
+		SW2#ping 200.51.45.5
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.45.5, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 8/20/28 ms
+		SW2#ping 200.51.56.5
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.56.5, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 4/22/48 ms
+		SW2#ping 200.51.56.6
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.56.6, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 12/43/72 ms
+		SW2#ping 200.51.67.6
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.67.6, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 36/39/44 ms
+		SW2#ping 200.51.67.7
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.67.7, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 12/42/68 ms
+	\end{verbatim*}
+\end{itemize}
+\section{Hot Standby Routing Protocal(HSRP)}
+\begin{itemize}
+	\item {\bf SW1}
+	\begin{verbatim*}
+		interface Vlan12
+		 standby 12 ip 200.51.12.254
+		 standby 12 priority 64
+		 standby 12 preempt
+		!
+		interface Vlan23
+		 standby 23 ip 200.51.23.254
+		 standby 23 priority 128
+		 standby 23 preempt
+		!
+		interface Vlan34
+		 standby 34 ip 200.51.34.254
+		!
+		interface Vlan45
+		 standby 45 ip 200.51.45.254
+		 standby 45 priority 64
+		 standby 45 preempt
+		!
+		interface Vlan56
+		 standby 56 ip 200.51.56.254
+		 standby 56 preempt
+		!
+		interface Vlan67
+		 standby 67 ip 200.51.67.254
+		!
+	\end{verbatim*}
+	\item {\bf SW2}
+	\begin{verbatim*}
+		interface Vlan12
+		 standby 12 ip 200.51.12.254
+		!
+		interface Vlan23
+		 standby preempt
+		 standby 23 ip 200.51.23.254
+		 standby 23 priority 64
+		!
+		interface Vlan34
+		 standby preempt
+		 standby 34 ip 200.51.34.254
+		 standby 34 priority 128
+		!
+		interface Vlan45
+		 standby 45 ip 200.51.45.254
+		!
+		interface Vlan56
+		 standby preempt
+		 standby 56 ip 200.51.56.254
+		 standby 56 priority 64
+		!
+		interface Vlan67
+		 standby preempt
+		 standby 67 ip 200.51.67.254
+		 standby 67 priority 128
+		!
+	\end{verbatim*}
+	\item {\bf R8}
+	\begin{verbatim*}
+		interface FastEthernet0/0.12
+		 standby 12 ip 200.51.12.254
+		 standby 12 priority 128
+		 standby 12 preempt
+		!
+		interface FastEthernet0/0.23
+		 standby 23 ip 200.51.23.254
+		!
+		interface FastEthernet0/0.34
+		 standby 34 ip 200.51.34.254
+		 standby 34 priority 64
+		 standby 34 preempt
+		!
+		interface FastEthernet0/0.45
+		 standby 45 ip 200.51.45.254
+		 standby 45 priority 128
+		 standby 45 preempt
+		!
+		interface FastEthernet0/0.56
+		 standby 56 ip 200.51.56.254
+		!
+		interface FastEthernet0/0.67
+		 standby 67 ip 200.51.67.254
+		 standby 67 priority 64
+		 standby 67 preempt
+		!         
+	\end{verbatim*}
+	\item {\bf Capture}
+	\begin{verbatim*}
+		R1#ping 200.51.12.2
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.12.2, timeout is 2 seconds:
+		!!!!!
+		Success rate is 100 percent (5/5), round-trip min/avg/max = 12/28/64 ms
+		R1#ping 200.51.23.2
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.23.2, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 16/30/40 ms
+		R1#ping 200.51.23.3
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.23.3, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 12/31/72 ms
+		R1#ping 200.51.34.3
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.34.3, timeout is 2 seconds:
+		!!!!!
+		Success rate is 100 percent (5/5), round-trip min/avg/max = 20/60/128 ms
+		R1#ping 200.51.34.4
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.34.4, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 16/45/72 ms
+		R1#ping 200.51.45.4
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.45.4, timeout is 2 seconds:
+		!!!!!
+		Success rate is 100 percent (5/5), round-trip min/avg/max = 16/53/76 ms
+		R1#ping 200.51.45.5
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.45.5, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 32/44/56 ms
+		R1#ping 200.51.56.5
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.56.5, timeout is 2 seconds:
+		!!!!!
+		Success rate is 100 percent (5/5), round-trip min/avg/max = 8/40/84 ms
+		R1#ping 200.51.56.6
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.56.6, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 24/40/72 ms
+		R1#ping 200.51.67.6
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.67.6, timeout is 2 seconds:
+		!!!!!
+		Success rate is 100 percent (5/5), round-trip min/avg/max = 8/26/40 ms
+		R1#ping 200.51.67.7
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.51.67.7, timeout is 2 seconds:
+		.!!!!
+		Success rate is 80 percent (4/5), round-trip min/avg/max = 24/71/124 ms
+	\end{verbatim*}
+	\item When R2 PING to R7:f1/0(200.51.67.7), the ICMP ECHO frame travels through R2:f0/1 $\Rightarrow$ R8:f0/0.12 $\Rightarrow$ R8:f0/0.67 $\Rightarrow$ R7:f1/0. The return path of the ICMP ECHO REPLY frame is R7:f1/0 $\Rightarrow$ SW2:vlan67 $\Rightarrow$ SW2:vlan12 $\Rightarrow$ R2:f1/0.
+\end{itemize}
+\section{Traffic Monitoring}
+\begin{itemize}
+	\item {\bf SW1}
+	\begin{verbatim*}
+		monitor session 1 source interface Fa1/5
+		monitor session 1 destination interface Fa1/15
+	\end{verbatim*}
+	\item {\bf Capture}
+	\begin{verbatim*}
+		SW1#show monitor session 1
+		Session 1
+		---------
+		Source Ports:
+		RX Only:       None
+		TX Only:       None
+		Both:          Fa1/5
+		Source VLANs:
+		RX Only:       None
+		TX Only:       None
+		Both:          None
+		Destination Ports: Fa1/15
+		Filter VLANs:      None
+	\end{verbatim*}
+\end{itemize}
+\newpage
+\appendix
+\section{Declaration}
+I declare that the assignment here submitted is original except for source material explicitly acknowledged, and that the same or related material has not been previously submitted for another course. I also acknowledge that I am aware of University policy and regulations on honesty in academic work, and of the disciplinary guidelines and procedures applicable to breaches of such policy and regulations, as contained in the website \url{http://www.cuhk.edu.hk/policy/academichonesty/}
+\vspace*{3cm}
+\end{document}
