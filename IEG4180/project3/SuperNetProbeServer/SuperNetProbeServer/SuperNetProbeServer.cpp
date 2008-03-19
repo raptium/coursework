@@ -46,6 +46,17 @@ NetProbeServer::NetProbeServer(const char *tcp_h, int tcp_p, const char *udp_h, 
 	}
 }
 
+int loadFile(char *fn, char *buf){
+	if(fn==NULL)
+		return -1;
+	FILE *fp = fopen(fn, "rb");
+
+	int bytes = fread(buf, 1, 2048, fp);
+	buf[bytes] = 0;
+
+	return bytes + 1;
+}
+
 
 struct sockaddr_in * NetProbeServer::createSockAddr(char *host, int port){
 	struct addrinfo aiHints;
@@ -433,18 +444,25 @@ DWORD WINAPI NetProbeServer::threadHTTPServer(LPVOID lpInstance){
 		if(strcmp("/", outbuf))
 			continue;
 
-		buf[0]=0;
+		memset(buf, 0, 2048);
 		strcat_s(buf, 2048, "HTTP/1.1 200 OK\n");
 		strcat_s(buf, 2048, "Date: Mon, 10 Mar 2008 22:38:34 GMT\n");
 		strcat_s(buf, 2048, "Server: SuperNetProbeServer/0.3.1 (Microsoft Windows)\n");
-		//strcat_s(buf, 2048, "Last-Modified: Wed, 08 Jan 2003 23:11:55 GMT\n");
-		//strcat_s(buf, 2048, "Etag: \"3f80f-1b6-3e1cb03b\"\n");
 		strcat_s(buf, 2048, "Accept-Ranges: bytes\n");
-		strcat_s(buf, 2048, "Content-Length: 200\n");
-		strcat_s(buf, 2048, "Connection: close\n");
-		strcat_s(buf, 2048, "Content-Type: text/html; charset=UTF-8\n");
+
+		char *fbuf = new char[2048];
+		int bytes = loadFile("index.html", fbuf);
+		char bstr[10];
+		memset(bstr, 0, 10);
+		sprintf(bstr, "%d", bytes);
+		strcat_s(buf, 2048, "Content-Length: ");
+		strcat_s(buf, 2048, bstr);
+		strcat_s(buf, 2048, "\nConnection: close\n");
+		strcat_s(buf, 2048, "Content-Type: text/html; charset=iso-8859-1\n\n");
 		//strcat_s(buf, 2048, "\nhello world!\n");
-		strcat_s(buf, 2048, "\n<html><head><title>IEG4180 Project 3:SuperNetProbeServer</title></head><body><h1>Hello World!</h1></body></html>");
+		memcpy(buf + strlen(buf), fbuf, bytes);
+
+		delete fbuf;
 
 		retVal = send(newsfd, buf, strlen(buf), 0);
 		if(retVal == SOCKET_ERROR){

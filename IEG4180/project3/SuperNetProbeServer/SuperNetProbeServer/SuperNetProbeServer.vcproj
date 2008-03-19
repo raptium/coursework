@@ -218,11 +218,6 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath=".\index.htm"
-			DeploymentContent="true"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>
