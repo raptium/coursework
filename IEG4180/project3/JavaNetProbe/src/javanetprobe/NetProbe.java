@@ -12,9 +12,9 @@ import java.util.logging.Logger;
 import javax.swing.*;
 import java.nio.*;
 import java.nio.channels.*;
-import org.jvnet.substance.*;
-import org.jvnet.substance.skin.*;
-import org.jvnet.substance.title.*;
+//import org.jvnet.substance.*;
+//import org.jvnet.substance.skin.*;
+
 
 
 
@@ -54,9 +54,15 @@ public class NetProbe implements Runnable{
     */
     public static void main(String args[]) {
         try {
-            UIManager.setLookAndFeel(new SubstanceRavenGraphiteGlassLookAndFeel());
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             JFrame.setDefaultLookAndFeelDecorated(true);
             JDialog.setDefaultLookAndFeelDecorated(true);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(NetProbe.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            Logger.getLogger(NetProbe.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(NetProbe.class.getName()).log(Level.SEVERE, null, ex);
         } catch (UnsupportedLookAndFeelException ex) {
             Logger.getLogger(NetProbeFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -100,6 +106,7 @@ public class NetProbe implements Runnable{
         bytesTransferred = 0;
         packetsTransferred = 0;
         maxPacketNum = -1;
+        frame.resetButton();
     }
 
     public void run() {
@@ -168,10 +175,12 @@ class threadTCP extends Thread {
                 m_probe.packetsTransferred++;
                 m_probe.maxPacketNum++;
             }
-            
+            m_probe.stop();
+            channel.close();
         } catch (IOException ex) {
             Logger.getLogger(threadTCP.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
     }
     
 }
@@ -236,10 +245,12 @@ class threadUDP extends Thread{
                 m_probe.packetsTransferred++;
                 m_probe.maxPacketNum = maxNum;
             }
-            
+            m_probe.stop();
+            channel.close();
         } catch (IOException ex) {
             Logger.getLogger(threadTCP.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
     }
     
     

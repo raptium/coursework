@@ -358,4 +358,9 @@ public class NetProbeFrame extends javax.swing.JFrame {
         timeLabel.setText(String.valueOf(t));
     }
     
+    public void resetButton(){
+        startButton.setSelected(false);
+        startButton.setText("Start");
+    }
+    
 }
