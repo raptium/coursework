@@ -37,11 +37,11 @@ public class NetProbeFrame extends javax.swing.JFrame {
         jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
-        jLabel11 = new javax.swing.JLabel();
-        jLabel12 = new javax.swing.JLabel();
-        jLabel13 = new javax.swing.JLabel();
-        jLabel14 = new javax.swing.JLabel();
-        jLabel15 = new javax.swing.JLabel();
+        lossLabel = new javax.swing.JLabel();
+        timeLabel = new javax.swing.JLabel();
+        numLabel = new javax.swing.JLabel();
+        rateLabel = new javax.swing.JLabel();
+        numLossLabel = new javax.swing.JLabel();
         paraPanel = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
@@ -74,16 +74,6 @@ public class NetProbeFrame extends javax.swing.JFrame {
 
         jLabel10.setText("No of packet loss:");
 
-        jLabel11.setText("jLabel11");
-
-        jLabel12.setText("jLabel12");
-
-        jLabel13.setText("jLabel13");
-
-        jLabel14.setText("jLabel14");
-
-        jLabel15.setText("jLabel15");
-
         javax.swing.GroupLayout statPanelLayout = new javax.swing.GroupLayout(statPanel);
         statPanel.setLayout(statPanelLayout);
         statPanelLayout.setHorizontalGroup(
@@ -94,49 +84,54 @@ public class NetProbeFrame extends javax.swing.JFrame {
                     .addGroup(statPanelLayout.createSequentialGroup()
                         .addComponent(jLabel6)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel11))
+                        .addComponent(lossLabel))
                     .addGroup(statPanelLayout.createSequentialGroup()
                         .addComponent(jLabel7)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel12))
+                        .addComponent(timeLabel))
                     .addGroup(statPanelLayout.createSequentialGroup()
                         .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel13))
+                        .addComponent(numLabel))
                     .addGroup(statPanelLayout.createSequentialGroup()
                         .addComponent(jLabel9)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel14))
+                        .addComponent(rateLabel))
                     .addGroup(statPanelLayout.createSequentialGroup()
                         .addComponent(jLabel10)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel15)))
-                .addContainerGap(40, Short.MAX_VALUE))
+                        .addComponent(numLossLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(33, Short.MAX_VALUE))
         );
+
+        statPanelLayout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {lossLabel, numLabel, numLossLabel, rateLabel, timeLabel});
+
         statPanelLayout.setVerticalGroup(
             statPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(statPanelLayout.createSequentialGroup()
                 .addGroup(statPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
-                    .addComponent(jLabel11))
+                    .addComponent(lossLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(statPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
-                    .addComponent(jLabel12))
+                    .addComponent(timeLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(statPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
-                    .addComponent(jLabel13))
+                    .addComponent(numLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(statPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel9)
-                    .addComponent(jLabel14))
+                    .addComponent(rateLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(statPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel10)
-                    .addComponent(jLabel15))
+                    .addComponent(numLossLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        statPanelLayout.linkSize(javax.swing.SwingConstants.VERTICAL, new java.awt.Component[] {lossLabel, numLabel, numLossLabel, rateLabel, timeLabel});
 
         paraPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("System Parameters Panel"));
 
@@ -278,9 +273,10 @@ public class NetProbeFrame extends javax.swing.JFrame {
 
     private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
         if(startButton.isSelected()){
-            m_probe.start();
+            m_probe.connect();
             startButton.setText("Stop");
         }else{
+            m_probe.stop();
             startButton.setText("Start");
         }
     }//GEN-LAST:event_startButtonActionPerformed
@@ -291,11 +287,6 @@ public class NetProbeFrame extends javax.swing.JFrame {
     private javax.swing.JTextField hostnameText;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel12;
-    private javax.swing.JLabel jLabel13;
-    private javax.swing.JLabel jLabel14;
-    private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -304,16 +295,21 @@ public class NetProbeFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JLabel lossLabel;
+    private javax.swing.JLabel numLabel;
+    private javax.swing.JLabel numLossLabel;
     private javax.swing.JTextField numText;
     private javax.swing.JPanel paraPanel;
     private javax.swing.JTextField portText;
     private javax.swing.ButtonGroup protocolGroup;
+    private javax.swing.JLabel rateLabel;
     private javax.swing.JTextField rateText;
     private javax.swing.JTextField refreshText;
     private javax.swing.JTextField sizeText;
     private javax.swing.JToggleButton startButton;
     private javax.swing.JPanel statPanel;
     private javax.swing.JRadioButton tcpRadio;
+    private javax.swing.JLabel timeLabel;
     private javax.swing.JRadioButton udpRadio;
     // End of variables declaration//GEN-END:variables
     
@@ -339,6 +335,27 @@ public class NetProbeFrame extends javax.swing.JFrame {
         
     public int getNumPackets(){
         return Integer.parseInt(numText.getText());
+    }
+    
+    public void setPacketsTransferred(int num){
+        numLabel.setText(String.valueOf(num));
+    }
+    
+    public void setPacketLoss(double p){
+        lossLabel.setText(String.valueOf(p));
+    }
+    
+    public void setNumPacketLoss(int n){
+        numLossLabel.setText(String.valueOf(n));
+    }
+    
+    public void setTransferringRate(double p){
+        p = Math.round(p * 100) / 100.0;
+        rateLabel.setText(String.valueOf(p));
+    }
+    
+    public void setTimeElapsed(double t){
+        timeLabel.setText(String.valueOf(t));
     }
     
 }

@@ -37,6 +37,11 @@ public class NetProbe implements Runnable{
     protected int packetsTransferred;
     protected int maxPacketNum;
     
+    protected Thread m_TimerThread;
+    protected Thread m_WorkerThread;
+    
+    protected long m_startTime;
+    
     
     NetProbe(){
         bytesTransferred = 0;
@@ -67,16 +72,34 @@ public class NetProbe implements Runnable{
         servAddr = new InetSocketAddress(host, port);
     }
     
-    public void start(){
+    public void connect(){
         PacketSize = frame.getPacketSize();
         SendingRate = frame.getSendingRate();
         NumPackets = frame.getNumPackets();
         
+        createAddr();
         if(frame.getProtocol()){
-            createAddr();
-            Thread tcpThread = new threadTCP(this);
-            tcpThread.run();
+            m_WorkerThread = new threadTCP(this);
+        }else{
+            m_WorkerThread = new threadUDP(this);
         }
+        m_WorkerThread.start();
+        m_TimerThread = new TimerThread(100, this);
+        m_TimerThread.start();
+        m_startTime = System.currentTimeMillis();
+    }
+    
+    public void stop() {
+        if(frame.getProtocol()) {
+            ((threadTCP)m_WorkerThread).Quit();
+        } else {
+            ((threadUDP)m_WorkerThread).Quit();
+        }
+        ((TimerThread)m_TimerThread).QuitUpdate();
+
+        bytesTransferred = 0;
+        packetsTransferred = 0;
+        maxPacketNum = -1;
     }
 
     public void run() {
@@ -84,16 +107,26 @@ public class NetProbe implements Runnable{
     }
     
     private void updateUI(){
-        
+        frame.setPacketsTransferred(packetsTransferred);
+        frame.setPacketLoss(100.0 - packetsTransferred / (maxPacketNum + 1.0) * 100.0);
+        frame.setNumPacketLoss(maxPacketNum + 1 - packetsTransferred);
+        frame.setTransferringRate(bytesTransferred / (System.currentTimeMillis() - m_startTime) * 1000.0);
+        frame.setTimeElapsed((System.currentTimeMillis() - m_startTime) / 1000.0);
     }
 }
 
 class threadTCP extends Thread {
     
     private NetProbe m_probe;
+    protected boolean m_bToQuit;
     
     threadTCP(NetProbe probe){
         m_probe = probe;
+        m_bToQuit = false;
+    }
+    
+    public void Quit() { 
+        m_bToQuit = true;
     }
     
 
@@ -127,7 +160,8 @@ class threadTCP extends Thread {
             
             buf = ByteBuffer.allocate(m_probe.PacketSize);
             
-            while(true){
+            while(!m_bToQuit){
+                buf.clear();
                 ret = channel.read(buf);
                 
                 m_probe.bytesTransferred += ret;
@@ -142,10 +176,105 @@ class threadTCP extends Thread {
     
 }
 
-class threadUDP {
+class threadUDP extends Thread{
     
-    public void run() {
-        
+    private NetProbe m_probe;
+    protected boolean m_bToQuit;
+    
+    threadUDP(NetProbe probe){
+        m_probe = probe;
+        m_bToQuit = false;
     }
     
+    public void Quit() { 
+        m_bToQuit = true;
+    }
+    
+    public final static int swabInt(int v) {
+        return  (v >>> 24) | (v << 24) | 
+          ((v << 8) & 0x00FF0000) | ((v >> 8) & 0x0000FF00);
+    }
+
+    @Override
+    public void run() {
+        DatagramChannel channel = null;
+        int ret;
+        try {
+            channel = DatagramChannel.open();
+            channel.connect(m_probe.servAddr);
+
+            // Retrieve handle to the embedded socket object:
+            // Socket s = channel.socket();
+
+            ByteBuffer buf = ByteBuffer.allocate(12);
+
+            buf.put(0, (byte)(m_probe.PacketSize & 0xff));
+            buf.put(1, (byte)(m_probe.PacketSize >> 8 & 0xff));
+            buf.put(2, (byte)(m_probe.PacketSize >> 16 & 0xff));
+            buf.put(3, (byte)(m_probe.PacketSize >> 24 & 0xff));
+            buf.put(4, (byte)(m_probe.SendingRate & 0xff));
+            buf.put(5, (byte)(m_probe.SendingRate >> 8 & 0xff));
+            buf.put(6, (byte)(m_probe.SendingRate >> 16 & 0xff));
+            buf.put(7, (byte)(m_probe.SendingRate >> 24 & 0xff));
+            buf.put(8, (byte)(m_probe.NumPackets & 0xff));
+            buf.put(9, (byte)(m_probe.NumPackets >> 8 & 0xff));
+            buf.put(10, (byte)(m_probe.NumPackets >> 16 & 0xff));
+            buf.put(11, (byte)(m_probe.NumPackets >> 24 & 0xff));
+
+            channel.write(buf);
+            
+            buf = ByteBuffer.allocate(m_probe.PacketSize);
+            
+            int maxNum;
+            while(!m_bToQuit){
+                buf.clear();
+                ret = channel.read(buf);
+                maxNum = buf.getInt(0);
+                maxNum = swabInt(maxNum);
+                
+                m_probe.bytesTransferred += ret;
+                m_probe.packetsTransferred++;
+                m_probe.maxPacketNum = maxNum;
+            }
+            
+        } catch (IOException ex) {
+            Logger.getLogger(threadTCP.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    
+}
+
+
+class TimerThread extends Thread {
+    protected int m_iRefreshInterval;
+    protected Runnable m_UpdateCode;
+    protected boolean m_bToQuit = false;
+    
+    
+    // Constructor
+    TimerThread(int refresh_interval, Runnable update_code) {
+        m_iRefreshInterval = refresh_interval;
+        m_UpdateCode = update_code;
+        m_bToQuit = false;
+    }
+    
+    // Set Function
+    public void QuitUpdate() { 
+        m_bToQuit = true;
+    }
+    
+    // Thread entry function
+    @Override
+    public void run() {
+        // Generates one event to m_UpdateCode every m_RefreshInterval milliseconds
+        while (!m_bToQuit) {
+            javax.swing.SwingUtilities.invokeLater(m_UpdateCode);
+            try {
+                sleep(m_iRefreshInterval);
+            } catch (Exception ex) {
+                Logger.getLogger(threadTCP.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
 }
