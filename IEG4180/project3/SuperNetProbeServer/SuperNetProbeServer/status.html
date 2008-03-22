@@ -1,0 +1,36 @@
+<html><head><link rel=stylesheet href=/css type=text/css media=screen /><script type="text/javascript">
+var xmlhttp;
+window.onload=GetStatistic;
+function GetStatistic(){
+	try{
+		xmlhttp = new XMLHttpRequest();
+	}
+	catch(e){
+		try{
+			xmlhttp = new ActiveXObject('Msxml2.XMLHTTP');
+			if (xmlhttp.overrideMimeType) {
+				xmlhttp.overrideMimeType('text/html');
+			}
+		}
+		catch(e) {
+			try {
+				xmlhttp = new ActiveXObject('Microsoft.XMLHTTP');
+			} catch (e) {
+			}
+		}
+	}
+	xmlhttp.onreadystatechange=function(){
+		if(xmlhttp.readyState==4){
+			if(xmlhttp.status==200){
+				document.getElementById('content').innerHTML = xmlhttp.responseText;
+				setTimeout('GetStatistic()', 2000);
+			}else{
+				setTimeout('GetStatistic()', 2000);
+			}
+		}
+	};
+	xmlhttp.open('get','status',true);
+	//xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+	xmlhttp.send(null)
+}
+</script><title>IEG4180 Project 3</title></head><body><div id=container><div id=header><h1>IEG 4180 Project 3 NetProbe Server</h1></div><div id=content><form method=get action=/start id=status name=status><fieldset id=control><legend>Control Panel</legend> <label for=client>Maximum Number of Connections</label> <input type=text id=client name=client value=5 /> <input type=submit value=Start /></fieldset></form></div><div id=footer><p>2008 raptium &amp; Ice, Some Rights Reserved.</p></div></div></body></html>

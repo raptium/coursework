@@ -1,5 +1,6 @@
 #include "SuperNetProbeServer.h"
 
+const char HTTPHeader[] = "HTTP/1.1 200 OK\nDate: Mon, 10 Mar 2008 22:38:34 GMT\nServer: SuperNetProbeServer/0.3.1 (Microsoft Windows)\nAccept-Ranges: bytes\nConnection: close\nCache-Control: no-cache\nContent-Type: text/html; charset=iso-8859-1\n";
 
 
 void errorMessageBox(){
@@ -28,6 +29,14 @@ int Init(void){
 	return 0;
 }
 
+int streq(char *str1, char *str2, int n){
+	int i;
+	for(i=0;i<n;i++)
+		if(str1[i]!=str2[i])
+			return -1;
+	return 0;
+}
+
 
 NetProbeServer::NetProbeServer(const char *tcp_h, int tcp_p, const char *udp_h, int udp_p, const char *http_h, int http_p){
 
@@ -44,6 +53,9 @@ NetProbeServer::NetProbeServer(const char *tcp_h, int tcp_p, const char *udp_h, 
 		cerr << "error." << endl;
 		exit(-1);
 	}
+
+	for(int i=0;i<10;i++)
+		clients[i].start = 0;
 }
 
 int loadFile(char *fn, char *buf){
@@ -54,6 +66,7 @@ int loadFile(char *fn, char *buf){
 	int bytes = fread(buf, 1, 2048, fp);
 	buf[bytes] = 0;
 
+	fclose(fp);
 	return bytes + 1;
 }
 
@@ -214,13 +227,15 @@ int NetProbeServer::detectProtocol(void){
 		errorMessageBox();
 		return -1;
 	}
-	if(retVal == 0)
+	if(retVal == 0 || this->maxNumClients <= this->numClients)
 		return 0;
 	if(FD_ISSET(tcpfd, &Peer)){
 		AfxBeginThread((AFX_THREADPROC)threadTCPSend, this);
+		this->numClients++;
 		return 0;
 	}else if(FD_ISSET(udpfd, &Peer)){
 		AfxBeginThread((AFX_THREADPROC)threadUDPSend, this);
+		this->numClients++;
 		return 0;
 	}
 	
@@ -243,7 +258,7 @@ DWORD WINAPI NetProbeServer::threadTCPSend(LPVOID lpInstance){
 	/*****************/
 	double T;
 	double sleepT;
-
+	
 
 
 	SOCKET newsfd = accept(Server->tcpfd, (struct sockaddr *)PeerAddr, &addrlen);
@@ -282,12 +297,24 @@ DWORD WINAPI NetProbeServer::threadTCPSend(LPVOID lpInstance){
 	T = (double)PacketSize / SendingRate;
 
 	timer.Start(); // Start the timer
+	
 	cout << "-> TCP : Sending Data" << endl;
 
 	packetsSent = 0;
 
 	delete buf;
 	buf = new char[PacketSize];
+
+
+	Client client;
+	client.Addr = PeerAddr;
+	client.protocol = 1;
+	client.start = time(NULL);
+	client.packetSize = PacketSize;
+	client.byteTransmitted = 0;
+	client.kill = 0;
+	
+
 	while(1){
 		if(NumPackets && packetsSent >= NumPackets)
 			break;
@@ -296,12 +323,58 @@ DWORD WINAPI NetProbeServer::threadTCPSend(LPVOID lpInstance){
 		if(retVal == SOCKET_ERROR){
 			closesocket(newsfd);
 			errorMessageBox();
+			Server->numClients--;
+			Client *pC = NULL;
+			for(int i=0;i<10;i++){
+				if(Server->clients[i].start == client.start)
+					pC = &(Server->clients[i]);
+			}
+			if(pC!=NULL)
+				pC->start=0;
 			AfxEndThread(0);
 		}
-		if(retVal == 0)
+		if(retVal == 0){
+			Server->numClients--;
+			Client *pC = NULL;
+			for(int i=0;i<10;i++){
+				if(Server->clients[i].start == client.start)
+					pC = &(Server->clients[i]);
+			}
+			if(pC!=NULL)
+				pC->start=0;
 			break;
+		}
 
 		packetsSent++;
+		client.byteTransmitted += retVal;
+		client.time = timer.Elapsed() / 1000.0;
+		client.rate = client.byteTransmitted / client.time;
+			
+
+		Client *pC = NULL;
+		for(int i=0;i<10;i++){
+			if(Server->clients[i].start == client.start)
+				pC = &(Server->clients[i]);
+		}
+		if(pC!=NULL && pC->kill){
+			closesocket(newsfd);
+			Server->numClients--;
+			pC->start=0;
+			break;
+		}
+
+		if(pC==NULL){
+			for(int i=0;i<10;i++){
+				if(Server->clients[i].start == 0){
+					pC = &(Server->clients[i]);
+					break;
+				}
+			}
+		}
+			
+		
+		memcpy(pC, &client, sizeof(Client));
+
 		if(SendingRate){
 			sleepT = packetsSent * T * 1000 - timer.Elapsed();
 			if(sleepT > 0)
@@ -370,6 +443,16 @@ DWORD WINAPI NetProbeServer::threadUDPSend(LPVOID lpInstance){
 
 	delete buf;
 	buf = new char[PacketSize];
+
+
+	Client client;
+	client.Addr = PeerAddr;
+	client.protocol = 0;
+	client.start = time(NULL);
+	client.packetSize = PacketSize;
+	client.byteTransmitted = 0;
+	client.kill = 0;
+
 	while(1){
 		if(NumPackets && packetsSent >= NumPackets)
 			break;
@@ -391,6 +474,33 @@ DWORD WINAPI NetProbeServer::threadUDPSend(LPVOID lpInstance){
 			packetsSent++;
 		}
 
+		client.byteTransmitted += retVal;
+		client.time = timer.Elapsed() / 1000.0;
+		client.rate = client.byteTransmitted / client.time;
+			
+
+		Client *pC = NULL;
+		for(int i=0;i<10;i++){
+			if(Server->clients[i].start == client.start)
+				pC = &(Server->clients[i]);
+		}
+		if(pC!=NULL && pC->kill){
+			Server->numClients--;
+			pC->start=0;
+			break;
+		}
+
+		if(pC==NULL)
+			for(int i=0;i<10;i++){
+				if(Server->clients[i].start == 0){
+					pC = &(Server->clients[i]);
+					break;
+				}
+			}
+
+		
+		memcpy(pC, &client, sizeof(Client));
+
 		if(SendingRate){
 			sleepT = packetsSent * T * 1000 - timer.Elapsed();
 			if(sleepT > 0)
@@ -403,13 +513,10 @@ DWORD WINAPI NetProbeServer::threadUDPSend(LPVOID lpInstance){
 	return 0;
 }
 
-DWORD WINAPI NetProbeServer::threadHTTPServer(LPVOID lpInstance){
+void NetProbeServer::HTTPServer(){
 	int addrlen = sizeof(struct sockaddr_in);
 	struct sockaddr_in *PeerAddr = new struct sockaddr_in;
 	int retVal;
-	NetProbeServer *Server = (NetProbeServer *)lpInstance;
-
-
 
 	char *buf = new char[2048];
 	string *str;
@@ -417,12 +524,11 @@ DWORD WINAPI NetProbeServer::threadHTTPServer(LPVOID lpInstance){
 
 	while(1){
 
-		SOCKET newsfd = accept(Server->httpfd, (struct sockaddr *)PeerAddr, &addrlen);
+		SOCKET newsfd = accept(httpfd, (struct sockaddr *)PeerAddr, &addrlen);
 		if(newsfd == INVALID_SOCKET){
 			errorMessageBox();
 			AfxEndThread(-1);
 		}
-
 
 		memset(buf,0,2048);
 		retVal = recv(newsfd, buf, 2048, 0);
@@ -440,29 +546,103 @@ DWORD WINAPI NetProbeServer::threadHTTPServer(LPVOID lpInstance){
 		char *outbuf = new char[1024];
 		memset(outbuf, 0, 1024);
 		memcpy(outbuf, buf+4,pos-5);
-		cout << outbuf;
-		if(strcmp("/", outbuf))
-			continue;
+		cout << outbuf << endl;
 
 		memset(buf, 0, 2048);
-		strcat_s(buf, 2048, "HTTP/1.1 200 OK\n");
-		strcat_s(buf, 2048, "Date: Mon, 10 Mar 2008 22:38:34 GMT\n");
-		strcat_s(buf, 2048, "Server: SuperNetProbeServer/0.3.1 (Microsoft Windows)\n");
-		strcat_s(buf, 2048, "Accept-Ranges: bytes\n");
+		strcat_s(buf, 2048, HTTPHeader);
 
-		char *fbuf = new char[2048];
-		int bytes = loadFile("index.html", fbuf);
-		char bstr[10];
-		memset(bstr, 0, 10);
-		sprintf(bstr, "%d", bytes);
-		strcat_s(buf, 2048, "Content-Length: ");
-		strcat_s(buf, 2048, bstr);
-		strcat_s(buf, 2048, "\nConnection: close\n");
-		strcat_s(buf, 2048, "Content-Type: text/html; charset=iso-8859-1\n\n");
-		//strcat_s(buf, 2048, "\nhello world!\n");
-		memcpy(buf + strlen(buf), fbuf, bytes);
+		if(strcmp("/", outbuf) == 0){
+			char *fbuf = new char[2048];
+			int bytes = loadFile("index.html", fbuf);
+			char bstr[10];
+			memset(bstr, 0, 10);
+			sprintf(bstr, "%d", bytes);
+			strcat_s(buf, 2048, "Content-Length: ");
+			strcat_s(buf, 2048, bstr);
+			strcat_s(buf, 2048, "\n\n");
+			memcpy(buf + strlen(buf), fbuf, bytes);
 
-		delete fbuf;
+			delete fbuf;
+		}else if(streq("/start", outbuf, 6) == 0) {
+			char *str = new char[5];
+			memset(str, 0, 5);
+			strcat_s(str, 5, outbuf+14);
+			int n = atoi(str);
+			maxNumClients = n;
+			AfxBeginThread((AFX_THREADPROC)threadServer, this);
+			char *fbuf = new char[2048];
+			int bytes = loadFile("status.html", fbuf);
+			char bstr[10];
+			memset(bstr, 0, 10);
+			sprintf(bstr, "%d", bytes);
+			strcat_s(buf, 2048, "Content-Length: ");
+			strcat_s(buf, 2048, bstr);
+			strcat_s(buf, 2048, "\n\n");
+			memcpy(buf + strlen(buf), fbuf, bytes);
+
+			delete fbuf;
+		}else if(streq("/css", outbuf, 4) == 0) {
+			char *fbuf = new char[2048];
+			int bytes = loadFile("style.css", fbuf);
+			char bstr[10];
+			memset(bstr, 0, 10);
+			sprintf(bstr, "%d", bytes);
+			strcat_s(buf, 2048, "Content-Length: ");
+			strcat_s(buf, 2048, bstr);
+			strcat_s(buf, 2048, "\n\n");
+			memcpy(buf + strlen(buf), fbuf, bytes);
+			delete fbuf;
+		}else if(streq("/status", outbuf, 3) == 0) {
+			char *fbuf = new char[2048];
+			memset(fbuf, 0 , 2048);
+			char tmp[256];
+			int count=0;
+
+			strcat_s(fbuf, 2048,"<table><tr><td>Client IP Address</td><td>Protocol</td><td>Transmission Rate(Bps)</td><td>Packet Size(Bytes)</td><td>Bytes Transmitted(Bytes)</td><td>Time Elapsed(s)</td><td>Control</td></tr>");
+			for(int i=0;i<10;i++){
+				if(clients[i].start){
+					sprintf(tmp, "<tr><td>%s:%d</td><td>%s</td><td>%f</td><td>%d</td><td>%d</td><td>%f</td><td><a href=\"kill?%d\">Kill</a></td></tr>\n", inet_ntoa(clients[i].Addr->sin_addr), clients[i].Addr->sin_port, clients[i].protocol?"TCP":"UDP", clients[i].rate, clients[i].packetSize, clients[i].byteTransmitted, clients[i].time, clients[i].start);
+					strcat_s(fbuf, 2048, tmp);
+					count++;
+				}
+			}
+			strcat_s(fbuf, 2048,"</table><br />");
+			sprintf(tmp, "Total number of clients: %d\n", count);
+			strcat_s(fbuf, 2048, tmp);
+
+			char bstr[10];
+			int bytes = strlen(fbuf);
+			memset(bstr, 0, 10);
+			sprintf(bstr, "%d", bytes);
+			strcat_s(buf, 2048, "Content-Length: ");
+			strcat_s(buf, 2048, bstr);
+			strcat_s(buf, 2048, "\n\n");
+			//memcpy(buf + strlen(buf), fbuf, bytes);
+			strcat_s(buf, 2048, fbuf);
+			delete fbuf;
+		}else if(streq("/kill", outbuf, 5) == 0) {
+			char *str = new char[15];
+			memset(str, 0, 15);
+			strcat_s(str, 15, outbuf+6);
+			long n = atoi(str);
+			for(int i=0;i<10;i++){
+				if(clients[i].start == n){
+					clients[i].kill = 1;
+				}
+			}
+
+			char *fbuf = new char[2048];
+			int bytes = loadFile("status.html", fbuf);
+			char bstr[10];
+			memset(bstr, 0, 10);
+			sprintf(bstr, "%d", bytes);
+			strcat_s(buf, 2048, "Content-Length: ");
+			strcat_s(buf, 2048, bstr);
+			strcat_s(buf, 2048, "\n\n");
+			memcpy(buf + strlen(buf), fbuf, bytes);
+
+			delete fbuf;
+		}
 
 		retVal = send(newsfd, buf, strlen(buf), 0);
 		if(retVal == SOCKET_ERROR){
@@ -470,10 +650,27 @@ DWORD WINAPI NetProbeServer::threadHTTPServer(LPVOID lpInstance){
 			errorMessageBox();
 			AfxEndThread(0);
 		}
+
+
 		shutdown(newsfd, SD_SEND);
 		closesocket(newsfd);
 		delete str;
 
+	}
+
+}
+
+
+DWORD WINAPI NetProbeServer::threadServer(LPVOID lpInstance){
+	NetProbeServer *Server = (NetProbeServer *)lpInstance;
+
+	Server->TCPReady();
+	Server->UDPReady();
+	while(1){
+		if(Server->maxNumClients < 0)
+			break;
+		Server->detectProtocol();
+		Sleep(50);
 	}
 
 	return 0;
@@ -499,18 +696,11 @@ int main(int argc, char const *argv[]){
 	//bind
 	//listen
 	//TCP
-	Server->TCPReady();
-	Server->UDPReady();
-	Server->HTTPReady();
 
-	AfxBeginThread((AFX_THREADPROC)Server->threadHTTPServer, (LPVOID)Server);
+	Server->HTTPReady();
+	Server->HTTPServer();
 	//accept
 	//UDPRecv
-	while(1){
-		Server->detectProtocol();
-		Sleep(50);
-	}
-
 
 
 	return 0;
