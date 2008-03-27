@@ -32,7 +32,11 @@ namespace SuperPang
             else if (inputKey.Equals("Down"))
                 model.stopHero();
             else if (inputKey.Equals("Space"))
-                model.getHero().jump();
+                model.jumpHero();
+            else if (inputKey.Equals("F"))
+                model.Fire();
+            else if (inputKey.Equals("R"))
+                model.Reset();
         }
     }
 

@@ -9,22 +9,21 @@ namespace SuperPang
     {
 
         public Hero(Rectangle initLocationInfo,
-            double initOrientation,
             double initVelocity_x,
             double init_Velocity_y,Model model) :
             base (initLocationInfo,
-            initOrientation,
             initVelocity_x,
             init_Velocity_y,
             model)
 		{
-			
+            image = Properties.Resources.Hero;
 		}
 
         public override void move(int max_width, int max_height)
         {
             locationInfo.X += (int)velocity_x;
             locationInfo.Y += (int)velocity_y;
+
             //velocity_x *= 0.95;
             if(velocity_y != 0)
                 velocity_y += 3;
@@ -47,21 +46,11 @@ namespace SuperPang
 
         public void moveLeft()
         {
-            /*
-            this.velocity_x -= 5;
-            if (velocity_x <= -20)
-                velocity_x = -20;
-             */
             this.velocity_x = -15;
         }
 
         public void moveRight()
         {
-            /*
-            this.velocity_x += 5;
-            if (velocity_x >= 20)
-                velocity_x = 20;
-             */
             this.velocity_x = 15;
         }
 

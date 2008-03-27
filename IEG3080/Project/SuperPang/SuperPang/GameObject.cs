@@ -8,44 +8,54 @@ namespace SuperPang
     public abstract class GameObject
     {
         protected Rectangle locationInfo;
-		protected double orientation = 0;
 		protected double velocity_x;
 		protected double velocity_y;
 		protected Model model = null;
+        protected Image image;
 
 		protected Random ran_gen = new Random();
 
 
 		public GameObject(Rectangle initLocationInfo,
-            double initOrientation,
             double initVelocity_x,
             double initVelocity_y,
             Model model) :
             base()
 		{
 			locationInfo = initLocationInfo;
-			orientation = initOrientation;
 			velocity_x = initVelocity_x;			
 			velocity_y = initVelocity_y;			
 			this.model = model;
 		}
 
-		public Rectangle getLocationInfo()
-		{
-			return locationInfo;
-		}
+        public GameObject(Rectangle initLocationInfo,
+            double initVelocity_x,
+            double initVelocity_y,
+            Model model, Image img) :
+            base()
+        {
+            locationInfo = initLocationInfo;
+            velocity_x = initVelocity_x;
+            velocity_y = initVelocity_y;
+            this.model = model;
+            image = img;
+        }
 
-		public double getOrientation()
+		public Rectangle Position
 		{
-			return orientation;
+            get { return locationInfo; }
 		}
 
 		public bool checkCollide(Rectangle other) 
 		{
-			return this.locationInfo.IntersectsWith(other);		
+			return this.locationInfo.IntersectsWith(other);
 		}
 
 		public abstract void move(int max_width, int max_height);
+        public Image Image
+        {
+            get { return image; }
+        }
 
     }
 }

@@ -45,44 +45,36 @@ namespace SuperPang
             
 
             Application.ApplicationExit += new EventHandler(MemoryCleanup);
-            //SetStyle(ControlStyles.AllPaintingInWmPaint, true);
 
             GraphicManager = BufferedGraphicsManager.Current;
             GraphicManager.MaximumBuffer =  new Size(this.Width + 1, this.Height + 1);
             ManagedBackBuffer = GraphicManager.Allocate(this.CreateGraphics(), ClientRectangle);
             ManagedBackBuffer.Graphics.SmoothingMode = SmoothingMode.HighQuality;
             ManagedBackBuffer.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-            //g.CompositingMode = CompositingMode.SourceCopy;
 
         }
 
 
         public override void update(Model model)
         {
+            foreach (GameObject obj in model.gameObjects)
+            {
+                obj.move(800 - obj.Position.Width, 500 - 22 - obj.Position.Height);
+            }
             Invalidate();
-            model.getHero().move(800 - 50, 500 - 160);
-            model.getBall().move(800 - 96, 500 - 110);
-            //makeHero(model.getHero());
-            //makeBall(model.getBall());
         }
 
-        private void makeHero(Graphics ControlGraphics, Hero hero)
+        private void makeObject(Graphics ControlGraphics, GameObject obj)
         {
             Bitmap img = Properties.Resources.Hero;
             try
             {
-                ControlGraphics.DrawImage(img, hero.getLocationInfo().X, hero.getLocationInfo().Y);
+                ControlGraphics.DrawImage(obj.Image, obj.Position.X, obj.Position.Y, obj.Position.Width, obj.Position.Height);
             }
             catch (Exception e)
             {
                 System.Console.WriteLine(e);
             }
-        }
-
-        private void makeBall(Graphics ControlGraphics, Ball ball)
-        {
-            Bitmap img = Properties.Resources.MacBook_White;
-            ControlGraphics.DrawImage(img, ball.getLocationInfo().X, ball.getLocationInfo().Y, 96, 96);
         }
 
         private void drawBackgroud(Graphics ControlGraphics)
@@ -93,8 +85,10 @@ namespace SuperPang
 
         private void drawObjects(Graphics ControlGraphics)
         {
-            makeHero(ControlGraphics, model.getHero());
-            makeBall(ControlGraphics, model.getBall());
+            foreach (GameObject obj in model.gameObjects)
+            {
+                makeObject(ControlGraphics, obj);
+            }
         }
     }
 }

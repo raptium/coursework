@@ -81,6 +81,13 @@ namespace SuperPang.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap gameover {
+            get {
+                object obj = ResourceManager.GetObject("gameover", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap Hero {
             get {
                 object obj = ResourceManager.GetObject("Hero", resourceCulture);
@@ -133,6 +140,13 @@ namespace SuperPang.Properties {
         internal static System.Drawing.Bitmap tiny {
             get {
                 object obj = ResourceManager.GetObject("tiny", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        internal static System.Drawing.Bitmap win {
+            get {
+                object obj = ResourceManager.GetObject("win", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
