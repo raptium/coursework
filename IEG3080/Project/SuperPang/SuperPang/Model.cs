@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
+
 namespace SuperPang
 {
     public class Model
@@ -122,6 +123,8 @@ namespace SuperPang
                     if (isCollision(ball, myHero) && shield == 0)
                     {
                         life--;
+                        balls.AddRange(ball.Split());
+                        balls.Remove(ball);
                         shield = 30;
                         break;
                     }
