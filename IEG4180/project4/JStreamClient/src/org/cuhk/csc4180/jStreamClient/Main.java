@@ -5,7 +5,6 @@
 
 package org.cuhk.csc4180.jStreamClient;
 
-
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.cuhk.csc4180.jStreamClient.LibHTTP.*;
