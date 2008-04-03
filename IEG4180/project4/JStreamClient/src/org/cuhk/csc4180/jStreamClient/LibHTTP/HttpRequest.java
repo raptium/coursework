@@ -69,6 +69,11 @@ public class HttpRequest {
         
     }
     
+    public String getPath(){
+        return m_path;
+    }
+    
+    
     @Override
     public String toString(){
         String str = new String();

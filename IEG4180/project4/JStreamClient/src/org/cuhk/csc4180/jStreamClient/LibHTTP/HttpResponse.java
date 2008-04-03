@@ -29,10 +29,10 @@ public class HttpResponse {
         m_version = "1.1";
         m_header = new HttpHeader();
         m_header.add("Cache-Control", "no-cache");
-        m_header.add("Connection", "close");
+        //m_header.add("Connection", "close");
         m_header.add("Date", format.format(date));
         m_header.add("Content-Type", "text/html; charset=us-ascii");
-        m_header.add("Accept-Ranges", "bytes");
+        //m_header.add("Accept-Ranges", "bytes");
         
         putStatusCode();
     }
@@ -95,7 +95,15 @@ public class HttpResponse {
     
     public void fillMessage(byte[] message){
         m_message = message;
-        m_header.add("Content-Length", "" + m_message.length);
+        //m_header.add("Content-Length", "" + m_message.length);
+    }
+    
+    public void setHeader(String key, String value){
+        m_header.add(key, value);
+    }
+    
+    public String getHeader(String key){
+        return m_header.retrieve(key);
     }
     
     public byte[] toBytes(){

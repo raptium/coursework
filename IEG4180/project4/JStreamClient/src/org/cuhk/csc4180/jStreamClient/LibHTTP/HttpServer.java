@@ -17,12 +17,12 @@ import java.util.logging.Logger;
  *
  * @author hguan5
  */
-public class HttpServer extends Thread{
+public class HttpServer{
     private String m_hostname;
     private int m_port;
     private InetSocketAddress m_addr;
     private ServerSocketChannel m_acceptChannel;
-    private SocketChannel m_activeChannel;
+
     
     public HttpServer(){
         m_hostname = "localhost";
@@ -34,8 +34,7 @@ public class HttpServer extends Thread{
         m_port = port;
     }
     
-    @Override
-    public void run(){
+    public void start(){
         try {
             m_addr = new InetSocketAddress(m_hostname, m_port);
             m_acceptChannel = ServerSocketChannel.open();
@@ -47,12 +46,21 @@ public class HttpServer extends Thread{
         }
     }
     
-    public HttpRequest getRequest(){
+    public SocketChannel accept(){
+        SocketChannel nChannel = null;
+        try {
+            nChannel = m_acceptChannel.accept();        
+        } catch (IOException ex) {
+            Logger.getLogger(HttpServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return nChannel;
+    }
+    
+    public HttpRequest getRequest(SocketChannel activeChannel){
         HttpRequest m_request = new HttpRequest();
         ByteBuffer buffer = ByteBuffer.allocate(4096);
         try {
-            m_activeChannel = m_acceptChannel.accept();
-            m_activeChannel.read(buffer);
+            activeChannel.read(buffer);
             m_request.parse(buffer.array());
         } catch (IOException ex) {
             Logger.getLogger(HttpServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -62,23 +70,35 @@ public class HttpServer extends Thread{
         return m_request;
     }
     
-    public void sendResponse(HttpResponse response){
+    public void sendResponse(SocketChannel activeChannel, HttpResponse response) throws IOException{
         ByteBuffer buffer = ByteBuffer.allocate(response.toBytes().length);
         buffer.put(response.toBytes());
         int attempts = 0;
         buffer.rewind();
-        try {
-            while(buffer.hasRemaining()){
-                int len = m_activeChannel.write(buffer);
-                attempts++;
-                if (len < 0){
-                    throw new EOFException();
-                }
-                System.out.println("bytes sent: " + len);
+
+        while(buffer.hasRemaining()){
+            int len = activeChannel.write(buffer);
+            attempts++;
+            if (len < 0){
+                throw new EOFException();
             }
-            m_activeChannel.close();
-        } catch (IOException ex) {
-            Logger.getLogger(HttpServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+    
+    public void sendData(SocketChannel activeChannel, byte[] buf) throws IOException{
+        ByteBuffer buffer = ByteBuffer.allocate(buf.length);
+        buffer.put(buf);
+        int attempts = 0;
+        buffer.rewind();
+
+        while(buffer.hasRemaining()){
+            int len = activeChannel.write(buffer);
+            attempts++;
+            if (len < 0){
+                throw new EOFException();
+            }
         }
     }
+    
 }
