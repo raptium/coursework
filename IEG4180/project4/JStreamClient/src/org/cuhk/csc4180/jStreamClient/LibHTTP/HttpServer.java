@@ -86,9 +86,9 @@ public class HttpServer{
 
     }
     
-    public void sendData(SocketChannel activeChannel, byte[] buf) throws IOException{
-        ByteBuffer buffer = ByteBuffer.allocate(buf.length);
-        buffer.put(buf);
+    public void sendData(SocketChannel activeChannel, byte[] buf, int length) throws IOException{
+        ByteBuffer buffer = ByteBuffer.allocate(length);
+        buffer.put(buf, 0, length);
         int attempts = 0;
         buffer.rewind();
 
