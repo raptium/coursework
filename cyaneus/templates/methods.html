@@ -1,0 +1,9 @@
+<div class="header">
+	<ul class="tabnav" id="methods-list">
+		{% for method in methods %}
+		<li{% if forloop.first %} class="active"{% endif %} id="channel_tab_{{ forloop.counter }}"><a href="#" onClick="switchChannelTab('channel_tab_{{ forloop.counter }}');loadChannel('{{ method.channel }}','{{ method.tool }}')">{{ method.tool }}</a></li>
+		{% endfor %}
+	</ul>
+</div>
+<div id="media" class="content">
+</div>
