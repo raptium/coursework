@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+	<head>
+	    <title>Admin Console</title>
+		<link rel="stylesheet" href="../static/static/cyaneus.css" type="text/css" media="screen" />
+		<style type="text/css" media="screen">
+		    label {
+				margin: 2px 10px 0;
+				width: 50px;
+				float: left;
+			}
+			
+			input {
+				margin: 2px 0;
+				padding: 0 2px;
+				font-size: 12px;
+			}
+			
+			.btn {
+				margin-left: 10px;
+				padding: 2px 10px;
+				text-align: center;
+				-moz-border-radius: 3px;
+				-webkit-border-radius: 3px;
+				border: 1px solid #999;
+			}
+		</style>
+		<script type="text/javascript" src="../static/static/prototype-1.6.0.2.js"></script>
+		<script type="text/javascript">
+		    //<![CDATA[
+		    	function updateData(){
+					new Ajax.Request('/admin/add/',
+					{
+						method:'post',
+						parameters: {
+							channel: $('channel').getValue(),
+							game: $('game').getValue(),
+							tool: $('tool').getValue(),
+							team: $('team').getValue(),
+						},
+						onSuccess: function(transport){
+						  var response = transport.responseText || "no response text";
+						  $('result').update(response);
+						},
+						onFailure: function(transport){
+							$('result').update("<p>Update failed.</p>" + transport.responseText);
+						}
+					  });
+				}
+				function addMethod(){
+					new Ajax.Request('/admin/addMethod/',
+					{
+						method:'post',
+						parameters: {
+							channel: $('channel').getValue(),
+							tool: $('tool').getValue(),
+							reference: $('reference').getValue(),
+						},
+						onSuccess: function(transport){
+						  var response = transport.responseText || "no response text";
+						  $('result').update(response);
+						},
+						onFailure: function(transport){
+							$('result').update("<p>Update failed.</p>" + transport.responseText);
+						}
+					  });
+				}
+		    //]]>
+		</script>
+	</head>
+	<body>
+	    <div id="console" class="box">
+		    <div class="header">
+			    <ul class="tabnav">
+					<li class="active"><a href="#">Database</a></li>
+				</ul>
+			</div>
+			<div id="optfield" class="content">
+			    <form method="post" action="#">
+				    <label for="channel">Channel</label><input type="text" id="channel" value="" /><br />
+					<label for="game">Game</label><input type="text" id="game" value="" /><br />
+					<label for="tool">Tool</label><input type="text" id="tool" value="" /><br />
+					<label for="team">Team</label><input type="text" id="team" value="" />
+					<a class="btn" href="#" onClick="updateData()">Add</a><br />
+					<label for="reference">Reference</label><textarea id="reference" value=""></textarea>
+					<a class="btn" href="#" onClick="addMethod()">Add Method</a>
+				</form>
+			</div>
+			<div id="result">
+			</div>
+		</div>
+	</body>
+</html>
