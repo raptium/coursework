@@ -10,7 +10,8 @@ urlpatterns = patterns('',
 	(r'^go/(.+)/(.+?)/$', actMethod),
 
     # Uncomment this for admin:
-     (r'^admin/$', console),
-     (r'^admin/add/$', addEntry),
-     (r'^admin/addMethod/$', addMethod),
+	(r'^admin/$', console),
+	(r'^admin/add/$', addEntry),
+	(r'^admin/addMethod/$', addMethod),
+	(r'^admin/addMatch/$', addMatch),
 )

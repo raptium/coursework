@@ -1,4 +1,5 @@
 from django.shortcuts import render_to_response
+from django.http import Http404
 from google.appengine.ext import db
 from live.models import *
 import logging
