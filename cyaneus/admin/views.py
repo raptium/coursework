@@ -18,12 +18,15 @@ def console(request):
 def addEntry(request):
 	ostr = ''
 	if request['channel']:
-		if Channel.all().filter('name =', request['channel'].decode('utf-8')).count() == 0:
-			channel = Channel(name=request['channel'].decode('utf-8'))
-			channel.put()
-			ostr += "Channel added.<br />"
-		else:
-			ostr += "Channel already exists.<br />"
+		msg = 'Channel already exists.<br />'	
+		schs = request['channel'].decode('utf-8').rsplit()
+		for sch in schs:
+			query = Channel.all().filter('name =', sch)
+			if query.count() == 0:
+				channel = Channel(name=sch)
+				channel.put()
+				msg = "Channel added.<br />"
+		ostr += msg
 	if request['game']:
 		if Game.all().filter('name =', request['game'].decode('utf-8')).count() == 0:
 			game = Game(name=request['game'].decode('utf-8'))

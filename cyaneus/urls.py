@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import *
 from live.views import *
 from admin.views import *
+from grab.views import *
 
 urlpatterns = patterns('',
     # Example:
@@ -9,9 +10,13 @@ urlpatterns = patterns('',
 	(r'^channel/(.+?)/$', listMethods),
 	(r'^go/(.+)/(.+?)/$', actMethod),
 
-    # Uncomment this for admin:
+    # simple admin
 	(r'^admin$', console),
 	(r'^admin/add/$', addEntry),
 	(r'^admin/addMethod/$', addMethod),
 	(r'^admin/addMatch/$', addMatch),
+	
+	# grab
+	(r'^grab$', getZhiBoBa),
+	
 )

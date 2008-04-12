@@ -98,6 +98,8 @@ function switchGameTab(current){
 }
 
 function loadGame(game){
+	$('methods').style.display = 'none';
+	$('matches').update('Now loading...');
 	new Ajax.Request('/game/' + Url.encode(game) + '/',
 	  {
 		method:'get',
@@ -112,6 +114,7 @@ function loadGame(game){
 }
 
 function loadChannel(channel, tool){
+	$('media').update('Now loading...');
 	new Ajax.Request('/go/' + Url.encode(channel) + '/' + tool + '/',
 	  {
 		method:'get',

@@ -13,4 +13,7 @@
 		</ul>
 	</li>
 	{% endfor %}
+	{% if not matches %}
+		<p>暂时没有符合要求的比赛。</p>
+	{% endif %}
 </ul>

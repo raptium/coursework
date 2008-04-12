@@ -1,0 +1,11 @@
+<ul>
+	{% for match in matches %}
+	<li>Game: {{ match.game }}<br />
+		Time: {{ match.begin_time }}<br />
+		Teams: {% for team in match.teams %}
+			{{ team }}
+		{% endfor %}<br />
+		Channels: {{ match.channels }}<br />
+	</li>
+	{% endfor %}
+</ul>

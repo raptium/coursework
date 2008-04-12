@@ -1,9 +1,18 @@
-from django.shortcuts import render_to_response
-from django.http import Http404
-from google.appengine.ext import db
-from live.models import *
+# import from standard python library
 import logging
 import urllib
+from datetime import *
+
+# import from google app engine
+from google.appengine.ext import db
+
+# import from django
+from django.shortcuts import render_to_response
+from django.http import Http404
+
+# import from cyaneus
+from live.models import *
+
 
 def live(request):
 	games = Game.all()
@@ -12,13 +21,16 @@ def live(request):
 def listMatches(request, gameName):
 	gameName = urllib.unquote(gameName).decode('utf-8')
 	if gameName == 'all':
-		m_matches = Match.all().order('begin_time')
+		m_matches = Match.all()
 	else:
 		game = Game.all().filter('name =', gameName)[0]
-		m_matches = Match.all().filter('game =', game).order('begin_time')
+		m_matches = Match.all().filter('game =', game)
 	
+	start_date = datetime.today() - timedelta(1)
+	end_date = datetime.today() + timedelta(3)
+	m_matches = m_matches.filter('begin_time >', start_date).filter('begin_time <', end_date).order('begin_time')
 	matches = []
-	for m in m_matches:
+	for m in m_matches[:15]:
 		match = {}
 		match['begin_time'] = m.begin_time
 		match['game'] = m.game.name
@@ -50,9 +62,10 @@ def actMethod(request, channel, tool):
 	ch = Channel.all().filter('name =', channel)[0]
 	t = Tool.all().filter('name =', tool)[0]
 	method = Method.all().filter('channel =', ch).filter('tool =', t)[0]
-	switch = {'SopCast': goSopCast,
+	switch = {
+		'SopCast': goSopCast,
 		'TVANTS': goTVANTS
-		}
+	}
 	if t.name in switch:
 	     return switch[t.name](method)
 	else:

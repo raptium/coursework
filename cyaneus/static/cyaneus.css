@@ -87,6 +87,7 @@ ul.channels {
 
 ul.channels li {
 	display: inline;
+	margin-right: 8px;
 }
 
 ul.channels li a {

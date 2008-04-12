@@ -10,21 +10,21 @@ indexes:
 # automatically uploaded to the admin console when you next deploy
 # your application using appcfg.py.
 
-# Used once in query history.
+# Used 74 times in query history.
+- kind: Match
+  properties:
+  - name: begin_time
+  - name: game
+
+# Used 32 times in query history.
+- kind: Match
+  properties:
+  - name: begin_time
+  - name: game
+  - name: teams
+
+# Used 148 times in query history.
 - kind: Match
   properties:
   - name: game
   - name: begin_time
-
-# Used 2 times in query history.
-- kind: Method
-  properties:
-  - name: channel
-  - name: reference
-  - name: tool
-
-# Unused in query history -- copied from input.
-- kind: Method
-  properties:
-  - name: channel
-  - name: tool
