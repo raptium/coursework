@@ -363,37 +363,30 @@ Origin codes: i - IGP, e - EGP, ? - incomplete
 *> 200.11.15.0      10.0.11.1                1         32768 ?
 
 
-S2_CE#sh ip route
-Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
-       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
-       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
-       E1 - OSPF external type 1, E2 - OSPF external type 2
-       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
-       ia - IS-IS inter area, * - candidate default, U - per-user static route
-       o - ODR, P - periodic downloaded static route
+S2_CE#sh ip bgp
+BGP table version is 47, local router ID is 1.51.2.1
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
+              r RIB-failure, S Stale
+Origin codes: i - IGP, e - EGP, ? - incomplete
 
-Gateway of last resort is 0.0.0.0 to network 0.0.0.0
+   Network          Next Hop            Metric LocPrf Weight Path
+*> 172.16.12.0/24   0.0.0.0                  0         32768 ?
+*> 200.12.1.0       172.16.12.1         156160         32768 ?
+*> 200.12.2.0       172.16.12.1         156160         32768 ?
+*> 200.12.3.0       172.16.12.1         156160         32768 ?
+*> 200.12.4.0       172.16.12.1         156160         32768 ?
+*> 200.12.5.0       172.16.12.1         156160         32768 ?
+*> 200.12.6.0       172.16.12.1         156160         32768 ?
+*> 200.12.7.0       172.16.12.1         156160         32768 ?
+*> 200.12.8.0       172.16.12.1         156160         32768 ?
+*> 200.12.9.0       172.16.12.1         156160         32768 ?
+*> 200.12.10.0      172.16.12.1         156160         32768 ?
+*> 200.12.11.0      172.16.12.1         156160         32768 ?
+*> 200.12.12.0      172.16.12.1         156160         32768 ?
+*> 200.12.13.0      172.16.12.1         156160         32768 ?
+*> 200.12.14.0      172.16.12.1         156160         32768 ?
+*> 200.12.15.0      172.16.12.1         156160         32768 ?
 
-D    200.12.4.0/24 [90/156160] via 172.16.12.1, 01:09:40, FastEthernet1/0
-     1.0.0.0/24 is subnetted, 1 subnets
-C       1.51.2.0 is directly connected, FastEthernet0/0
-D    200.12.5.0/24 [90/156160] via 172.16.12.1, 01:09:40, FastEthernet1/0
-D    200.12.6.0/24 [90/156160] via 172.16.12.1, 01:09:40, FastEthernet1/0
-D    200.12.7.0/24 [90/156160] via 172.16.12.1, 01:09:40, FastEthernet1/0
-D    200.12.1.0/24 [90/156160] via 172.16.12.1, 01:09:40, FastEthernet1/0
-D    200.12.2.0/24 [90/156160] via 172.16.12.1, 01:09:40, FastEthernet1/0
-     172.16.0.0/24 is subnetted, 1 subnets
-C       172.16.12.0 is directly connected, FastEthernet1/0
-D    200.12.3.0/24 [90/156160] via 172.16.12.1, 01:09:40, FastEthernet1/0
-D    200.12.12.0/24 [90/156160] via 172.16.12.1, 01:09:40, FastEthernet1/0
-D    200.12.13.0/24 [90/156160] via 172.16.12.1, 01:09:40, FastEthernet1/0
-D    200.12.14.0/24 [90/156160] via 172.16.12.1, 01:09:41, FastEthernet1/0
-D    200.12.15.0/24 [90/156160] via 172.16.12.1, 01:09:41, FastEthernet1/0
-D    200.12.8.0/24 [90/156160] via 172.16.12.1, 01:09:41, FastEthernet1/0
-D    200.12.9.0/24 [90/156160] via 172.16.12.1, 01:09:41, FastEthernet1/0
-D    200.12.10.0/24 [90/156160] via 172.16.12.1, 01:09:41, FastEthernet1/0
-D    200.12.11.0/24 [90/156160] via 172.16.12.1, 01:09:41, FastEthernet1/0
-S*   0.0.0.0/0 is directly connected, Null0
 
 S3_CE#sh ip bgp
 BGP table version is 17, local router ID is 192.168.13.254

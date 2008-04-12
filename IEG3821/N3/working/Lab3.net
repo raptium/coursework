@@ -6,41 +6,16 @@ mmap = true
 sparsemem = true
 
 [127.0.0.1]
-# “workingdir?stores all files needed by Dynamips
-# This Network File is stored in the “workingdir?
-# “workingdir?can be pointed to a USB flash disk but not a Samba drive
-# e.g. workingdir = F:\MyDir\IEG3821\Lab3\
-
-workingdir = C:\temp\raptium\MyDir\IEG3821\Lab3\
+workingdir = /Users/raptium/Documents/Study/IEG3821/Lab3/working/
 
 [[ETHSW SW]]
-# SW is the switch connecting Ethernet interface of S1_PE, 
-# S2_PE and S3_PE
-#
-# Connection:
-#
-# Port 1 dot1q [VLAN 12 + VLAN 13] => S1_PE:F0/0
-# Port 2 dot1q [VLAN 12 + VLAN 23] => S2_PE:F0/0
-# Port 3 dot1q [VLAN 13 + VLAN 23] => S3_PE:F0/0
-#
-# Example: 
-#   Port 88 is connected to [VLAN 98 + VLAN 99]
-#   Configuration:
-#     88 = dot1q
-# 
-# READ_THE_NETWORK_DIAGRAM_AND
-# FILL_IN_THE_CONFIGURATION_OF_SW_BELOW
 1 = dot1q 123
 2 = dot1q 123
 3 = dot1q 123
 
 [[3640]]
-# idlepc depends on machine. 
-# Read the tutorial website on how to evaluate a good value
-# idlepc = 0x6103dca4
-idlepc = 0x610095ec
-# “F:\MyDir\IEG3821\images?is the path where the IOS image is put into
-image = C:\temp\raptium\MyDir\IEG3821\images\c3640-telco-mz.124-13.image
+#idle-pc
+image = /Users/raptium/Documents/Study/IEG3821/images/c3640-telco-mz.124-13.image
 ram = 64
 
 #### S1_PE ####

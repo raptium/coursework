@@ -1,0 +1,1015 @@
+\documentclass[10pt]{article}
+\usepackage{fontspec,xunicode}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage[a4paper,hmargin=0.8in,vmargin=1.2in]{geometry}
+\defaultfontfeatures{Mapping=tex-text}
+\XeTeXlinebreaklocale "en"
+\XeTeXlinebreakskip = 0pt plus 1pt
+\setromanfont{Georgia}
+\setmainfont{Georgia}
+\setsansfont{Tahoma}
+%\setmonofont{Lucida Console}
+\setmonofont{Courier New}
+%\setmonofont{Consolas}
+\renewcommand{\thesection}{Task \arabic{section}:}
+\renewcommand{\thesubsection}{\alph{subsection})}
+
+
+\author{GUAN Hao\\05569511\\hguan5@ie.cuhk.edu.hk}
+\title{IEG3821 N3:Daynamic Routing Protocol\\Laboratory Report}
+\date{\today}
+\begin{document}
+\maketitle
+\setcounter{section}{-1}
+\section{Construct the Dynagen Network File and Basic router configuration}
+\subsection{Construct the Dynagen Network File}
+According to the network diagram, the Network File has modified as following:
+\begin{verbatim*}
+	# IEG3821 ?Lab3
+	autostart = false
+	ghostios = true
+	ghostsize = 64
+	mmap = true
+	sparsemem = true
+
+	[127.0.0.1]
+	workingdir = /Users/raptium/Documents/Study/IEG3821/N3/working/
+
+	[[ETHSW SW]]
+	1 = dot1q 123
+	2 = dot1q 123
+	3 = dot1q 123
+
+	[[3640]]
+	image = /Users/raptium/Documents/Study/IEG3821/N3/images/c3640-telco-mz.124-13.image
+	ram = 64
+
+	#### S1_PE ####
+	[[ROUTER S1_PE]]
+	console = 2001
+	model = 3640
+	F0/0 = SW 1
+
+	#### S2_PE ####
+	[[ROUTER S2_PE]]
+	console = 2002
+	model = 3640
+	F0/0 = SW 2
+
+	#### S3_PE ####
+	[[ROUTER S3_PE]]
+	console = 2003
+	model = 3640
+	F0/0 = SW 3
+
+	#### S1_CE ####
+	[[ROUTER S1_CE]]
+	console = 2004
+	model = 3640
+	F0/0 = S1_PE F1/0
+
+	#### S2_CE ####
+	[[ROUTER S2_CE]]
+	console = 2005
+	model = 3640
+	F0/0 = S2_PE F1/0
+
+	#### S3_CE ####
+	[[ROUTER S3_CE]]
+	console = 2006
+	model = 3640
+	F0/0 = S3_PE F1/0
+
+	#### S1_R ####
+	[[ROUTER S1_R]]
+	console = 2007
+	model = 3640
+	F0/0 = S1_CE F1/0
+
+	#### S2_R ####
+	[[ROUTER S2_R]]
+	console = 2008
+	model = 3640
+	F0/0 = S2_CE F1/0
+
+	#### S3_R ####
+	[[ROUTER S3_R]]
+	console = 2009
+	model = 3640
+	F0/0 = S3_CE F1/0
+\end{verbatim*}
+\subsection{Basic Router Configurations} % (fold)
+\label{sub:basic_router_configurations}
+To configure the hostname of each router, just run {\tt hostname} on the routers.
+
+The missing IP address can be set as following:
+\begin{itemize}
+	\item {\bf S1\_PE}
+	\begin{verbatim*}
+		interface FastEthernet0/0
+		 no ip address
+		!
+		interface FastEthernet0/0.12
+		 encapsulation dot1Q 12
+		 ip address 1.51.12.1 255.255.255.0
+		!
+		interface FastEthernet0/0.13
+		 encapsulation dot1Q 13
+		 ip address 1.51.13.1 255.255.255.0
+		!
+		interface FastEthernet1/0
+		 ip address 1.51.1.254 255.255.255.0
+		!
+	\end{verbatim*}
+	\item {\bf S2\_PE}
+	\begin{verbatim*}
+		interface FastEthernet0/0
+		 no ip address
+		!
+		interface FastEthernet0/0.12
+		 encapsulation dot1Q 12
+		 ip address 1.51.12.2 255.255.255.0
+		!
+		interface FastEthernet0/0.23
+		 encapsulation dot1Q 23
+		 ip address 1.51.23.2 255.255.255.0
+		!
+		interface FastEthernet1/0
+		 ip address 1.51.2.254 255.255.255.0
+		!
+	\end{verbatim*}
+	\item {\bf S3\_PE}
+	\begin{verbatim*}
+		interface FastEthernet0/0
+		 no ip address
+		!
+		interface FastEthernet0/0.13
+		 encapsulation dot1Q 13
+		 ip address 1.51.13.3 255.255.255.0
+		!
+		interface FastEthernet0/0.23
+		 encapsulation dot1Q 23
+		 ip address 1.51.23.3 255.255.255.0
+		!
+		interface FastEthernet1/0
+		 ip address 1.51.3.254 255.255.255.0
+		!
+	\end{verbatim*}
+	\item {\bf S1\_CE}
+	\begin{verbatim*}
+		interface FastEthernet0/0
+		 ip address 1.51.1.1 255.255.255.0
+		!
+	\end{verbatim*}
+	\item {\bf S2\_CE}
+	\begin{verbatim*}
+		interface FastEthernet0/0
+		 ip address 1.51.2.1 255.255.255.0
+		!
+	\end{verbatim*}
+	\item {\bf S3\_CE}
+	\begin{verbatim*}
+		interface FastEthernet0/0
+		 ip address 1.51.3.1 255.255.255.0
+		!
+	\end{verbatim*}
+\end{itemize}
+To verify the configuration above,
+\begin{verbatim*}
+	S1_PE#ping 1.51.12.2
+
+	Type escape sequence to abort.
+	Sending 5, 100-byte ICMP Echos to 1.51.12.2, timeout is 2 seconds:
+	!!!!!
+	Success rate is 100 percent (5/5), round-trip min/avg/max = 12/29/76 ms
+	S1_PE#ping 1.51.13.3
+
+	Type escape sequence to abort.
+	Sending 5, 100-byte ICMP Echos to 1.51.13.3, timeout is 2 seconds:
+	.!!!!
+	Success rate is 80 percent (4/5), round-trip min/avg/max = 20/52/96 ms
+	S1_PE#ping 1.51.1.1
+
+	Type escape sequence to abort.
+	Sending 5, 100-byte ICMP Echos to 1.51.1.1, timeout is 2 seconds:
+	.!!!!
+	Success rate is 80 percent (4/5), round-trip min/avg/max = 28/45/60 ms
+
+	S2_PE#ping 1.51.12.1
+
+	Type escape sequence to abort.
+	Sending 5, 100-byte ICMP Echos to 1.51.12.1, timeout is 2 seconds:
+	!!!!!
+	Success rate is 100 percent (5/5), round-trip min/avg/max = 16/39/88 ms
+	S2_PE#ping 1.51.23.3
+
+	Type escape sequence to abort.
+	Sending 5, 100-byte ICMP Echos to 1.51.23.3, timeout is 2 seconds:
+	!!!!!
+	Success rate is 100 percent (5/5), round-trip min/avg/max = 8/29/68 ms
+	S2_PE#ping 1.51.2.1
+
+	Type escape sequence to abort.
+	Sending 5, 100-byte ICMP Echos to 1.51.2.1, timeout is 2 seconds:
+	.!!!!
+	Success rate is 80 percent (4/5), round-trip min/avg/max = 16/32/40 ms
+
+	S3_PE#ping 1.51.13.1
+
+	Type escape sequence to abort.
+	Sending 5, 100-byte ICMP Echos to 1.51.13.1, timeout is 2 seconds:
+	!!!!!
+	Success rate is 100 percent (5/5), round-trip min/avg/max = 12/25/52 ms
+	S3_PE#ping 1.51.23.2
+
+	Type escape sequence to abort.
+	Sending 5, 100-byte ICMP Echos to 1.51.23.2, timeout is 2 seconds:
+	!!!!!
+	Success rate is 100 percent (5/5), round-trip min/avg/max = 8/44/112 ms
+	S3_PE#ping 1.51.3.1
+
+	Type escape sequence to abort.
+	Sending 5, 100-byte ICMP Echos to 1.51.3.1, timeout is 2 seconds:
+	.!!!!
+	Success rate is 80 percent (4/5), round-trip min/avg/max = 8/27/48 ms
+\end{verbatim*}
+
+% subsection basic_router_configurations (end)
+\section{Core IGP in NSP network} % (fold)
+\label{sec:core_igp_in_nsp_network}
+\begin{itemize}
+	\item {\bf S1\_PE}
+	\begin{verbatim*}
+		interface Loopback0
+		 ip ospf network point-to-point
+		!
+		router ospf 1
+		 network 1.51.12.0 0.0.0.255 area 0
+		 network 1.51.13.0 0.0.0.255 area 0
+		 network 10.1.1.3 0.0.0.0 area 0
+		!	
+	\end{verbatim*}
+	\item {\bf S2\_PE}
+	\begin{verbatim*}
+		interface Loopback0
+		 ip ospf network point-to-point
+		!
+		router ospf 1
+		 network 1.51.12.0 0.0.0.255 area 0
+		 network 1.51.23.0 0.0.0.255 area 0
+		 network 10.1.1.2 0.0.0.0 area 0
+		!	
+	\end{verbatim*}
+	\item {\bf S3\_PE}
+	\begin{verbatim*}
+		interface Loopback0
+		 ip ospf network point-to-point
+		!
+		router ospf 1
+		 network 1.51.13.0 0.0.0.255 area 0
+		 network 1.51.23.0 0.0.0.255 area 0
+		 network 10.1.1.3 0.0.0.0 area 0
+		!	
+	\end{verbatim*}
+	\item {\bf Verify}
+	\begin{verbatim*}
+		S1_PE#ping 10.1.1.2 source lo0
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 10.1.1.2, timeout is 2 seconds:
+		Packet sent with a source address of 10.1.1.1 
+		!!!!!
+		Success rate is 100 percent (5/5), round-trip min/avg/max = 4/10/24 ms
+		S1_PE#ping 10.1.1.3 source lo0
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 10.1.1.3, timeout is 2 seconds:
+		Packet sent with a source address of 10.1.1.1 
+		!!!!!
+		Success rate is 100 percent (5/5), round-trip min/avg/max = 8/10/16 ms
+		
+		S2_PE#ping 10.1.1.1 source lo0
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 10.1.1.1, timeout is 2 seconds:
+		Packet sent with a source address of 10.1.1.2 
+		!!!!!
+		Success rate is 100 percent (5/5), round-trip min/avg/max = 4/12/16 ms
+		S2_PE#ping 10.1.1.3 source lo0
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 10.1.1.3, timeout is 2 seconds:
+		Packet sent with a source address of 10.1.1.2 
+		!!!!!
+		Success rate is 100 percent (5/5), round-trip min/avg/max = 8/10/16 ms
+		
+		S3_PE#ping 10.1.1.1 source lo0
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 10.1.1.1, timeout is 2 seconds:
+		Packet sent with a source address of 10.1.1.3 
+		!!!!!
+		Success rate is 100 percent (5/5), round-trip min/avg/max = 4/16/40 ms
+		S3_PE#ping 10.1.1.2 source lo0
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 10.1.1.2, timeout is 2 seconds:
+		Packet sent with a source address of 10.1.1.3 
+		!!!!!
+		Success rate is 100 percent (5/5), round-trip min/avg/max = 4/10/20 ms
+	\end{verbatim*}
+\end{itemize}
+% section core_igp_in_nsp_network (end)
+\section{COnfiguration of IGP on networks in each site} % (fold)
+\label{sec:configuration_of_igp_on_networks_in_each_site}
+\subsection{Configure RIP on networks in Site 1} % (fold)
+\label{sub:configure_rip_on_networks_in_site_1}
+\begin{itemize}
+	\item {\bf S1\_CE}
+	\begin{verbatim*}
+		router rip
+		 network 10.0.0.0
+		 default-information originate
+		!
+	\end{verbatim*}
+	\item {\bf S1\_R}
+	\begin{verbatim*}
+		router rip
+		 network 10.0.0.0
+		 network 200.11.1.0
+		 network 200.11.2.0
+		 network 200.11.3.0
+		 network 200.11.4.0
+		 network 200.11.5.0
+		 network 200.11.6.0
+		 network 200.11.7.0
+		 network 200.11.8.0
+		 network 200.11.9.0
+		 network 200.11.10.0
+		 network 200.11.11.0
+		 network 200.11.12.0
+		 network 200.11.13.0
+		 network 200.11.14.0
+		 network 200.11.15.0
+		!
+	\end{verbatim*}
+	\item {Verify \& Capture}
+	\begin{verbatim*}
+		S1_CE#sh ip route
+		Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+		       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+		       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+		       E1 - OSPF external type 1, E2 - OSPF external type 2
+		       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+		       ia - IS-IS inter area, * - candidate default, U - per-user static route
+		       o - ODR, P - periodic downloaded static route
+
+		Gateway of last resort is not set
+
+		R    200.11.4.0/24 [120/1] via 10.0.11.1, 00:00:04, FastEthernet1/0
+		     1.0.0.0/24 is subnetted, 1 subnets
+		C       1.51.1.0 is directly connected, FastEthernet0/0
+		R    200.11.5.0/24 [120/1] via 10.0.11.1, 00:00:04, FastEthernet1/0
+		R    200.11.6.0/24 [120/1] via 10.0.11.1, 00:00:04, FastEthernet1/0
+		R    200.11.7.0/24 [120/1] via 10.0.11.1, 00:00:04, FastEthernet1/0
+		R    200.11.1.0/24 [120/1] via 10.0.11.1, 00:00:04, FastEthernet1/0
+		R    200.11.2.0/24 [120/1] via 10.0.11.1, 00:00:04, FastEthernet1/0
+		R    200.11.3.0/24 [120/1] via 10.0.11.1, 00:00:04, FastEthernet1/0
+		R    200.11.12.0/24 [120/1] via 10.0.11.1, 00:00:04, FastEthernet1/0
+		R    200.11.13.0/24 [120/1] via 10.0.11.1, 00:00:04, FastEthernet1/0
+		R    200.11.14.0/24 [120/1] via 10.0.11.1, 00:00:04, FastEthernet1/0
+		     10.0.0.0/24 is subnetted, 1 subnets
+		C       10.0.11.0 is directly connected, FastEthernet1/0
+		R    200.11.15.0/24 [120/1] via 10.0.11.1, 00:00:05, FastEthernet1/0
+		R    200.11.8.0/24 [120/1] via 10.0.11.1, 00:00:05, FastEthernet1/0
+		R    200.11.9.0/24 [120/1] via 10.0.11.1, 00:00:05, FastEthernet1/0
+		R    200.11.10.0/24 [120/1] via 10.0.11.1, 00:00:05, FastEthernet1/0
+		R    200.11.11.0/24 [120/1] via 10.0.11.1, 00:00:05, FastEthernet1/0
+
+
+
+		S1_R#sh ip route
+		Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+		       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+		       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+		       E1 - OSPF external type 1, E2 - OSPF external type 2
+		       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+		       ia - IS-IS inter area, * - candidate default, U - per-user static route
+		       o - ODR, P - periodic downloaded static route
+
+		Gateway of last resort is 10.0.11.254 to network 0.0.0.0
+
+		C    200.11.4.0/24 is directly connected, Loopback0
+		C    200.11.5.0/24 is directly connected, Loopback0
+		C    200.11.6.0/24 is directly connected, Loopback0
+		C    200.11.7.0/24 is directly connected, Loopback0
+		C    200.11.1.0/24 is directly connected, Loopback0
+		C    200.11.2.0/24 is directly connected, Loopback0
+		C    200.11.3.0/24 is directly connected, Loopback0
+		C    200.11.12.0/24 is directly connected, Loopback0
+		C    200.11.13.0/24 is directly connected, Loopback0
+		C    200.11.14.0/24 is directly connected, Loopback0
+		     10.0.0.0/24 is subnetted, 1 subnets
+		C       10.0.11.0 is directly connected, FastEthernet0/0
+		C    200.11.15.0/24 is directly connected, Loopback0
+		C    200.11.8.0/24 is directly connected, Loopback0
+		C    200.11.9.0/24 is directly connected, Loopback0
+		C    200.11.10.0/24 is directly connected, Loopback0
+		C    200.11.11.0/24 is directly connected, Loopback0
+		R*   0.0.0.0/0 [120/1] via 10.0.11.254, 00:00:12, FastEthernet0/0
+	\end{verbatim*}
+\end{itemize}
+% subsection configure_rip_on_networks_in_site_1 (end)
+\subsection{Configure EIGRP on networks in Site 2} % (fold)
+\label{sub:configure_eigrp_on_networks_in_site_2}
+\begin{itemize}
+	\item {\bf S2\_CE}
+	\begin{verbatim*}
+		router eigrp 1200
+		 redistribute static
+		 network 172.16.12.0 0.0.0.255
+		!
+		ip route 0.0.0.0 0.0.0.0 Null0
+	\end{verbatim*}
+	\item {\bf S2\_R}
+	\begin{verbatim*}
+		router eigrp 1200
+		 network 172.16.12.0 0.0.0.255
+		 network 200.12.0.0 0.0.15.255
+		!
+	\end{verbatim*}
+	\item {\bf Verify \& Capture}
+	\begin{verbatim*}
+		S2_CE#sh ip route
+		Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+		       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+		       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+		       E1 - OSPF external type 1, E2 - OSPF external type 2
+		       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+		       ia - IS-IS inter area, * - candidate default, U - per-user static route
+		       o - ODR, P - periodic downloaded static route
+
+		Gateway of last resort is 0.0.0.0 to network 0.0.0.0
+
+		D    200.12.4.0/24 [90/156160] via 172.16.12.1, 00:02:23, FastEthernet1/0
+		     1.0.0.0/24 is subnetted, 1 subnets
+		C       1.51.2.0 is directly connected, FastEthernet0/0
+		D    200.12.5.0/24 [90/156160] via 172.16.12.1, 00:02:23, FastEthernet1/0
+		D    200.12.6.0/24 [90/156160] via 172.16.12.1, 00:02:23, FastEthernet1/0
+		D    200.12.7.0/24 [90/156160] via 172.16.12.1, 00:02:23, FastEthernet1/0
+		D    200.12.1.0/24 [90/156160] via 172.16.12.1, 00:02:23, FastEthernet1/0
+		D    200.12.2.0/24 [90/156160] via 172.16.12.1, 00:02:23, FastEthernet1/0
+		     172.16.0.0/24 is subnetted, 1 subnets
+		C       172.16.12.0 is directly connected, FastEthernet1/0
+		D    200.12.3.0/24 [90/156160] via 172.16.12.1, 00:02:23, FastEthernet1/0
+		D    200.12.12.0/24 [90/156160] via 172.16.12.1, 00:02:23, FastEthernet1/0
+		D    200.12.13.0/24 [90/156160] via 172.16.12.1, 00:02:23, FastEthernet1/0
+		D    200.12.14.0/24 [90/156160] via 172.16.12.1, 00:02:24, FastEthernet1/0
+		D    200.12.15.0/24 [90/156160] via 172.16.12.1, 00:02:24, FastEthernet1/0
+		D    200.12.8.0/24 [90/156160] via 172.16.12.1, 00:02:24, FastEthernet1/0
+		D    200.12.9.0/24 [90/156160] via 172.16.12.1, 00:02:24, FastEthernet1/0
+		D    200.12.10.0/24 [90/156160] via 172.16.12.1, 00:02:24, FastEthernet1/0
+		D    200.12.11.0/24 [90/156160] via 172.16.12.1, 00:02:24, FastEthernet1/0
+		S*   0.0.0.0/0 is directly connected, Null0
+
+
+		S2_R#sh ip route
+		Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+		       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+		       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+		       E1 - OSPF external type 1, E2 - OSPF external type 2
+		       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+		       ia - IS-IS inter area, * - candidate default, U - per-user static route
+		       o - ODR, P - periodic downloaded static route
+
+		Gateway of last resort is 172.16.12.254 to network 0.0.0.0
+
+		C    200.12.4.0/24 is directly connected, Loopback0
+		C    200.12.5.0/24 is directly connected, Loopback0
+		C    200.12.6.0/24 is directly connected, Loopback0
+		C    200.12.7.0/24 is directly connected, Loopback0
+		C    200.12.1.0/24 is directly connected, Loopback0
+		C    200.12.2.0/24 is directly connected, Loopback0
+		     172.16.0.0/16 is variably subnetted, 2 subnets, 2 masks
+		C       172.16.12.0/24 is directly connected, FastEthernet0/0
+		D       172.16.0.0/16 is a summary, 00:02:39, Null0
+		C    200.12.3.0/24 is directly connected, Loopback0
+		C    200.12.12.0/24 is directly connected, Loopback0
+		C    200.12.13.0/24 is directly connected, Loopback0
+		C    200.12.14.0/24 is directly connected, Loopback0
+		C    200.12.15.0/24 is directly connected, Loopback0
+		C    200.12.8.0/24 is directly connected, Loopback0
+		C    200.12.9.0/24 is directly connected, Loopback0
+		C    200.12.10.0/24 is directly connected, Loopback0
+		C    200.12.11.0/24 is directly connected, Loopback0
+		D*EX 0.0.0.0/0 [170/28160] via 172.16.12.254, 00:00:35, FastEthernet0/0
+	\end{verbatim*}
+\end{itemize}
+% subsection configure_eigrp_on_networks_in_site_2 (end)
+\subsection{Configure OSPF no networks in Site 3} % (fold)
+\label{sub:configure_ospf_no_networks_in_site_3}
+\begin{itemize}
+	\item {\bf S3\_CE}
+	\begin{verbatim*}
+		router ospf 1
+		 network 192.168.13.0 0.0.0.255 area 1300
+		 default-information originate
+		!
+		ip route 0.0.0.0 0.0.0.0 Null0
+	\end{verbatim*}
+	\item {\bf S3\_R}
+	\begin{verbatim*}
+		router ospf 1
+		 network 192.168.13.0 0.0.0.255 area 1300
+		 network 200.13.0.0 0.0.15.255 area 1300
+		!
+	\end{verbatim*}
+	\item {\bf Verify \& Capture}
+	\begin{verbatim*}
+		S3_CE#sh ip route
+		Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+		       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+		       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+		       E1 - OSPF external type 1, E2 - OSPF external type 2
+		       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+		       ia - IS-IS inter area, * - candidate default, U - per-user static route
+		       o - ODR, P - periodic downloaded static route
+
+		Gateway of last resort is 0.0.0.0 to network 0.0.0.0
+
+		O    200.13.4.0/24 [110/2] via 192.168.13.1, 00:00:38, FastEthernet1/0
+		     1.0.0.0/24 is subnetted, 1 subnets
+		C       1.51.3.0 is directly connected, FastEthernet0/0
+		C    192.168.13.0/24 is directly connected, FastEthernet1/0
+		O    200.13.5.0/24 [110/2] via 192.168.13.1, 00:00:38, FastEthernet1/0
+		O    200.13.6.0/24 [110/2] via 192.168.13.1, 00:00:38, FastEthernet1/0
+		O    200.13.7.0/24 [110/2] via 192.168.13.1, 00:00:38, FastEthernet1/0
+		     200.13.1.0/32 is subnetted, 1 subnets
+		O       200.13.1.254 [110/2] via 192.168.13.1, 00:00:38, FastEthernet1/0
+		O    200.13.2.0/24 [110/2] via 192.168.13.1, 00:00:38, FastEthernet1/0
+		O    200.13.3.0/24 [110/2] via 192.168.13.1, 00:00:38, FastEthernet1/0
+		O    200.13.12.0/24 [110/2] via 192.168.13.1, 00:00:38, FastEthernet1/0
+		O    200.13.13.0/24 [110/2] via 192.168.13.1, 00:00:38, FastEthernet1/0
+		O    200.13.14.0/24 [110/2] via 192.168.13.1, 00:00:38, FastEthernet1/0
+		O    200.13.15.0/24 [110/2] via 192.168.13.1, 00:00:38, FastEthernet1/0
+		O    200.13.8.0/24 [110/2] via 192.168.13.1, 00:00:38, FastEthernet1/0
+		O    200.13.9.0/24 [110/2] via 192.168.13.1, 00:00:38, FastEthernet1/0
+		O    200.13.10.0/24 [110/2] via 192.168.13.1, 00:00:38, FastEthernet1/0
+		O    200.13.11.0/24 [110/2] via 192.168.13.1, 00:00:38, FastEthernet1/0
+		S*   0.0.0.0/0 is directly connected, Null0
+
+
+		S3_R#sh ip route
+		Codes: C - connected, S - static, R - RIP, M - mobile, B - BGP
+		       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+		       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+		       E1 - OSPF external type 1, E2 - OSPF external type 2
+		       i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
+		       ia - IS-IS inter area, * - candidate default, U - per-user static route
+		       o - ODR, P - periodic downloaded static route
+
+		Gateway of last resort is 192.168.13.254 to network 0.0.0.0
+
+		C    200.13.4.0/24 is directly connected, Loopback0
+		C    192.168.13.0/24 is directly connected, FastEthernet0/0
+		C    200.13.5.0/24 is directly connected, Loopback0
+		C    200.13.6.0/24 is directly connected, Loopback0
+		C    200.13.7.0/24 is directly connected, Loopback0
+		C    200.13.1.0/24 is directly connected, Loopback0
+		C    200.13.2.0/24 is directly connected, Loopback0
+		C    200.13.3.0/24 is directly connected, Loopback0
+		C    200.13.12.0/24 is directly connected, Loopback0
+		C    200.13.13.0/24 is directly connected, Loopback0
+		C    200.13.14.0/24 is directly connected, Loopback0
+		C    200.13.15.0/24 is directly connected, Loopback0
+		C    200.13.8.0/24 is directly connected, Loopback0
+		C    200.13.9.0/24 is directly connected, Loopback0
+		C    200.13.10.0/24 is directly connected, Loopback0
+		C    200.13.11.0/24 is directly connected, Loopback0
+		O*E2 0.0.0.0/0 [110/1] via 192.168.13.254, 00:00:00, FastEthernet0/0
+	\end{verbatim*}
+\end{itemize}
+% subsection configure_ospf_no_networks_in_site_3 (end)
+% section configuration_of_igp_on_networks_in_each_site (end)
+\section{Core BGP in each NSP network} % (fold)
+\label{sec:core_bgp_in_each_nsp_network}
+\begin{itemize}
+	\item {\bf S1\_PE}
+	\begin{verbatim*}
+		router bgp 1000
+		 bgp router-id 10.1.1.1
+		 neighbor 10.1.1.2 remote-as 1000
+		 neighbor 10.1.1.2 update-source Loopback0
+		 neighbor 10.1.1.3 remote-as 1000
+		 neighbor 10.1.1.3 update-source Loopback0
+		!
+	\end{verbatim*}
+	\item {\bf S2\_PE}
+	\begin{verbatim*}
+		router bgp 1000
+		 bgp router-id 10.1.1.2
+		 neighbor 10.1.1.1 remote-as 1000
+		 neighbor 10.1.1.1 update-source Loopback0
+		 neighbor 10.1.1.3 remote-as 1000
+		 neighbor 10.1.1.3 update-source Loopback0
+		!
+	\end{verbatim*}
+	\item {\bf S3\_PE}
+	\begin{verbatim*}
+		router bgp 1000
+		 bgp router-id 10.1.1.3
+		 neighbor 10.1.1.1 remote-as 1000
+		 neighbor 10.1.1.1 update-source Loopback0
+		 neighbor 10.1.1.2 remote-as 1000
+		 neighbor 10.1.1.2 update-source Loopback0
+		!
+	\end{verbatim*}
+	\item {\bf Verify \& Capture}
+	\begin{verbatim*}
+		S1_PE#sh ip bgp sum
+		BGP router identifier 10.1.1.1, local AS number 1000
+		BGP table version is 1, main routing table version 1
+
+		Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+		10.1.1.2        4  1000       4       5        1    0    0 00:01:14        0
+		10.1.1.3        4  1000       4       4        1    0    0 00:00:38        0
+
+
+		S2_PE#sh ip bgp sum
+		BGP router identifier 10.1.1.2, local AS number 1000
+		BGP table version is 1, main routing table version 1
+
+		Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+		10.1.1.1        4  1000       5       4        1    0    0 00:01:24        0
+		10.1.1.3        4  1000       4       4        1    0    0 00:00:24        0
+
+		S3_PE#sh ip bgp sum
+		BGP router identifier 10.1.1.3, local AS number 1000
+		BGP table version is 1, main routing table version 1
+
+		Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+		10.1.1.1        4  1000       4       4        1    0    0 00:00:53        0
+		10.1.1.2        4  1000       4       4        1    0    0 00:00:29        0
+	\end{verbatim*}
+\end{itemize}
+% section core_bgp_in_each_nsp_network (end)
+\section{Configuration of eBGP between PE and CE of each Site} % (fold)
+\label{sec:configuration_of_ebgp_between_pe_and_ce_of_each_site}
+\begin{itemize}
+	\item {\bf S1\_PE}
+	\begin{verbatim*}
+		router bgp 1000
+		 bgp router-id 10.1.1.1
+		 neighbor 1.51.1.1 remote-as 1100
+		 neighbor 10.1.1.2 next-hop-self
+		 neighbor 10.1.1.3 next-hop-self
+		!
+	\end{verbatim*}
+	\item {\bf S1\_CE}
+	\begin{verbatim*}
+		router bgp 1100
+		 bgp router-id 1.51.1.1
+		 redistribute rip
+		 neighbor 1.51.1.254 remote-as 1000
+		 neighbor 1.51.1.254 update-source FastEthernet0/0
+		!
+	\end{verbatim*}
+	\item {\bf S2\_PE}
+	\begin{verbatim*}
+		router bgp 1000
+		 bgp router-id 10.1.1.2
+		 neighbor 1.51.2.1 remote-as 1200
+		 neighbor 10.1.1.1 next-hop-self
+		 neighbor 10.1.1.3 next-hop-self
+		!
+	\end{verbatim*}
+	\item {\bf S2\_CE}
+	\begin{verbatim*}
+		router bgp 1200
+		 bgp router-id 1.51.2.1
+		 redistribute eigrp 1200
+		 neighbor 1.51.2.254 remote-as 1000
+		 neighbor 1.51.2.254 update-source FastEthernet0/0
+		!
+	\end{verbatim*}
+	\item {\bf S3\_PE}
+	\begin{verbatim*}
+		router bgp 1000
+		 bgp router-id 10.1.1.3
+		 neighbor 1.51.3.1 remote-as 1300
+		 neighbor 10.1.1.1 next-hop-self
+		 neighbor 10.1.1.2 next-hop-self
+		!
+	\end{verbatim*}
+	\item {\bf S3\_CE}
+	\begin{verbatim*}
+		router bgp 1300
+		 bgp router-id 1.51.3.1
+		 redistribute ospf 1
+		 neighbor 1.51.3.254 remote-as 1000
+		 neighbor 1.51.3.254 update-source FastEthernet0/0
+		!
+	\end{verbatim*}
+	\item {\bf Verify \& Capture}
+	\begin{verbatim*}
+		S1_CE#sh ip bgp
+		BGP table version is 17, local router ID is 1.51.1.1
+		Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
+		              r RIB-failure, S Stale
+		Origin codes: i - IGP, e - EGP, ? - incomplete
+
+		   Network          Next Hop            Metric LocPrf Weight Path
+		*> 10.0.11.0/24     0.0.0.0                  0         32768 ?
+		*> 200.11.1.0       10.0.11.1                1         32768 ?
+		*> 200.11.2.0       10.0.11.1                1         32768 ?
+		*> 200.11.3.0       10.0.11.1                1         32768 ?
+		*> 200.11.4.0       10.0.11.1                1         32768 ?
+		*> 200.11.5.0       10.0.11.1                1         32768 ?
+		*> 200.11.6.0       10.0.11.1                1         32768 ?
+		*> 200.11.7.0       10.0.11.1                1         32768 ?
+		*> 200.11.8.0       10.0.11.1                1         32768 ?
+		*> 200.11.9.0       10.0.11.1                1         32768 ?
+		*> 200.11.10.0      10.0.11.1                1         32768 ?
+		*> 200.11.11.0      10.0.11.1                1         32768 ?
+		*> 200.11.12.0      10.0.11.1                1         32768 ?
+		*> 200.11.13.0      10.0.11.1                1         32768 ?
+		*> 200.11.14.0      10.0.11.1                1         32768 ?
+		*> 200.11.15.0      10.0.11.1                1         32768 ?
+
+
+		S2_CE#sh ip bgp
+		BGP table version is 47, local router ID is 1.51.2.1
+		Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
+		              r RIB-failure, S Stale
+		Origin codes: i - IGP, e - EGP, ? - incomplete
+
+		   Network          Next Hop            Metric LocPrf Weight Path
+		*> 172.16.12.0/24   0.0.0.0                  0         32768 ?
+		*> 200.12.1.0       172.16.12.1         156160         32768 ?
+		*> 200.12.2.0       172.16.12.1         156160         32768 ?
+		*> 200.12.3.0       172.16.12.1         156160         32768 ?
+		*> 200.12.4.0       172.16.12.1         156160         32768 ?
+		*> 200.12.5.0       172.16.12.1         156160         32768 ?
+		*> 200.12.6.0       172.16.12.1         156160         32768 ?
+		*> 200.12.7.0       172.16.12.1         156160         32768 ?
+		*> 200.12.8.0       172.16.12.1         156160         32768 ?
+		*> 200.12.9.0       172.16.12.1         156160         32768 ?
+		*> 200.12.10.0      172.16.12.1         156160         32768 ?
+		*> 200.12.11.0      172.16.12.1         156160         32768 ?
+		*> 200.12.12.0      172.16.12.1         156160         32768 ?
+		*> 200.12.13.0      172.16.12.1         156160         32768 ?
+		*> 200.12.14.0      172.16.12.1         156160         32768 ?
+		*> 200.12.15.0      172.16.12.1         156160         32768 ?
+
+
+		S3_CE#sh ip bgp
+		BGP table version is 17, local router ID is 1.51.3.1
+		Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
+		              r RIB-failure, S Stale
+		Origin codes: i - IGP, e - EGP, ? - incomplete
+
+		   Network          Next Hop            Metric LocPrf Weight Path
+		*> 192.168.13.0     0.0.0.0                  0         32768 ?
+		*> 200.13.1.254/32  192.168.13.1             2         32768 ?
+		*> 200.13.2.0       192.168.13.1             2         32768 ?
+		*> 200.13.3.0       192.168.13.1             2         32768 ?
+		*> 200.13.4.0       192.168.13.1             2         32768 ?
+		*> 200.13.5.0       192.168.13.1             2         32768 ?
+		*> 200.13.6.0       192.168.13.1             2         32768 ?
+		*> 200.13.7.0       192.168.13.1             2         32768 ?
+		*> 200.13.8.0       192.168.13.1             2         32768 ?
+		*> 200.13.9.0       192.168.13.1             2         32768 ?
+		*> 200.13.10.0      192.168.13.1             2         32768 ?
+		*> 200.13.11.0      192.168.13.1             2         32768 ?
+		*> 200.13.12.0      192.168.13.1             2         32768 ?
+		*> 200.13.13.0      192.168.13.1             2         32768 ?
+		*> 200.13.14.0      192.168.13.1             2         32768 ?
+		*> 200.13.15.0      192.168.13.1             2         32768 ?
+
+		S1_R#ping 200.12.1.254 source lo0
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.12.1.254, timeout is 2 seconds:
+		Packet sent with a source address of 200.11.1.254
+		!!!!!
+		Success rate is 100 percent (5/5), round-trip min/avg/max = 44/99/144 ms
+		S1_R#ping 200.13.1.254 source lo0
+
+		Type escape sequence to abort.
+		Sending 5, 100-byte ICMP Echos to 200.13.1.254, timeout is 2 seconds:
+		Packet sent with a source address of 200.11.1.254
+		!!!!!
+		Success rate is 100 percent (5/5), round-trip min/avg/max = 64/88/136 ms
+	\end{verbatim*}
+\end{itemize}
+% section configuration_of_ebgp_between_pe_and_ce_of_each_site (end)
+\section{Implementation of RFC 1918 in PE Router} % (fold)
+\label{sec:implementation_of_rfc_1918_in_pe_router}
+\begin{itemize}
+	\item {\bf S1\_PE}
+	\begin{verbatim*}
+		ip prefix-list PL seq 5 deny 10.0.11.0/24
+		ip prefix-list PL seq 10 permit 0.0.0.0/0 le 32
+		router bgp 1000
+		 neighbor 1.51.1.1 prefix-list PL in
+		!
+	\end{verbatim*}
+	\item {\bf S2\_PE}
+	\begin{verbatim*}
+		ip prefix-list PL seq 5 deny 172.16.12.0/24
+		ip prefix-list PL seq 10 permit 0.0.0.0/0 le 32
+		router bgp 1000
+		 neighbor 1.51.2.1 prefix-list PL in
+		!
+	\end{verbatim*}
+	\item {\bf S3\_PE}
+	\begin{verbatim*}
+		ip prefix-list PL seq 5 deny 192.168.13.0/24
+		ip prefix-list PL seq 10 permit 0.0.0.0/0 le 32
+		router bgp 1000
+		 neighbor 1.51.3.1 prefix-list PL in
+		!
+	\end{verbatim*}
+	\item {\bf Capture \& Verify}
+	\begin{verbatim*}
+		S1_CE#sh bgp
+		BGP table version is 47, local router ID is 1.51.1.1
+		Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
+		              r RIB-failure, S Stale
+		Origin codes: i - IGP, e - EGP, ? - incomplete
+
+		   Network          Next Hop            Metric LocPrf Weight Path
+		*> 10.0.11.0/24     0.0.0.0                  0         32768 ?
+		*> 200.11.1.0       10.0.11.1                1         32768 ?
+		*> 200.11.2.0       10.0.11.1                1         32768 ?
+		*> 200.11.3.0       10.0.11.1                1         32768 ?
+		*> 200.11.4.0       10.0.11.1                1         32768 ?
+		*> 200.11.5.0       10.0.11.1                1         32768 ?
+		*> 200.11.6.0       10.0.11.1                1         32768 ?
+		*> 200.11.7.0       10.0.11.1                1         32768 ?
+		*> 200.11.8.0       10.0.11.1                1         32768 ?
+		*> 200.11.9.0       10.0.11.1                1         32768 ?
+		*> 200.11.10.0      10.0.11.1                1         32768 ?
+		*> 200.11.11.0      10.0.11.1                1         32768 ?
+		*> 200.11.12.0      10.0.11.1                1         32768 ?
+		*> 200.11.13.0      10.0.11.1                1         32768 ?
+		*> 200.11.14.0      10.0.11.1                1         32768 ?
+		*> 200.11.15.0      10.0.11.1                1         32768 ?
+		*> 200.12.1.0       1.51.1.254                             0 1000 1200 ?
+		   Network          Next Hop            Metric LocPrf Weight Path
+		*> 200.12.2.0       1.51.1.254                             0 1000 1200 ?
+		*> 200.12.3.0       1.51.1.254                             0 1000 1200 ?
+		*> 200.12.4.0       1.51.1.254                             0 1000 1200 ?
+		*> 200.12.5.0       1.51.1.254                             0 1000 1200 ?
+		*> 200.12.6.0       1.51.1.254                             0 1000 1200 ?
+		*> 200.12.7.0       1.51.1.254                             0 1000 1200 ?
+		*> 200.12.8.0       1.51.1.254                             0 1000 1200 ?
+		*> 200.12.9.0       1.51.1.254                             0 1000 1200 ?
+		*> 200.12.10.0      1.51.1.254                             0 1000 1200 ?
+		*> 200.12.11.0      1.51.1.254                             0 1000 1200 ?
+		*> 200.12.12.0      1.51.1.254                             0 1000 1200 ?
+		*> 200.12.13.0      1.51.1.254                             0 1000 1200 ?
+		*> 200.12.14.0      1.51.1.254                             0 1000 1200 ?
+		*> 200.12.15.0      1.51.1.254                             0 1000 1200 ?
+		*> 200.13.1.254/32  1.51.1.254                             0 1000 1300 ?
+		*> 200.13.2.0       1.51.1.254                             0 1000 1300 ?
+		*> 200.13.3.0       1.51.1.254                             0 1000 1300 ?
+		*> 200.13.4.0       1.51.1.254                             0 1000 1300 ?
+		*> 200.13.5.0       1.51.1.254                             0 1000 1300 ?
+		*> 200.13.6.0       1.51.1.254                             0 1000 1300 ?
+		*> 200.13.7.0       1.51.1.254                             0 1000 1300 ?
+		*> 200.13.8.0       1.51.1.254                             0 1000 1300 ?
+		   Network          Next Hop            Metric LocPrf Weight Path
+		*> 200.13.9.0       1.51.1.254                             0 1000 1300 ?
+		*> 200.13.10.0      1.51.1.254                             0 1000 1300 ?
+		*> 200.13.11.0      1.51.1.254                             0 1000 1300 ?
+		*> 200.13.12.0      1.51.1.254                             0 1000 1300 ?
+		*> 200.13.13.0      1.51.1.254                             0 1000 1300 ?
+		*> 200.13.14.0      1.51.1.254                             0 1000 1300 ?
+		*> 200.13.15.0      1.51.1.254                             0 1000 1300 ?
+
+
+		S2_CE#sh bgp
+		BGP table version is 47, local router ID is 1.51.2.1
+		Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
+		              r RIB-failure, S Stale
+		Origin codes: i - IGP, e - EGP, ? - incomplete
+
+		   Network          Next Hop            Metric LocPrf Weight Path
+		*> 172.16.12.0/24   0.0.0.0                  0         32768 ?
+		*> 200.11.1.0       1.51.2.254                             0 1000 1100 ?
+		*> 200.11.2.0       1.51.2.254                             0 1000 1100 ?
+		*> 200.11.3.0       1.51.2.254                             0 1000 1100 ?
+		*> 200.11.4.0       1.51.2.254                             0 1000 1100 ?
+		*> 200.11.5.0       1.51.2.254                             0 1000 1100 ?
+		*> 200.11.6.0       1.51.2.254                             0 1000 1100 ?
+		*> 200.11.7.0       1.51.2.254                             0 1000 1100 ?
+		*> 200.11.8.0       1.51.2.254                             0 1000 1100 ?
+		*> 200.11.9.0       1.51.2.254                             0 1000 1100 ?
+		*> 200.11.10.0      1.51.2.254                             0 1000 1100 ?
+		*> 200.11.11.0      1.51.2.254                             0 1000 1100 ?
+		*> 200.11.12.0      1.51.2.254                             0 1000 1100 ?
+		*> 200.11.13.0      1.51.2.254                             0 1000 1100 ?
+		*> 200.11.14.0      1.51.2.254                             0 1000 1100 ?
+		*> 200.11.15.0      1.51.2.254                             0 1000 1100 ?
+		*> 200.12.1.0       172.16.12.1         156160         32768 ?
+		   Network          Next Hop            Metric LocPrf Weight Path
+		*> 200.12.2.0       172.16.12.1         156160         32768 ?
+		*> 200.12.3.0       172.16.12.1         156160         32768 ?
+		*> 200.12.4.0       172.16.12.1         156160         32768 ?
+		*> 200.12.5.0       172.16.12.1         156160         32768 ?
+		*> 200.12.6.0       172.16.12.1         156160         32768 ?
+		*> 200.12.7.0       172.16.12.1         156160         32768 ?
+		*> 200.12.8.0       172.16.12.1         156160         32768 ?
+		*> 200.12.9.0       172.16.12.1         156160         32768 ?
+		*> 200.12.10.0      172.16.12.1         156160         32768 ?
+		*> 200.12.11.0      172.16.12.1         156160         32768 ?
+		*> 200.12.12.0      172.16.12.1         156160         32768 ?
+		*> 200.12.13.0      172.16.12.1         156160         32768 ?
+		*> 200.12.14.0      172.16.12.1         156160         32768 ?
+		*> 200.12.15.0      172.16.12.1         156160         32768 ?
+		*> 200.13.1.254/32  1.51.2.254                             0 1000 1300 ?
+		*> 200.13.2.0       1.51.2.254                             0 1000 1300 ?
+		*> 200.13.3.0       1.51.2.254                             0 1000 1300 ?
+		*> 200.13.4.0       1.51.2.254                             0 1000 1300 ?
+		*> 200.13.5.0       1.51.2.254                             0 1000 1300 ?
+		*> 200.13.6.0       1.51.2.254                             0 1000 1300 ?
+		*> 200.13.7.0       1.51.2.254                             0 1000 1300 ?
+		*> 200.13.8.0       1.51.2.254                             0 1000 1300 ?
+		   Network          Next Hop            Metric LocPrf Weight Path
+		*> 200.13.9.0       1.51.2.254                             0 1000 1300 ?
+		*> 200.13.10.0      1.51.2.254                             0 1000 1300 ?
+		*> 200.13.11.0      1.51.2.254                             0 1000 1300 ?
+		*> 200.13.12.0      1.51.2.254                             0 1000 1300 ?
+		*> 200.13.13.0      1.51.2.254                             0 1000 1300 ?
+		*> 200.13.14.0      1.51.2.254                             0 1000 1300 ?
+		*> 200.13.15.0      1.51.2.254                             0 1000 1300 ?
+
+
+
+		S3_CE#sh bgp
+		BGP table version is 47, local router ID is 1.51.3.1
+		Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
+		              r RIB-failure, S Stale
+		Origin codes: i - IGP, e - EGP, ? - incomplete
+
+		   Network          Next Hop            Metric LocPrf Weight Path
+		*> 192.168.13.0     0.0.0.0                  0         32768 ?
+		*> 200.11.1.0       1.51.3.254                             0 1000 1100 ?
+		*> 200.11.2.0       1.51.3.254                             0 1000 1100 ?
+		*> 200.11.3.0       1.51.3.254                             0 1000 1100 ?
+		*> 200.11.4.0       1.51.3.254                             0 1000 1100 ?
+		*> 200.11.5.0       1.51.3.254                             0 1000 1100 ?
+		*> 200.11.6.0       1.51.3.254                             0 1000 1100 ?
+		*> 200.11.7.0       1.51.3.254                             0 1000 1100 ?
+		*> 200.11.8.0       1.51.3.254                             0 1000 1100 ?
+		*> 200.11.9.0       1.51.3.254                             0 1000 1100 ?
+		*> 200.11.10.0      1.51.3.254                             0 1000 1100 ?
+		*> 200.11.11.0      1.51.3.254                             0 1000 1100 ?
+		*> 200.11.12.0      1.51.3.254                             0 1000 1100 ?
+		*> 200.11.13.0      1.51.3.254                             0 1000 1100 ?
+		*> 200.11.14.0      1.51.3.254                             0 1000 1100 ?
+		*> 200.11.15.0      1.51.3.254                             0 1000 1100 ?
+		*> 200.12.1.0       1.51.3.254                             0 1000 1200 ?
+		   Network          Next Hop            Metric LocPrf Weight Path
+		*> 200.12.2.0       1.51.3.254                             0 1000 1200 ?
+		*> 200.12.3.0       1.51.3.254                             0 1000 1200 ?
+		*> 200.12.4.0       1.51.3.254                             0 1000 1200 ?
+		*> 200.12.5.0       1.51.3.254                             0 1000 1200 ?
+		*> 200.12.6.0       1.51.3.254                             0 1000 1200 ?
+		*> 200.12.7.0       1.51.3.254                             0 1000 1200 ?
+		*> 200.12.8.0       1.51.3.254                             0 1000 1200 ?
+		*> 200.12.9.0       1.51.3.254                             0 1000 1200 ?
+		*> 200.12.10.0      1.51.3.254                             0 1000 1200 ?
+		*> 200.12.11.0      1.51.3.254                             0 1000 1200 ?
+		*> 200.12.12.0      1.51.3.254                             0 1000 1200 ?
+		*> 200.12.13.0      1.51.3.254                             0 1000 1200 ?
+		*> 200.12.14.0      1.51.3.254                             0 1000 1200 ?
+		*> 200.12.15.0      1.51.3.254                             0 1000 1200 ?
+		*> 200.13.1.254/32  192.168.13.1             2         32768 ?
+		*> 200.13.2.0       192.168.13.1             2         32768 ?
+		*> 200.13.3.0       192.168.13.1             2         32768 ?
+		*> 200.13.4.0       192.168.13.1             2         32768 ?
+		*> 200.13.5.0       192.168.13.1             2         32768 ?
+		*> 200.13.6.0       192.168.13.1             2         32768 ?
+		*> 200.13.7.0       192.168.13.1             2         32768 ?
+		*> 200.13.8.0       192.168.13.1             2         32768 ?
+		   Network          Next Hop            Metric LocPrf Weight Path
+		*> 200.13.9.0       192.168.13.1             2         32768 ?
+		*> 200.13.10.0      192.168.13.1             2         32768 ?
+		*> 200.13.11.0      192.168.13.1             2         32768 ?
+		*> 200.13.12.0      192.168.13.1             2         32768 ?
+		*> 200.13.13.0      192.168.13.1             2         32768 ?
+		*> 200.13.14.0      192.168.13.1             2         32768 ?
+		*> 200.13.15.0      192.168.13.1             2         32768 ?
+	\end{verbatim*}
+	As you can see above, there are no private addresses from other CE networks advertised any more.
+\end{itemize}
+% section implementation_of_rfc_1918_in_pe_router (end)
+\newpage
+\appendix
+\section{Declaration}
+I declare that the assignment here submitted is original except for source material explicitly acknowledged, and that the same or related material has not been previously submitted for another course. I also acknowledge that I am aware of University policy and regulations on honesty in academic work, and of the disciplinary guidelines and procedures applicable to breaches of such policy and regulations, as contained in the website \url{http://www.cuhk.edu.hk/policy/academichonesty/}
+\vspace*{3cm}
+\end{document}
