@@ -1,24 +1,25 @@
+from appengine_django.models import BaseModel
 from google.appengine.ext import db
 
-class Game(db.Model):
+class Game(BaseModel):
 	name = db.StringProperty()
 	def __str__(self):
 		return self.name
 
-class Team(db.Model):
+class Team(BaseModel):
 	name = db.StringProperty()
 	#game = db.ReferenceProperty(Game)
 	def __str__(self):
 		return self.name
 
 
-class Channel(db.Model):
+class Channel(BaseModel):
 	name = db.StringProperty()
 	def __str__(self):
 		return self.name
 
 
-class Match(db.Model):
+class Match(BaseModel):
 	game = db.ReferenceProperty(Game)
 	begin_time = db.DateTimeProperty()
 	teams = db.ListProperty(db.Key)
@@ -30,13 +31,13 @@ class Match(db.Model):
 		return str
 
 
-class Tool(db.Model):
+class Tool(BaseModel):
 	name = db.StringProperty()
 	def __str__(self):
 		return self.name
 
 
-class Method(db.Model):
+class Method(BaseModel):
 	channel = db.ReferenceProperty(Channel)
 	tool = db.ReferenceProperty(Tool)
 	reference = db.TextProperty()

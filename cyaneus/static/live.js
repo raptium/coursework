@@ -69,7 +69,7 @@ var Url = {
 var preChannel = '';
 var preGame = 'game_tab_0';
 function fetchMethods(channel){
-	new Ajax.Request('/channel/' + Url.encode(channel),
+	new Ajax.Request('/channel/' + Url.encode(channel) + '/',
 	  {
 		method:'get',
 		onSuccess: function(transport){
@@ -98,7 +98,7 @@ function switchGameTab(current){
 }
 
 function loadGame(game){
-	new Ajax.Request('/game/' + Url.encode(game),
+	new Ajax.Request('/game/' + Url.encode(game) + '/',
 	  {
 		method:'get',
 		onSuccess: function(transport){
@@ -112,7 +112,7 @@ function loadGame(game){
 }
 
 function loadChannel(channel, tool){
-	new Ajax.Request('/go/' + Url.encode(channel) + '/' + tool,
+	new Ajax.Request('/go/' + Url.encode(channel) + '/' + tool + '/',
 	  {
 		method:'get',
 		onSuccess: function(transport){
