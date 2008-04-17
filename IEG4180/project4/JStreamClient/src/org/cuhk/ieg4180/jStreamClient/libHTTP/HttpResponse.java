@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package org.cuhk.csc4180.jStreamClient.LibHTTP;
+package org.cuhk.ieg4180.jStreamClient.libHTTP;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
