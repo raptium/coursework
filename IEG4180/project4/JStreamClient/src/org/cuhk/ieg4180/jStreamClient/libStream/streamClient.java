@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package org.cuhk.ieg4180.jStreamClient.libStream;
 
 import java.io.*;
@@ -13,7 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * Streaming client with cache
  * @author hguan5
  */
 public class streamClient {
@@ -157,7 +152,10 @@ public class streamClient {
     }
 }
 
-
+/**
+ * 
+ * @author hguan5
+ */
 class mediaCache{
     private final String m_cacheDir = "c:\\temp\\media\\cache\\";
     private String m_filename;

@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.regex.*;
 
 /**
- *
+ * The HTTP Request Class
  * @author hguan5
  */
 public class HttpRequest {
@@ -29,10 +29,20 @@ public class HttpRequest {
         m_message = null;
     }
     
+    /**
+     * Parse the request from String
+     * @param str
+     * @throws java.lang.Exception
+     */
     public void parse(String str) throws Exception{
         parse(str.getBytes());
     }
     
+    /**
+     * Parse the request from bytes
+     * @param bytes
+     * @throws java.lang.Exception
+     */
     public void parse(byte[] bytes) throws Exception{
         String str = new String(bytes);
         Pattern pattern = null;
@@ -69,23 +79,35 @@ public class HttpRequest {
         
     }
     
+    /**
+     * Get the PATH in request
+     * @return path in HTTP request as a String
+     */
     public String getPath(){
         return m_path;
     }
     
+    /**
+     * Retreive specified field in the header
+     * @param key the specifed key
+     * @return value of the key
+     */
     public String getHeader(String key){
         return m_header.retrieve(key);
     }
 
-    public HttpRequest(String m_method, String m_path, String m_version, HttpHeader m_header, byte[] m_message) {
-        this.m_method = m_method;
-        this.m_path = m_path;
-        this.m_version = m_version;
-        this.m_header = m_header;
-        this.m_message = m_message;
+    private HttpRequest(String method, String path, String version, HttpHeader header, byte[] message) {
+        this.m_method = method;
+        this.m_path = path;
+        this.m_version = version;
+        this.m_header = header;
+        this.m_message = message;
     }
     
-    
+    /**
+     * Get the Request as a String
+     * @return the http request
+     */
     @Override
     public String toString(){
         String str = new String();

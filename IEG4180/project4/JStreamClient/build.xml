@@ -6,6 +6,16 @@
     <description>Builds, tests, and runs the project JStreamClient.</description>
     <import file="nbproject/build-impl.xml"/>
     <import file="nbproject/profiler-build-impl.xml"/>
+    
+    <javadoc doclet="com.tarsec.javadoc.pdfdoclet.PDFDoclet"
+    docletpath="./jar/pdfdoclet-1.0.2-all.jar"
+    packagenames="org.cuhk.ieg4180.jStreamClient.*"
+    additionalparam="-pdf c:\temp\stream.pdf"
+    private="no">
+    <sourcepath>
+            <pathelement location="./src/"/>
+    </sourcepath>
+    </javadoc>
     <!--
 
     There exist several targets which are by default empty and which can be 
