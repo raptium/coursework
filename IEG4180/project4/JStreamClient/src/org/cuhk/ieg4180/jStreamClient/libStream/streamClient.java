@@ -26,7 +26,15 @@ public class streamClient {
     private mediaCache m_cache;
     private int m_contentLength;
     
-    
+    /**
+     * 
+     * @param host The hostname of the streaming server, either IP or domain name
+     * @param port Port number of the streaming server
+     * @param packetSize Packet Size for transmitting
+     * @param protocol TCP or UDP protocol, 'tcp' or 'udp'
+     * @param filename The filename requested
+     * @throws java.io.IOException
+     */
     public streamClient(String host, int port, int packetSize,String protocol, String filename) throws java.io.IOException{
         m_remote = new InetSocketAddress(host, port);
         
@@ -47,28 +55,34 @@ public class streamClient {
         }
     }
     
+    /**
+     * Swap Integer value between litten-endian and big-endian
+     * 
+     * @param v The int value to be converted
+     * @return The converted int value
+     */
     public final static int swabInt(int v) {
         return  (v >> 24) | (v << 24) |
                 ((v << 8) & 0x00ff0000) | ((v >> 8) & 0x0000ff00);
     }
     
+    /**
+     * Connect to the streaming server, send file request, if it fails, IOException will be thrown
+     * @throws java.io.IOException
+     */
     public void connect() throws java.io.IOException{
-        ByteBuffer buffer = ByteBuffer.allocate(256);
+        ByteBuffer buffer = ByteBuffer.allocate(m_packetSize);
         int ret;
         
         buffer.putInt(0, swabInt(m_packetSize));
+        buffer.putInt(4, swabInt(256*1024)); // Set sending rate to 256kBps
         buffer.putInt(8, swabInt(-1));
         buffer.position(12);
         buffer.put(m_filename.getBytes());
         buffer.rewind();
         
         if(m_protocol == 1){
-            m_tcpChannel.write(buffer);
-            m_tcpChannel.read(buffer);
-            buffer.putInt(0, swabInt(404));
-            buffer.rewind();
-            m_tcpChannel.write(buffer);
-            
+            m_tcpChannel.write(buffer);            
         }
         else{
             m_udpChannel.write(buffer);
@@ -91,11 +105,20 @@ public class streamClient {
         m_cache = new mediaCache(m_filename);
     }
     
+    
+    /**
+     * Get the file length return by the streaming server.
+     * @return File size in bytes
+     */
     public int getLength(){
         return m_contentLength;
     }
     
-    
+    /**
+     * Receive data from the server and fill the data into given buffer.
+     * @param buffer Buffer to store the data from streaming server
+     * @return receive data length in bytes
+     */
     public int read(byte[] buffer){
         int length = 0;
         ByteBuffer bBuffer = ByteBuffer.allocate(buffer.length);
@@ -122,6 +145,9 @@ public class streamClient {
         return length;
     }
     
+    /**
+     * To finish the streaming, the temp file in cache will be saved.
+     */
     public void finish(){
         try {
             m_cache.save();

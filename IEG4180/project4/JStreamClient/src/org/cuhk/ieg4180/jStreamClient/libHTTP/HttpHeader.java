@@ -24,7 +24,11 @@ public class HttpHeader {
     }
     
     public String retrieve(String field){
-        return (String)m_headers.get(field);
+       String v = m_headers.get(field);
+       if(v!=null)
+           return v;
+       else
+           return new String("");
     }
     
     @Override

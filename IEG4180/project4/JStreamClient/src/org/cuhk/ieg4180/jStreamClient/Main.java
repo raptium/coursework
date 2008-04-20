@@ -90,7 +90,10 @@ class mediaServer extends Thread{
             response.setStatus("404");
             response.setHeader("Connection", "close");
             response.setHeader("Content-Type", "text/html;charset=iso-8859-1");
-            response.fillMessage(ex.getMessage().getBytes());
+            if(ex!=null)
+                response.fillMessage(ex.getMessage().getBytes());
+            else
+                response.fillMessage("".getBytes());
             m_server.sendResponse(m_channel, response);
             m_channel.close();
         }catch(Exception e){
@@ -104,7 +107,7 @@ class mediaServer extends Thread{
         try{
             response.setStatus("200");
             response.setHeader("Connection", "close");
-            response.setHeader("Content-Type", "text/html;charset=iso-8859-1");
+            response.setHeader("Content-Type", "application/octet-stream");
             response.fillMessage("".getBytes());
             m_server.sendResponse(m_channel, response);
             m_channel.close();
@@ -140,6 +143,25 @@ class mediaServer extends Thread{
         }
         
         
+        /*
+         * 
+         * A play request for mpeg file will contain 'Mozilla', 'NSPlayer' or 'RMA'
+         * in User-Agent field
+         * other request can be terminated after reponse header is sent
+         * no actual data will be transmitted if the request des not cantain 'Mozilla'
+         * 
+         */
+        String user_agent = request.getHeader("User-Agent");
+        if(!user_agent.contains("Mozilla") && !user_agent.contains("NSPlayer")
+                && !user_agent.contains("RMA")){
+            send200();
+            System.out.println("Describe request");
+            return;
+        }
+        System.out.println("Play request");
+        
+        
+        
         try{
             // Try to find the file in cache directory first
             iStream = new FileInputStream(new File(m_cacheDir + m_filename));
@@ -162,15 +184,11 @@ class mediaServer extends Thread{
         }
         
         
-        /*
-        if(!request.toString().contains("Pragma")){
-            send200();
-            return;
-        }
-        */
+        System.out.println(request.toString()); // for debug only
         
-        System.out.print(request.toString()); // for debug only
+        
 
+        
         
         int len = 0;
         try{
@@ -182,11 +200,14 @@ class mediaServer extends Thread{
         }catch(Exception ex){
             
         }
+        if(len <= 0){
+            System.out.println("Invalid Length.");
+            Error404(null);
+            return; // Error 404 here
+        }
 
         byte[] buffer = new byte[m_packetSize];
         try{
-            System.out.println("here.");
-            
             HttpResponse response = new HttpResponse();
             response.setStatus("200"); // HTTP 200 OK
             // Set the default MIME type
@@ -206,8 +227,9 @@ class mediaServer extends Thread{
             response.fillMessage(new String("").getBytes()); // Add empty data message
             // Set the Content-Length to the whole length of the file
             response.setHeader("Content-Length", "" + len);
+            System.out.println(new String(response.toBytes()));
             m_server.sendResponse(m_channel, response); // Send the HTTP response with header only
-            
+
             // For transmission rate control
             long startTime = System.currentTimeMillis();
             int sent = 0;
@@ -228,6 +250,8 @@ class mediaServer extends Thread{
                     break;
                 received += length;
                 m_server.sendData(m_channel, buffer, length); //Send the streaming data
+                
+                
                 if(received >= len)
                     break;
                 

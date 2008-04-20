@@ -73,6 +73,18 @@ public class HttpRequest {
         return m_path;
     }
     
+    public String getHeader(String key){
+        return m_header.retrieve(key);
+    }
+
+    public HttpRequest(String m_method, String m_path, String m_version, HttpHeader m_header, byte[] m_message) {
+        this.m_method = m_method;
+        this.m_path = m_path;
+        this.m_version = m_version;
+        this.m_header = m_header;
+        this.m_message = m_message;
+    }
+    
     
     @Override
     public String toString(){
